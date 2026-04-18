@@ -162,3 +162,19 @@ test(
     }
   }
 );
+
+// --- Test 5: GET /health with non-local Origin returns 403 (regression) ---
+test(
+  'GET /health with non-local Origin returns 403',
+  {},
+  async () => {
+    const { port, cleanup } = await startServer(BASE_PORT + 4);
+    try {
+      const res = await httpRequest(port, 'GET', '/health', { Origin: 'https://evil.example' });
+      assert.equal(res.status, 403, `Expected 403, got ${res.status}: ${res.body}`);
+      assert.equal(res.body, '', 'Response body should be empty');
+    } finally {
+      await cleanup();
+    }
+  }
+);

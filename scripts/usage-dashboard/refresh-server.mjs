@@ -44,6 +44,9 @@ function isLocalOrigin(origin) {
   return false;
 }
 
+let building = false;
+let activeChild = null;
+
 /**
  * Runs build.sh and returns a Promise that resolves to { ok, durationMs, error? }.
  */
@@ -53,11 +56,13 @@ function runBuild() {
     const child = spawn('bash', [BUILD_SH], {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+    activeChild = child;
 
     let stderr = '';
     child.stderr.on('data', (d) => { stderr += d.toString(); });
 
     child.on('close', (code) => {
+      activeChild = null;
       const durationMs = Date.now() - start;
       if (code === 0) {
         resolve({ ok: true, durationMs });
@@ -67,6 +72,7 @@ function runBuild() {
     });
 
     child.on('error', (err) => {
+      activeChild = null;
       const durationMs = Date.now() - start;
       resolve({ ok: false, durationMs, error: err.message });
     });
@@ -114,6 +120,11 @@ const server = http.createServer((req, res) => {
 
   // GET /health
   if (method === 'GET' && url === '/health') {
+    if (!isLocalOrigin(origin)) {
+      res.writeHead(403);
+      res.end();
+      return;
+    }
     setCorsHeaders(res, origin);
     sendJson(res, 200, { ok: true, version: '1' });
     return;
@@ -127,10 +138,17 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    if (building) {
+      sendJson(res, 409, { ok: false, error: 'Build already in progress' });
+      return;
+    }
+
     setCorsHeaders(res, origin);
     console.log(`[refresh] ${new Date().toISOString()} POST /refresh received`);
 
+    building = true;
     runBuild().then((result) => {
+      building = false;
       const payload = {
         ok: result.ok,
         updatedAt: new Date().toISOString(),
@@ -156,9 +174,9 @@ server.listen(PORT, '127.0.0.1', () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+function shutdown() {
+  if (activeChild) activeChild.kill();
   server.close(() => process.exit(0));
-});
-process.on('SIGINT', () => {
-  server.close(() => process.exit(0));
-});
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
