@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "typescript": "^5.4.0",
-    "vitest": "^4.0.18"
+    "vitest": "4.0.18"
   },
   "overrides": {
     "protobufjs": "7.5.5",
