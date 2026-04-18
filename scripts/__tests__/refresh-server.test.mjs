@@ -72,7 +72,7 @@ const BASE_PORT = 47660;
 // --- Test 1: GET /health returns 200 with {ok:true, version:"1"} ---
 test(
   'GET /health returns 200 with {ok:true, version:"1"}',
-  { todo: 'xfail — refresh-server.mjs not yet implemented' },
+  {},
   async () => {
     const { port, cleanup } = await startServer(BASE_PORT);
     try {
@@ -90,7 +90,7 @@ test(
 // --- Test 2: POST /refresh with stubbed succeeding build.sh returns 200 ok:true ---
 test(
   'POST /refresh with stubbed build.sh that succeeds returns 200 with ok:true',
-  { todo: 'xfail — refresh-server.mjs not yet implemented' },
+  {},
   async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rs-t2-'));
     try {
@@ -117,7 +117,7 @@ test(
 // --- Test 3: POST /refresh with stubbed failing build.sh returns 500 ok:false ---
 test(
   'POST /refresh with stubbed failing build.sh returns 500 with ok:false and error',
-  { todo: 'xfail — refresh-server.mjs not yet implemented' },
+  {},
   async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rs-t3-'));
     try {
@@ -143,7 +143,7 @@ test(
 // --- Test 4: Non-local Origin returns 403 ---
 test(
   'POST /refresh with non-local Origin returns 403',
-  { todo: 'xfail — refresh-server.mjs not yet implemented' },
+  {},
   async () => {
     const dir = mkdtempSync(join(tmpdir(), 'rs-t4-'));
     try {
