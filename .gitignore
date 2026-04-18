@@ -80,6 +80,10 @@ deploy/
 .playwright-mcp/
 apps/functions/lib/
 
+# Playwright test results (screenshots, videos, traces, HTML report)
+test-results/
+playwright-report/
+
 # Claude session sentinels
 .claude/*.sentinel
 

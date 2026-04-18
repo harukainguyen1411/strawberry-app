@@ -185,7 +185,6 @@ describe('B.2 — importCsv callable', () => {
     expect(ibCash?.currency).toBe('EUR')
   })
 
-
   it('B.2.11 positions are overwritten not merged on re-import', async () => {
     const { importCsv } = await import('../import.js')
     // First import
