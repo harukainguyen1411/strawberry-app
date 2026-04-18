@@ -29,18 +29,6 @@ function makeRoster(names, dir) {
   return rosterFile;
 }
 
-function runScan(projectsDir, rosterFile, cacheDir) {
-  const result = execSync(`node ${SCRIPT}`, {
-    env: makeEnv({
-      CLAUDE_PROJECTS_DIR: projectsDir,
-      ROSTER_FILE: rosterFile,
-      AGENTS_OUT: join(cacheDir, 'agents.json'),
-    }),
-    stdio: 'pipe',
-  });
-  return JSON.parse(require('fs').readFileSync(join(cacheDir, 'agents.json'), 'utf8'));
-}
-
 import { readFileSync } from 'node:fs';
 
 test('fixture JSONL with "Hey Syndra" as first user msg -> agent == "Syndra"', { todo: 'xfail — agent-scan.mjs not yet implemented' }, () => {
@@ -184,6 +172,32 @@ test('perf: 100 fixture JSONLs scan in <1000ms', { todo: 'xfail — agent-scan.m
     });
     const elapsed = Date.now() - start;
     assert.ok(elapsed < 1000, `scan took ${elapsed}ms, expected <1000ms`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// regression: strawberry-agents cwd must not be swallowed by bare "strawberry" prefix check
+test('cwd under strawberry-agents -> project == "strawberry-agents" (not "strawberry")', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'scan-reg-'));
+  const cacheDir = mkdtempSync(join(tmpdir(), 'scan-cache-'));
+  const home = process.env.HOME || process.env.USERPROFILE || '/Users/test';
+  try {
+    const projectsDir = makeProjectsDir([{
+      id: 'sessReg', project: 'projReg',
+      lines: [
+        { type: 'user', message: { content: [{ type: 'text', text: 'Hello' }] }, cwd: `${home}/Documents/Personal/strawberry-agents/some/subdir` },
+      ],
+    }]);
+    const rosterFile = makeRoster(['Evelynn'], dir);
+    execSync(`node ${SCRIPT}`, {
+      env: makeEnv({ CLAUDE_PROJECTS_DIR: projectsDir, ROSTER_FILE: rosterFile, AGENTS_OUT: join(cacheDir, 'agents.json') }),
+      stdio: 'pipe',
+    });
+    const out = JSON.parse(readFileSync(join(cacheDir, 'agents.json'), 'utf8'));
+    const sess = out.sessions.find(s => s.sessionId === 'sessReg');
+    assert.equal(sess.project, 'strawberry-agents');
   } finally {
     rmSync(dir, { recursive: true, force: true });
     rmSync(cacheDir, { recursive: true, force: true });

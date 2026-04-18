@@ -42,7 +42,9 @@ function attributeProject(cwd) {
   if (!cwd) return 'unknown';
   const expanded = cwd.replace(/^~/, homedir());
   const home = homedir();
+  // strawberry-app and strawberry-agents must be checked before bare strawberry
   if (expanded.startsWith(join(home, 'Documents/Personal/strawberry-app'))) return 'strawberry-app';
+  if (expanded.startsWith(join(home, 'Documents/Personal/strawberry-agents'))) return 'strawberry-agents';
   if (expanded.startsWith(join(home, 'Documents/Personal/strawberry'))) return 'strawberry';
   if (expanded.includes('Documents/Work/mmp')) return 'work/mmp';
   return basename(expanded) || 'unknown';
@@ -92,6 +94,8 @@ const unknowns = [];
 for (const filePath of walkJsonl(claudeProjectsDir)) {
   const { sessionId, firstUserMsg, cwd } = scanJsonl(filePath);
   const project = attributeProject(cwd);
+  let firstSeen = null;
+  try { firstSeen = statSync(filePath).mtime.toISOString(); } catch { /* ignore */ }
 
   let agent = 'Evelynn';
   let rawMatch = undefined;
@@ -109,7 +113,7 @@ for (const filePath of walkJsonl(claudeProjectsDir)) {
     // no match -> fallback Evelynn (already set)
   }
 
-  const entry = { sessionId, agent, project, cwd: cwd || null, firstSeen: null };
+  const entry = { sessionId, agent, project, cwd: cwd || null, firstSeen };
   if (rawMatch !== undefined) entry.rawMatch = rawMatch;
   sessions.push(entry);
   if (agent === 'unknown') unknowns.push(sessionId);
