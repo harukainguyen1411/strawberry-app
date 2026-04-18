@@ -15,6 +15,15 @@
   var _renderTimer = null;
 
   // --- helpers ---
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function fmt(n) {
     if (n == null) return '—';
     if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
@@ -38,7 +47,7 @@
     var cut = cutoff();
     return _data.sessions.filter(function (s) {
       if (_hideUnknown && s.agent === 'unknown') return false;
-      return s.startedAt >= cut;
+      return !s.startedAt || s.startedAt >= cut;
     });
   }
 
@@ -136,8 +145,8 @@
       totals.cost += a.cost;
       var tokens = a.tokensIn + a.tokensOut;
       var avg = a.sessions > 0 ? Math.round(tokens / a.sessions) : 0;
-      return '<tr class="expandable border-b border-[#313244] hover:bg-[#313244]/40" data-agent="' + agent + '">' +
-        '<td class="py-1.5 pr-4">' + agent + '</td>' +
+      return '<tr class="expandable border-b border-[#313244] hover:bg-[#313244]/40" data-agent="' + escHtml(agent) + '">' +
+        '<td class="py-1.5 pr-4">' + escHtml(agent) + '</td>' +
         '<td class="text-right py-1.5 px-2">' + a.sessions + '</td>' +
         '<td class="text-right py-1.5 px-2">' + fmt(tokens) + '</td>' +
         '<td class="text-right py-1.5 px-2">' + fmt(a.tokensIn) + '</td>' +
@@ -167,19 +176,19 @@
     tbody.querySelectorAll('tr.expandable').forEach(function (row) {
       row.addEventListener('click', function () {
         var agent = row.getAttribute('data-agent');
-        var existing = tbody.querySelector('tr[data-expand="' + agent + '"]');
+        var existing = tbody.querySelector('tr[data-expand="' + escHtml(agent) + '"]');
         if (existing) { existing.remove(); return; }
         var agentSessions = sessions.filter(function (s) { return s.agent === agent; });
         var detail = agentSessions.map(function (s) {
-          return '<tr data-expand="' + agent + '" class="text-xs text-[#6c7086] border-b border-[#313244]/50">' +
-            '<td class="pl-4 py-1 pr-4 font-mono text-[0.7rem]">' + s.sessionId + '</td>' +
-            '<td class="text-right py-1 px-2">' + s.sessions + '</td>' +
+          return '<tr data-expand="' + escHtml(agent) + '" class="text-xs text-[#6c7086] border-b border-[#313244]/50">' +
+            '<td class="pl-4 py-1 pr-4 font-mono text-[0.7rem]">' + escHtml(s.sessionId) + '</td>' +
+            '<td class="text-right py-1 px-2">1</td>' +
             '<td class="text-right py-1 px-2">' + fmt(s.tokensIn + s.tokensOut) + '</td>' +
             '<td class="text-right py-1 px-2">' + fmt(s.tokensIn) + '</td>' +
             '<td class="text-right py-1 px-2">' + fmt(s.tokensOut) + '</td>' +
             '<td class="text-right py-1 px-2">' + fmt(s.cacheRead + s.cacheCreate) + '</td>' +
             '<td class="text-right py-1 px-2">' + fmtCost(s.cost) + '</td>' +
-            '<td class="text-right py-1 pl-2">' + s.model + '</td>' +
+            '<td class="text-right py-1 pl-2">' + escHtml(s.model) + '</td>' +
             '</tr>';
         }).join('');
         row.insertAdjacentHTML('afterend', detail);
@@ -215,7 +224,7 @@
     var rows = projects.map(function (p) {
       var d = map[p];
       return '<tr class="border-b border-[#313244]">' +
-        '<td class="py-1.5 pr-4">' + p + '</td>' +
+        '<td class="py-1.5 pr-4">' + escHtml(p) + '</td>' +
         '<td class="text-right py-1.5 px-2">' + d.sessions + '</td>' +
         '<td class="text-right py-1.5 px-2">' + fmt(d.tokens) + '</td>' +
         '<td class="text-right py-1.5 pl-2">' + fmtCost(d.cost) + '</td>' +
@@ -293,7 +302,7 @@
     detail.hidden = false;
     tbody.innerHTML = sessions.map(function (s) {
       return '<tr class="border-b border-[#313244]/50">' +
-        '<td class="py-1 pr-3 font-mono text-[0.7rem]">' + s.sessionId + '</td>' +
+        '<td class="py-1 pr-3 font-mono text-[0.7rem]">' + escHtml(s.sessionId) + '</td>' +
         '<td class="text-right py-1 px-2">' + fmt((s.tokensIn || 0) + (s.tokensOut || 0)) + '</td>' +
         '<td class="text-right py-1 pl-2">' + fmtCost(s.cost) + '</td>' +
         '</tr>';

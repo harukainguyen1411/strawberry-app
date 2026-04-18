@@ -109,4 +109,28 @@ describe('T8 app.js render', () => {
     const rows = doc.querySelectorAll('#leaderboard-body tr');
     assert.ok(rows.length >= 1, 'should have at least one row (empty state)');
   });
+
+  test('XSS payloads in agent/project/sessionId are escaped, not executed', async () => {
+    const xssData = {
+      ...FIXTURE,
+      sessions: [{
+        sessionId: '<img src=x onerror="window.__xss=1">',
+        agent: '<script>window.__xss=1</script>',
+        project: '"><svg onload="window.__xss=1">',
+        cwd: '/home/user',
+        tokensIn: 100, tokensOut: 50, cacheRead: 0, cacheCreate: 0,
+        cost: 0.001, model: '<b>bold</b>',
+        startedAt: '2026-04-18T10:00:00Z',
+      }],
+    };
+    const doc = await loadApp(xssData);
+    assert.equal(doc.defaultView.__xss, undefined, 'XSS payload must not execute');
+    // Cell text content must be escaped (angle brackets as entities, not tags)
+    const cells = Array.from(doc.querySelectorAll('#leaderboard-body td'));
+    const cellTexts = cells.map(c => c.innerHTML);
+    assert.ok(!cellTexts.some(t => t.includes('<script>')), 'script tag must be escaped in cell content');
+    assert.ok(!cellTexts.some(t => t.includes('<img')), 'img tag must be escaped in cell content');
+    assert.ok(!cellTexts.some(t => t.includes('<svg')), 'svg tag must be escaped in cell content');
+    assert.ok(cellTexts.some(t => t.includes('&lt;')), 'lt entity should be present in cell');
+  });
 });
