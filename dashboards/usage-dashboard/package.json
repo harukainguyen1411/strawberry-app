@@ -1,0 +1,12 @@
+{
+  "name": "usage-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "bash ../../scripts/usage-dashboard/build.sh",
+    "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs"
+  },
+  "devDependencies": {
+    "ccusage": "^0.8.0"
+  }
+}
