@@ -1,8 +1,7 @@
 /**
  * A.6 — Tool surface enumeration (Refs V0.4)
  *
- * xfail-first: asserts every tool name from ADR §7 is exported as a function.
- * These tests use it.fails() and will flip to it() in the implementation commit.
+ * Implementation commit: all tests flipped from it.fails() to it().
  *
  * EXPECTED_TOOLS is canonical — pulled from ADR §7 tool surface list.
  */
@@ -33,14 +32,14 @@ const EXPECTED_TOOLS = [
 ] as const
 
 describe('A.6 — portfolio-tools surface', () => {
-  it.fails('A.6.1 every tool name from ADR §7 is exported as a function', async () => {
+  it('A.6.1 every tool name from ADR §7 is exported as a function', async () => {
     const handlers = await import('../index.js')
     for (const name of EXPECTED_TOOLS) {
       expect(typeof (handlers as Record<string, unknown>)[name]).toBe('function')
     }
   })
 
-  it.fails('A.6.2 every v1+ stub tool throws NotImplementedError when called', async () => {
+  it('A.6.2 every v1+ stub tool throws NotImplementedError when called', async () => {
     const handlers = await import('../index.js')
     const v1PlusTools = [
       'portfolio_get_intents',
@@ -63,7 +62,7 @@ describe('A.6 — portfolio-tools surface', () => {
     }
   })
 
-  it.fails('A.6.3 v0 in-scope tools do not throw NotImplementedError', async () => {
+  it('A.6.3 v0 in-scope tools do not throw NotImplementedError', async () => {
     const handlers = await import('../index.js')
     const v0Tools = [
       'portfolio_get_snapshot',
@@ -85,7 +84,7 @@ describe('A.6 — portfolio-tools surface', () => {
     }
   })
 
-  it.fails('A.6.4 no extra exports and no missing exports vs EXPECTED_TOOLS', async () => {
+  it('A.6.4 no extra exports and no missing exports vs EXPECTED_TOOLS', async () => {
     const handlers = await import('../index.js')
     const exported = Object.keys(handlers as Record<string, unknown>).filter(
       (k) => typeof (handlers as Record<string, unknown>)[k] === 'function'
