@@ -46,25 +46,35 @@ test('mock ccusage shim producing fixture JSON runs end-to-end and produces vali
   const cacheDir = mkdtempSync(join(tmpdir(), 'build-cache-'));
   const outDir = mkdtempSync(join(tmpdir(), 'build-out-'));
   try {
-    // Write fixture files the shim will produce
-    writeFileSync(join(cacheDir, 'sessions.json'), SESSIONS_JSON);
-    writeFileSync(join(cacheDir, 'blocks.json'), BLOCKS_JSON);
-    writeFileSync(join(cacheDir, 'daily.json'), DAILY_JSON);
-    writeFileSync(join(cacheDir, 'agents.json'), AGENTS_JSON);
     writeFileSync(join(outDir, 'roster.json'), ROSTER_JSON);
 
-    // ccusage shim: just exits 0 (files pre-written)
+    // ccusage shim: prints correct fixture JSON to stdout based on subcommand
+    const sessionsEsc = SESSIONS_JSON.replace(/'/g, "'\\''");
+    const blocksEsc   = BLOCKS_JSON.replace(/'/g, "'\\''");
+    const dailyEsc    = DAILY_JSON.replace(/'/g, "'\\''");
     const ccusageShim = join(dir, 'ccusage');
-    writeFileSync(ccusageShim, '#!/bin/sh\nexit 0\n');
+    writeFileSync(ccusageShim, [
+      '#!/bin/sh',
+      `case "$1" in`,
+      `  session) printf '%s' '${sessionsEsc}' ;;`,
+      `  blocks)  printf '%s' '${blocksEsc}' ;;`,
+      `  daily)   printf '%s' '${dailyEsc}' ;;`,
+      `esac`,
+      'exit 0',
+    ].join('\n') + '\n');
     execSync(`chmod +x ${ccusageShim}`);
 
+    const emptyProjects = mkdtempSync(join(tmpdir(), 'build-projects-'));
     const dataOut = join(outDir, 'data.json');
     runBuild({
       PATH: `${dir}:${process.env.PATH}`,
       USAGE_CACHE_DIR: cacheDir,
       DASHBOARD_DIR: outDir,
+      CLAUDE_PROJECTS_DIR: emptyProjects,
+      HOME: homedir(),
       REPO_ROOT,
     });
+    rmSync(emptyProjects, { recursive: true, force: true });
 
     assert.ok(existsSync(dataOut), 'data.json should exist');
     const data = JSON.parse(readFileSync(dataOut, 'utf8'));
@@ -114,8 +124,12 @@ test('missing ccusage binary prints install hint and exits non-zero', { todo: 'x
     let threw = false;
     let output = '';
     try {
-      // PATH with no ccusage
-      runBuild({ PATH: emptyDir, REPO_ROOT });
+      // PATH has system utils (bash, node, sh) but no ccusage
+      // Strip any dir that contains ccusage from PATH to guarantee the binary is absent
+      const safePath = (process.env.PATH || '').split(':')
+        .filter(p => { try { return !existsSync(join(p, 'ccusage')); } catch { return true; } })
+        .join(':');
+      runBuild({ PATH: `${emptyDir}:${safePath}`, REPO_ROOT, HOME: homedir() });
     } catch (err) {
       threw = true;
       output = err.stderr?.toString() + (err.stdout?.toString() || '');
