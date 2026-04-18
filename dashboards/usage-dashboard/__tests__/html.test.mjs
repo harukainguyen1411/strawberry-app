@@ -1,4 +1,4 @@
-// xfail: plan plans/approved/2026-04-19-claude-usage-dashboard-tasks.md T7
+// plan: plans/approved/2026-04-19-claude-usage-dashboard-tasks.md T7
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { test, describe } from 'node:test';
@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const { document } = new JSDOM(html).window;
 
-describe('T7 index.html shell', { todo: true }, () => {
+describe('T7 index.html shell', () => {
   test('required section IDs exist', () => {
     assert.ok(document.getElementById('window-strip'), '#window-strip missing');
     assert.ok(document.getElementById('agent-leaderboard'), '#agent-leaderboard missing');
