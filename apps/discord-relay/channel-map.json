@@ -1,0 +1,9 @@
+{
+  "_readme": "Populate channel IDs by running: bash scripts/setup-discord-channels.sh",
+  "channels": {
+    "CHANNEL_ID_MYAPPS_REQUESTS": { "app": "myapps", "type": "feature" },
+    "CHANNEL_ID_MYAPPS_ISSUES": { "app": "myapps", "type": "bug" },
+    "CHANNEL_ID_NEW_APP_REQUESTS": { "app": null, "type": "new-app" }
+  },
+  "categoryId": "CATEGORY_ID_APP_FEEDBACK"
+}

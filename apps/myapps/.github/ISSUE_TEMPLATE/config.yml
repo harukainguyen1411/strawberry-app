@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ReadTracker Documentation
+    url: https://github.com/Duongntd/myapps/blob/main/USER_GUIDE.md
+    about: Check the user guide for ReadTracker features and usage
+  - name: 🏗️ Project Plan
+    url: https://github.com/Duongntd/myapps/blob/main/PROJECT_PLAN.md
+    about: View the project plan and roadmap

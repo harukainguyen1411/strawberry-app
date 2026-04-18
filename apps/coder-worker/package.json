@@ -1,0 +1,29 @@
+{
+  "name": "@strawberry/coder-worker",
+  "version": "1.0.0",
+  "description": "Local Windows coder worker — polls GitHub issues and invokes Claude Code headlessly",
+  "main": "dist/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.0",
+    "dotenv": "^17.4.1",
+    "execa": "^9.0.0",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "@types/proper-lockfile": "^4.1.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.4"
+  }
+}

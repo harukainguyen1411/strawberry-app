@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.secrets.*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment variables
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Firebase config (if accidentally committed)
+src/firebase/config.local.ts
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/

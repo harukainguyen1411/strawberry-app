@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   DS DESIGN TOKENS — CSS custom properties
+   Mirrors darkstrawberry-landing.html exactly.
+   Toggle via html[data-theme="light"|"dark"]
+   ═══════════════════════════════════════════════════ */
+:root,
+html[data-theme="dark"] {
+  --bg:          #111110;
+  --surface:     #1c1a18;
+  --surface-hi:  #272420;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.14);
+  --text:        #f4efe8;
+  --muted:       #9c9188;
+  --accent:      #cc2e2e;
+  --accent-soft: #e85555;
+  --nav-bg:      rgba(17,17,16,0.88);
+
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --bg:          #faf8f5;
+  --surface:     #ffffff;
+  --surface-hi:  #f0ece6;
+  --border:      rgba(0,0,0,0.08);
+  --border-hi:   rgba(0,0,0,0.16);
+  --text:        #1a1714;
+  --muted:       #6b6560;
+  --accent:      #cc2e2e;
+  --accent-soft: #e85555;
+  --nav-bg:      rgba(250,248,245,0.92);
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════ */
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    /* Warm ambient mesh — coral on warm charcoal (dark) / soft coral blush (light) */
+    background-image:
+      radial-gradient(ellipse at 15% 60%, rgba(204,46,46,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 15%, rgba(204,46,46,0.05) 0%, transparent 45%),
+      radial-gradient(ellipse at 55% 95%, rgba(204,46,46,0.04) 0%, transparent 40%);
+    background-attachment: fixed;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Smooth theme transitions on key elements — avoids snap/jank at end of switch */
+  h1, h2, h3, h4, h5, h6, p, span, a, button, label, li,
+  header, nav, footer, main, section, article, aside {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, a {
+    touch-action: manipulation;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-hi); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENTS
+   ═══════════════════════════════════════════════════ */
+@layer components {
+
+  /* Glass card — matches landing page .glass */
+  .ds-glass {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--surface-hi) 65%, transparent) 0%,
+      color-mix(in srgb, var(--surface) 85%, transparent) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .ds-glass:hover {
+    border-color: rgba(204,46,46,0.25);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25), 0 0 24px rgba(204,46,46,0.08);
+  }
+
+  /* Primary button — matches landing page .btn-primary */
+  .ds-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 500;
+    padding: 0.625rem 1.5rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 0 18px rgba(204,46,46,0.25);
+    animation: btn-glow-pulse 1.8s ease-in-out infinite;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+
+  .ds-btn-primary:hover {
+    box-shadow: 0 0 32px rgba(204,46,46,0.5), 0 0 52px rgba(204,46,46,0.18);
+    transform: translateY(-1px);
+    animation: none;
+  }
+
+  .ds-btn-primary:active { transform: translateY(0); }
+
+  /* Ghost button — matches landing page .btn-ghost */
+  .ds-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    font-weight: 500;
+    padding: 0.625rem 1.5rem;
+    border-radius: 100px;
+    border: 1px solid var(--border-hi);
+    cursor: pointer;
+    text-decoration: none;
+    animation: btn-ghost-pulse 1.8s ease-in-out infinite;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .ds-btn-ghost:hover {
+    border-color: rgba(204,46,46,0.5);
+    color: var(--accent);
+    animation: none;
+  }
+
+  /* Theme toggle button */
+  .ds-theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0.4rem 0.85rem;
+    background: var(--surface-hi);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .ds-theme-toggle:hover { color: var(--text); border-color: var(--border-hi); }
+  .ds-theme-toggle svg { width: 15px; height: 15px; }
+
+  /* Section label (small caps above headings) */
+  .ds-section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   KEYFRAMES
+   ═══════════════════════════════════════════════════ */
+@keyframes btn-glow-pulse {
+  0%  { box-shadow: 0 0 12px rgba(204,46,46,0.25), 0 0 0 rgba(204,46,46,0); }
+  50% { box-shadow: 0 0 28px rgba(204,46,46,0.55), 0 0 52px rgba(204,46,46,0.18); }
+  100%{ box-shadow: 0 0 12px rgba(204,46,46,0.25), 0 0 0 rgba(204,46,46,0); }
+}
+
+@keyframes btn-ghost-pulse {
+  0%  { box-shadow: 0 0 0 rgba(204,46,46,0),    0 0 0 rgba(204,46,46,0); }
+  50% { box-shadow: 0 0 14px rgba(204,46,46,0.15), 0 0 28px rgba(204,46,46,0.06); }
+  100%{ box-shadow: 0 0 0 rgba(204,46,46,0),    0 0 0 rgba(204,46,46,0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════ */
+@layer utilities {
+  .touch-manipulation { touch-action: manipulation; }
+
+  /* DS token overrides so Tailwind classes pick up CSS vars */
+  .bg-ds-bg       { background-color: var(--bg); }
+  .bg-ds-surface  { background-color: var(--surface); }
+  .bg-ds-surface-hi { background-color: var(--surface-hi); }
+  .text-ds-text   { color: var(--text); }
+  .text-ds-muted  { color: var(--muted); }
+  .text-ds-accent { color: var(--accent); }
+  .border-ds-border { border-color: var(--border); }
+  .border-ds-border-hi { border-color: var(--border-hi); }
+}

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="32x32">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Strawberry — Apps built for you. Literally.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ══════════════════════════════════
+       THEME TOKENS
+       Dark = "Dark Strawberry"
+       Light = "White Strawberry"
+    ══════════════════════════════════ */
+
+    /* Dark mode (default) */
+    :root, [data-theme="dark"] {
+      --bg:             #111110;
+      --surface:        #1c1a18;
+      --surface-hi:     #272420;
+      --border:         #38342e;
+      --border-hi:      #5a5248;
+      --text:           #f4efe8;
+      --muted:          #9c9188;
+      --accent:         #cc2e2e;       /* ripe strawberry red */
+      --accent-sec:     #f5a623;       /* warm amber */
+      --accent-soft:    #e06060;       /* softer red for hovers */
+      --red-deep:       #8a1f1f;
+      --nav-bg:         rgba(17,17,16,0.88);
+      --font-display:   'Cormorant Garamond', Georgia, serif;
+      --font-sans:      'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    /* Light mode — "White Strawberry" */
+    [data-theme="light"] {
+      --bg:             #faf8f5;
+      --surface:        #ffffff;
+      --surface-hi:     #f2ede8;
+      --border:         #e0d8d0;
+      --border-hi:      #c8bdb4;
+      --text:           #1a1714;
+      --muted:          #7a6e66;
+      --accent:         #cc2e2e;       /* same strawberry red */
+      --accent-sec:     #d4780a;       /* deeper amber for light bg */
+      --accent-soft:    #e06060;
+      --red-deep:       #8a1f1f;
+      --nav-bg:         rgba(250,248,245,0.92);
+    }
+
+    /* ── Base ── */
+    html {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.25s ease;
+    }
+
+    [data-theme="dark"] body {
+      background-image:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(140,30,30,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 85% 10%, rgba(204,46,46,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 90%, rgba(245,166,35,0.04) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    [data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse 70% 50% at 10% 20%, rgba(204,46,46,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 70% at 85% 10%, rgba(245,166,35,0.04) 0%, transparent 55%);
+      background-attachment: fixed;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── Glass surface ── */
+    .glass {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    [data-theme="dark"] .glass {
+      background: linear-gradient(135deg, rgba(39,36,32,0.6) 0%, rgba(28,26,24,0.82) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .glass:hover {
+      border-color: rgba(204,46,46,0.3);
+      box-shadow: 0 6px 32px rgba(0,0,0,0.12), 0 0 20px rgba(204,46,46,0.07);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.8rem 2rem;
+      background: var(--accent);
+      color: white;
+      font-family: var(--font-sans); font-size: 0.95rem; font-weight: 500;
+      border: none; border-radius: 12px; cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 0 0 1px rgba(204,46,46,0.7), 0 0 20px rgba(204,46,46,0.5), 0 0 40px rgba(204,46,46,0.2);
+      animation: btn-glow-pulse 1.8s ease-in-out infinite;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .btn-primary:hover {
+      background: var(--accent-soft);
+      box-shadow: 0 0 0 2px rgba(204,46,46,0.9), 0 0 36px rgba(204,46,46,0.7), 0 0 64px rgba(204,46,46,0.35);
+      transform: translateY(-2px);
+      animation: none;
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    @keyframes btn-glow-pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 1px rgba(204,46,46,0.55), 0 0 12px rgba(204,46,46,0.35), 0 0 28px rgba(204,46,46,0.12);
+      }
+      50% {
+        box-shadow: 0 0 0 1px rgba(204,46,46,0.85), 0 0 28px rgba(204,46,46,0.65), 0 0 52px rgba(204,46,46,0.28);
+      }
+    }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.75rem 1.75rem;
+      background: transparent; color: var(--muted);
+      font-family: var(--font-sans); font-size: 0.95rem; font-weight: 400;
+      border: 1px solid rgba(204,46,46,0.45); border-radius: 12px;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 0 14px rgba(204,46,46,0.18), inset 0 0 12px rgba(204,46,46,0.04);
+      animation: btn-ghost-pulse 1.8s ease-in-out infinite;
+      transition: color 0.2s ease, transform 0.15s ease;
+    }
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(204,46,46,0.8);
+      box-shadow: 0 0 26px rgba(204,46,46,0.4), inset 0 0 16px rgba(204,46,46,0.08);
+      transform: translateY(-2px);
+      animation: none;
+    }
+
+    @keyframes btn-ghost-pulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(204,46,46,0.14), inset 0 0 8px rgba(204,46,46,0.03);
+        border-color: rgba(204,46,46,0.35);
+      }
+      50% {
+        box-shadow: 0 0 22px rgba(204,46,46,0.32), inset 0 0 14px rgba(204,46,46,0.07);
+        border-color: rgba(204,46,46,0.65);
+      }
+    }
+
+    .btn-discord {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 0.85rem 2rem;
+      background: #5865F2; color: white;
+      font-family: var(--font-sans); font-size: 0.95rem; font-weight: 500;
+      border: none; border-radius: 12px; cursor: pointer; text-decoration: none;
+      box-shadow: 0 2px 12px rgba(88,101,242,0.3);
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+    }
+    .btn-discord:hover { box-shadow: 0 4px 24px rgba(88,101,242,0.5); transform: translateY(-2px); }
+
+    /* ── Theme toggle button ── */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 7px;
+      padding: 0.4rem 0.85rem;
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500;
+      color: var(--muted);
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--border-hi); }
+    .theme-toggle .toggle-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .theme-toggle .toggle-icon svg { width: 16px; height: 16px; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border) 30%, var(--border-hi) 50%, var(--border) 70%, transparent);
+      margin: 1rem 0;
+    }
+
+    .section-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 600; color: var(--text); line-height: 1.1; margin-bottom: 1rem;
+    }
+    .section-sub { color: var(--muted); font-size: 1rem; font-weight: 300; max-width: 520px; line-height: 1.7; }
+
+    /* ══════════════════════════════════
+       NAV
+    ══════════════════════════════════ */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo:hover .nav-wordmark { color: var(--accent); }
+    .nav-wordmark {
+      font-family: var(--font-display); font-size: 1.2rem;
+      font-weight: 600; color: var(--text); letter-spacing: 0.02em;
+      transition: color 0.2s ease;
+    }
+    /* brand-adj = "Dark" or "White" — always primary text color, same logic both modes */
+    .brand-adj { color: var(--text); }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Strawberry logo SVG ── */
+    .strawberry-logo {
+      width: 30px; height: 30px; flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════
+       HERO
+    ══════════════════════════════════ */
+    .hero { padding: 7rem 0 5rem; text-align: center; position: relative; }
+
+    [data-theme="dark"] .hero::before {
+      content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+      width: 640px; height: 380px; top: 0; left: 50%; transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(204,46,46,0.09) 0%, transparent 70%);
+      animation: pulse-orb 6s ease-in-out infinite;
+    }
+    @keyframes pulse-orb {
+      0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+      50%       { opacity: 1.0; transform: translateX(-50%) scale(1.07); }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.5rem;
+      padding: 0.4rem 1rem; border: 1px solid var(--border); border-radius: 100px;
+    }
+    .hero-eyebrow .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 6px var(--accent);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 0.5rem; position: relative; z-index: 1;
+    }
+    .hero-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 4vw, 2.8rem);
+      font-weight: 400; color: var(--text);
+      margin-bottom: 1.5rem; position: relative; z-index: 1;
+    }
+    .hero-tagline .italic { font-style: italic; color: var(--accent-soft); }
+    .hero-tagline .glow {
+      color: var(--accent);
+      text-shadow: 0 0 24px rgba(204,46,46,0.4), 0 0 48px rgba(204,46,46,0.12);
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted);
+      max-width: 500px; margin: 0 auto 2.5rem;
+      line-height: 1.7; font-weight: 300; position: relative; z-index: 1;
+    }
+    .hero-actions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; flex-wrap: wrap; position: relative; z-index: 1;
+    }
+    .scroll-hint {
+      margin-top: 4rem;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+      animation: fade-float 3s ease-in-out infinite;
+    }
+    @keyframes fade-float {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50%       { transform: translateY(5px); opacity: 0.9; }
+    }
+
+    /* ══════════════════════════════════
+       HOW IT WORKS
+    ══════════════════════════════════ */
+    .how-section { padding: 5rem 0; }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .step-card { padding: 2rem; position: relative; }
+    .step-number {
+      font-family: var(--font-display); font-size: 3.5rem; font-weight: 700;
+      line-height: 1; color: var(--border-hi); margin-bottom: 0.75rem;
+      -webkit-text-stroke: 1px rgba(204,46,46,0.2);
+    }
+    .step-icon { font-size: 1.8rem; margin-bottom: 0.75rem; color: var(--accent); display: flex; align-items: center; }
+    .step-icon svg { width: 32px; height: 32px; }
+    .step-title { font-size: 1.05rem; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; }
+    .step-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    /* ══════════════════════════════════
+       FEATURED APPS
+    ══════════════════════════════════ */
+    .apps-section { padding: 5rem 0; }
+    .apps-header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
+    .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .app-card { padding: 1.75rem 2rem; cursor: pointer; transition: transform 0.2s ease; position: relative; overflow: hidden; }
+    .app-card:hover { transform: translateY(-4px); }
+    .app-card-glow {
+      position: absolute; inset: 0; border-radius: 18px; opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(ellipse at 30% 30%, rgba(204,46,46,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .app-card:hover .app-card-glow { opacity: 1; }
+    .app-card::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent-soft), transparent);
+      transform: scaleX(0); transition: transform 0.3s ease; transform-origin: center;
+    }
+    .app-card:hover::after { transform: scaleX(1); }
+    .app-icon { margin-bottom: 1rem; display: block; color: var(--accent); }
+    .app-icon svg { width: 48px; height: 48px; }
+    .app-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+    .app-name span { color: var(--accent); }
+    .app-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.65; font-weight: 300; margin-bottom: 1.25rem; }
+    .app-try-link { font-size: 0.85rem; color: var(--accent-soft); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: color 0.2s ease; }
+    .app-try-link:hover { color: var(--accent); }
+    .app-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted); padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border); border-radius: 100px; margin-right: 8px;
+    }
+
+    /* ══════════════════════════════════
+       WHAT MAKES THIS DIFFERENT
+    ══════════════════════════════════ */
+    .diff-section { padding: 5rem 0; }
+    .diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-top: 3rem; }
+    .diff-copy p { color: var(--muted); line-height: 1.75; font-weight: 300; margin-bottom: 1rem; font-size: 0.98rem; }
+    .diff-copy p strong { color: var(--text); font-weight: 500; }
+    .diff-points { display: flex; flex-direction: column; gap: 1rem; }
+    .diff-point { padding: 1.25rem 1.5rem; display: flex; align-items: flex-start; gap: 1rem; }
+    .diff-point-icon {
+      font-size: 1.4rem; flex-shrink: 0; width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      background: rgba(204,46,46,0.07);
+      border: 1px solid rgba(204,46,46,0.14);
+    }
+    .diff-point-text h4 { font-size: 0.95rem; font-weight: 500; color: var(--text); margin-bottom: 0.25rem; }
+    .diff-point-text p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-weight: 300; margin: 0; }
+
+    /* ══════════════════════════════════
+       REQUEST YOUR APP
+    ══════════════════════════════════ */
+    .request-section { padding: 5rem 0 6rem; }
+    .request-card { padding: 3rem 3.5rem; text-align: center; max-width: 700px; margin: 3rem auto 0; position: relative; overflow: hidden; }
+    .request-card::before {
+      content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 200px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(88,101,242,0.07) 0%, transparent 70%); pointer-events: none;
+    }
+    .request-card h3 { font-family: var(--font-display); font-size: 2rem; font-weight: 600; color: var(--text); margin-bottom: 0.75rem; position: relative; z-index: 1; }
+    .request-card > p { color: var(--muted); font-size: 0.98rem; line-height: 1.7; font-weight: 300; max-width: 480px; margin: 0 auto 2rem; position: relative; z-index: 1; }
+    .request-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .discord-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .request-flow { margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); position: relative; z-index: 1; }
+    .request-flow-step { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem; border: 1px solid var(--border); border-radius: 100px; }
+    .request-flow-arrow { color: var(--border-hi); font-size: 0.8rem; }
+
+    /* ══════════════════════════════════
+       FOOTER
+    ══════════════════════════════════ */
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 0; transition: border-color 0.25s ease; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .footer-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .footer-wordmark { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--muted); }
+    /* footer brand-adj inherits same rule from .brand-adj above */
+    .footer-copy { font-size: 0.8rem; color: var(--muted); opacity: 0.55; }
+    .footer-links { display: flex; align-items: center; gap: 1.5rem; }
+    .footer-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.2s ease; }
+    .footer-link:hover { color: var(--text); }
+    .footer-credit { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); opacity: 0.45; }
+    .footer-credit svg { width: 14px; height: 14px; color: var(--muted); }
+
+    /* ══════════════════════════════════
+       ENTRANCE ANIMATIONS
+    ══════════════════════════════════ */
+    .fade-up { opacity: 0; transform: translateY(24px); animation: fade-up 0.7s ease forwards; }
+    @keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.35s; }
+    .delay-4 { animation-delay: 0.5s; }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 700px) {
+      .diff-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 5rem 0 3rem; }
+      .nav-actions .btn-ghost { display: none; }
+      .apps-header { flex-direction: column; align-items: flex-start; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .request-card { padding: 2rem 1.5rem; }
+      .theme-toggle span.toggle-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- DS Icon Sprite — embedded once, referenced via <use href="#ds-icon-*"/> -->
+<div style="display:none" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="ds-icon-strawberry" viewBox="0 0 24 24"><path d="M12 2.5C9.5 2.5 7 4.5 5.5 7C4 9.5 4 12 4.5 14.5C5.5 18.5 8.5 21 12 22C15.5 21 18.5 18.5 19.5 14.5C20 12 20 9.5 18.5 7C17 4.5 14.5 2.5 12 2.5Z"/><path d="M9.5 3C9.5 3 8 1.5 7 2C6 2.5 7 4 7 4" stroke-width="1.5"/><path d="M12 2.5C12 2.5 12 1 13 0.8" stroke-width="1.5"/><path d="M14.5 3C14.5 3 16 1.5 17 2C18 2.5 17 4 17 4" stroke-width="1.5"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="12.5" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="15" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ds-icon-neeko" viewBox="0 0 24 24"><path d="M5 14C5 9.5 8 6 12.5 6C17 6 20 9 20 13C20 16.5 17.5 19 14 19.5"/><path d="M5 14C5 16.5 6.5 18.5 9 19.5C10.5 20 12 20 14 19.5"/><circle cx="16" cy="10.5" r="2.8"/><circle cx="16" cy="10.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="16.7" cy="9.9" r="0.5" fill="white" stroke="none"/><path d="M13.5 6.5C13.5 4.5 14.5 3 15.5 3" stroke-width="1.5"/><path d="M13 19.5C12 20.5 11.5 21.5 12 22C12.5 22.5 13.5 21.5 13.5 20.5C13.5 21 14 21.5 14.5 21C15 20.5 14.5 19.8 14 19.5" stroke-width="1.5"/><path d="M5 14C4 14 3 14.5 3 15C3 15.8 4.2 16 5 15.5" stroke-width="1.5"/></symbol>
+    <symbol id="ds-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/><path d="M12 5.5v1" stroke-width="1"/><path d="M12 17.5v1" stroke-width="1"/><path d="M5.5 12h1" stroke-width="1"/><path d="M17.5 12h1" stroke-width="1"/></symbol>
+    <symbol id="ds-icon-moon" viewBox="0 0 24 24"><path d="M20 13.5A8.5 8.5 0 1 1 10.5 4a6.5 6.5 0 0 0 9.5 9.5z"/><circle cx="19" cy="5" r="0.7" fill="currentColor" stroke="none"/><circle cx="21" cy="8" r="0.5" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ds-icon-arrow-right" viewBox="0 0 24 24"><path d="M3 12h16"/><path d="M14 7l5 5-5 5"/></symbol>
+    <symbol id="ds-icon-chevron-down" viewBox="0 0 24 24"><path d="M6 9.5l6 5 6-5"/></symbol>
+    <symbol id="ds-icon-lightbulb" viewBox="0 0 24 24"><path d="M9 21h6M9.5 18.5h5M12 3a7 7 0 0 1 4 12.7V17H8v-1.3A7 7 0 0 1 12 3z"/><path d="M10.5 13a3 3 0 0 1 1.5-2.6A3 3 0 0 1 13.5 13" stroke-width="1" stroke-dasharray="1 1"/></symbol>
+    <symbol id="ds-icon-wrench" viewBox="0 0 24 24"><path d="M14.5 2.5a5 5 0 0 1 1 9.5L7 21a2 2 0 0 1-3-3l8.5-8.5A5 5 0 0 1 14.5 2.5z"/><path d="M16 7.5l2-2"/><path d="M19.5 4l.5.5"/></symbol>
+    <symbol id="ds-icon-book" viewBox="0 0 24 24"><path d="M4 4.5C4 4.5 4 19.5 4 20a1 1 0 0 0 1 1h6.5a2.5 2.5 0 0 1 0-5H4"/><path d="M20 4.5C20 4.5 20 19.5 20 20a1 1 0 0 1-1 1h-6.5a2.5 2.5 0 0 0 0-5H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H12"/><path d="M20 4.5A2.5 2.5 0 0 0 17.5 2H12"/><path d="M12 2v19"/><path d="M17 7.5c.5-.5 1.5-.8 2-.3" stroke-width="1.5"/></symbol>
+    <symbol id="ds-icon-chart-line" viewBox="0 0 24 24"><path d="M3 18C5 16 7.5 10.5 10 12.5S14.5 8 17.5 6L21 8.5"/><path d="M3 21h18"/><circle cx="10" cy="12.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="6" r="1.5" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ds-icon-checklist" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17" rx="2.5"/><path d="M9 4V2.5"/><path d="M15 4V2.5"/><path d="M8.5 4h7"/><path d="M8 10l2 2 4-4"/><path d="M8 15.5h8"/><path d="M8 19h5"/></symbol>
+    <symbol id="ds-icon-leaf" viewBox="0 0 24 24"><path d="M17 2C13 2 6 5 4.5 12.5 3 20 9 22 12 22c0 0-2-7 5-10 5-2.2 6.5-7 0-10z"/><path d="M4.5 12.5C7 9 10 7.5 12 22" stroke-width="1.5"/></symbol>
+    <symbol id="ds-icon-zap" viewBox="0 0 24 24"><path d="M13 2L4 14.5h8L9 22l11-13H12L13 2z"/></symbol>
+    <symbol id="ds-icon-refresh" viewBox="0 0 24 24"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 7.4 3.3"/><path d="M22 12C22 17.5 17.5 22 12 22a10 10 0 0 1-7.4-3.3"/><path d="M19.4 5.3V2M19.4 5.3H16"/><path d="M4.6 18.7V22M4.6 18.7H8"/></symbol>
+    <symbol id="ds-icon-key" viewBox="0 0 24 24"><circle cx="7.5" cy="11.5" r="4"/><path d="M11 11.5h9"/><path d="M17 11.5v3"/><path d="M14 11.5v2"/></symbol>
+    <symbol id="ds-icon-discord" viewBox="0 0 24 24"><path d="M20.3 4.4a19.8 19.8 0 0 0-4.9-1.5.07.07 0 0 0-.08.04c-.21.37-.44.86-.6 1.25a18.3 18.3 0 0 0-5.5 0 12.6 12.6 0 0 0-.62-1.25.08.08 0 0 0-.08-.04A19.7 19.7 0 0 0 3.7 4.4a.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06c0 .02.01.04.03.06a19.9 19.9 0 0 0 6 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-2a.08.08 0 0 0-.04-.1 13.1 13.1 0 0 1-1.87-.9.08.08 0 0 1 0-.13c.13-.1.25-.2.37-.29a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.25.19.37.3a.08.08 0 0 1-.01.12c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.11c.36.7.77 1.36 1.22 1.99a.08.08 0 0 0 .08.03 19.8 19.8 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.67-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.3c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.41 2.16-2.41 1.21 0 2.18 1.1 2.16 2.41 0 1.34-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.95-2.41 2.16-2.41 1.2 0 2.18 1.1 2.16 2.41 0 1.34-.95 2.42-2.16 2.42z"/></symbol>
+  </svg>
+</div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <!-- Clean professional strawberry SVG — geometric, modern -->
+      <svg class="strawberry-logo" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Leaves / calyx -->
+        <path d="M20 10 C17 6, 11 5, 10 9 C13 9, 15 11, 16 13" fill="#3d8c3d" opacity="0.9"/>
+        <path d="M20 10 C23 6, 29 5, 30 9 C27 9, 25 11, 24 13" fill="#3d8c3d" opacity="0.9"/>
+        <path d="M20 10 C20 5, 20 3, 20 2 C20 2, 21 5, 21 8" fill="#2d6e2d" opacity="0.8"/>
+        <!-- Body — smooth strawberry shape -->
+        <path d="M16 13 C10 14, 6 18, 6 23 C6 31, 12 39, 20 41 C28 39, 34 31, 34 23 C34 18, 30 14, 24 13 Z" fill="url(#berry-grad)"/>
+        <!-- Surface highlight (left) -->
+        <ellipse cx="14" cy="22" rx="3.5" ry="5" fill="white" opacity="0.12" transform="rotate(-15 14 22)"/>
+        <!-- Seeds — small oval dots -->
+        <ellipse cx="16" cy="21" rx="1.2" ry="1.6" fill="white" opacity="0.22" transform="rotate(-10 16 21)"/>
+        <ellipse cx="22" cy="19" rx="1.2" ry="1.6" fill="white" opacity="0.22" transform="rotate(5 22 19)"/>
+        <ellipse cx="14" cy="28" rx="1.2" ry="1.6" fill="white" opacity="0.22" transform="rotate(-5 14 28)"/>
+        <ellipse cx="20" cy="30" rx="1.2" ry="1.6" fill="white" opacity="0.22"/>
+        <ellipse cx="26" cy="25" rx="1.2" ry="1.6" fill="white" opacity="0.22" transform="rotate(10 26 25)"/>
+        <defs>
+          <linearGradient id="berry-grad" x1="6" y1="13" x2="34" y2="41" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#e03535"/>
+            <stop offset="55%"  stop-color="#cc2e2e"/>
+            <stop offset="100%" stop-color="#8a1f1f"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="nav-wordmark"><span class="brand-adj" id="brand-adj-nav">Dark</span><span style="color: var(--accent);">Strawberry</span></span>
+    </a>
+    <div class="nav-actions">
+      <!-- Theme toggle -->
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="toggle-icon" id="toggle-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-sun"/></svg></span>
+        <span class="toggle-label" id="toggle-label">Light mode</span>
+      </button>
+      <a href="#request" class="btn-ghost">Request an app</a>
+      <a href="https://apps.darkstrawberry.com" class="btn-primary">
+        Browse Apps
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═══════════ SECTION 1 — HERO ═══════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow fade-up">
+      <span class="dot"></span>
+      Custom apps — built to order
+    </div>
+
+    <h1 class="hero-headline fade-up delay-1" id="hero-brand-name">
+      <span class="brand-adj" id="hero-brand-adj">Dark</span><span style="color: var(--accent);">Strawberry</span>
+    </h1>
+
+    <p class="hero-tagline fade-up delay-2">Apps built for <span class="italic">you.</span> <span class="glow">Literally.</span></p>
+
+    <p class="hero-sub fade-up delay-3">
+      Describe what you need. We build a custom app — not a template, not a workaround.
+      Yours to keep, yours to use.
+    </p>
+
+    <div class="hero-actions fade-up delay-4">
+      <a href="https://apps.darkstrawberry.com" class="btn-primary">
+        Browse Apps
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg>
+      </a>
+      <a href="#request" class="btn-ghost">Request Your App</a>
+    </div>
+
+    <div class="scroll-hint fade-up" style="animation-delay: 0.65s;">
+      <span>Explore</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-chevron-down"/></svg>
+    </div>
+  </div>
+</section>
+
+
+<div class="container"><div class="section-divider"></div></div>
+
+
+<!-- ═══════════ SECTION 2 — HOW IT WORKS ═══════════ -->
+<section class="how-section" id="how">
+  <div class="container">
+    <p class="section-label">How it works</p>
+    <h2 class="section-heading">From idea to app</h2>
+    <p class="section-sub">
+      Tell us what you need. Our AI agent team builds it. You get a custom tool
+      that fits exactly how you work.
+    </p>
+
+    <div class="steps-grid">
+      <div class="step-card glass">
+        <div class="step-number">01</div>
+        <div class="step-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-lightbulb"/></svg></div>
+        <h3 class="step-title">Describe it</h3>
+        <p class="step-desc">
+          Join our Discord and tell us what you need — a tracker, a dashboard,
+          a workflow tool. Plain language, no spec required.
+        </p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-number">02</div>
+        <div class="step-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-wrench"/></svg></div>
+        <h3 class="step-title">We build it</h3>
+        <p class="step-desc">
+          An AI agent team builds your app — custom code, not a template.
+          A real human reviews every detail before it ships.
+        </p>
+      </div>
+      <div class="step-card glass">
+        <div class="step-number">03</div>
+        <div class="step-icon"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-strawberry"/></svg></div>
+        <h3 class="step-title">It is yours</h3>
+        <p class="step-desc">
+          Sign in with Google, find your app in your personal dashboard.
+          Give feedback, request changes — we iterate until it fits.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="container"><div class="section-divider"></div></div>
+
+
+<!-- ═══════════ SECTION 3 — FEATURED APPS ═══════════ -->
+<section class="apps-section" id="apps">
+  <div class="container">
+    <div class="apps-header">
+      <div>
+        <p class="section-label">The collection</p>
+        <h2 class="section-heading">Apps built for <span style="color: var(--accent);">you</span></h2>
+        <p class="section-sub" style="margin-top: 0.5rem;">
+          These apps exist because someone described a need. Each one is a real tool — not a demo.
+        </p>
+      </div>
+      <a href="https://apps.darkstrawberry.com" class="btn-primary" style="align-self: flex-end;">
+        Open portal
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg>
+      </a>
+    </div>
+
+    <div class="apps-grid">
+      <div class="app-card glass">
+        <div class="app-card-glow"></div>
+        <span class="app-icon"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-book"/></svg></span>
+        <h3 class="app-name">Read<span>Tracker</span></h3>
+        <p class="app-desc">Track reading sessions, manage your book list, and set weekly goals. Built for the reader who wants data, not gamification.</p>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="app-tag"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#cc2e2e"/></svg>Live</span>
+          <a href="https://apps.darkstrawberry.com/read-tracker" class="app-try-link">Try it <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg></a>
+        </div>
+      </div>
+
+      <div class="app-card glass">
+        <div class="app-card-glow"></div>
+        <span class="app-icon"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-chart-line"/></svg></span>
+        <h3 class="app-name">Portfolio<span>Tracker</span></h3>
+        <p class="app-desc">A calm view of your investments. No alerts, no noise. Just your numbers, clearly laid out the way you want to see them.</p>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="app-tag"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#cc2e2e"/></svg>Live</span>
+          <a href="https://apps.darkstrawberry.com/portfolio-tracker" class="app-try-link">Try it <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg></a>
+        </div>
+      </div>
+
+      <div class="app-card glass">
+        <div class="app-card-glow"></div>
+        <span class="app-icon"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-checklist"/></svg></span>
+        <h3 class="app-name">Task<span>List</span></h3>
+        <p class="app-desc">Weekly planning built around how you actually think — not how productivity gurus think you should. Drag, drop, done.</p>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="app-tag"><svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#cc2e2e"/></svg>Live</span>
+          <a href="https://apps.darkstrawberry.com/task-list" class="app-try-link">Try it <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="container"><div class="section-divider"></div></div>
+
+
+<!-- ═══════════ SECTION 4 — WHAT MAKES THIS DIFFERENT ═══════════ -->
+<section class="diff-section" id="different">
+  <div class="container">
+    <div class="diff-grid">
+      <div class="diff-copy">
+        <p class="section-label">What makes this different</p>
+        <h2 class="section-heading">Not a platform.<br>A craftsman.</h2>
+        <p>Every other tool gives you a template and tells you to adapt. <strong>We start from your need</strong> and build outward.</p>
+        <p>No subscription tiers. No feature flags. No "upgrade to unlock." You describe what you need. We build exactly that.</p>
+        <p>The AI agent team means we move fast. The human in the loop means we get it right. Not abandoned SaaS — <strong>living software</strong> that evolves with your feedback.</p>
+      </div>
+      <div class="diff-points">
+        <div class="diff-point glass">
+          <div class="diff-point-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-leaf"/></svg></div>
+          <div class="diff-point-text">
+            <h4>Custom-built, not templated</h4>
+            <p>Every app starts from scratch. Your workflow, your data model, your UI preferences.</p>
+          </div>
+        </div>
+        <div class="diff-point glass">
+          <div class="diff-point-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-zap"/></svg></div>
+          <div class="diff-point-text">
+            <h4>AI speed, human judgment</h4>
+            <p>An agent team builds the app. A real person reviews it, refines it, and ships it.</p>
+          </div>
+        </div>
+        <div class="diff-point glass">
+          <div class="diff-point-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-refresh"/></svg></div>
+          <div class="diff-point-text">
+            <h4>Maintained, not abandoned</h4>
+            <p>The feedback loop stays open. Post in Discord, describe what changed, watch the app update.</p>
+          </div>
+        </div>
+        <div class="diff-point glass">
+          <div class="diff-point-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-key"/></svg></div>
+          <div class="diff-point-text">
+            <h4>One login, everything synced</h4>
+            <p>Sign in with Google. All your apps, all your data, all your progress — in one place.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="container"><div class="section-divider"></div></div>
+
+
+<!-- ═══════════ SECTION 5 — REQUEST YOUR APP ═══════════ -->
+<section class="request-section" id="request">
+  <div class="container" style="text-align: center;">
+    <p class="section-label">Request your app</p>
+    <h2 class="section-heading" style="max-width: 600px; margin: 0 auto 1rem;">
+      What would you build,<br>if building was easy?
+    </h2>
+    <p class="section-sub" style="margin: 0 auto;">
+      Most people have something they track in a spreadsheet, a notes app, or their head
+      — because no tool fits quite right. That's exactly what we build.
+    </p>
+
+    <div class="request-card glass">
+      <h3>Join the Discord. Describe your idea.</h3>
+      <p>Post in #app-requests with what you need. We'll ask a few questions to get it right, then build it. No upfront cost, no waiting list — just describe it.</p>
+      <div class="request-actions">
+        <a href="https://discord.gg/MuqGY2yHNh" class="btn-discord">
+          <svg class="discord-icon" width="20" height="20" fill="currentColor" stroke="none"><use href="#ds-icon-discord"/></svg>
+          Join the Discord
+        </a>
+        <a href="https://apps.darkstrawberry.com" class="btn-primary">
+          Browse Apps
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg>
+        </a>
+      </div>
+      <div class="request-flow">
+        <span class="request-flow-step"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><use href="#ds-icon-lightbulb"/></svg> Describe it</span>
+        <span class="request-flow-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg></span>
+        <span class="request-flow-step"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><use href="#ds-icon-wrench"/></svg> We build it</span>
+        <span class="request-flow-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-arrow-right"/></svg></span>
+        <span class="request-flow-step"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><use href="#ds-icon-strawberry"/></svg> It's yours</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <a href="#" class="footer-logo">
+        <svg class="strawberry-logo" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 10 C17 6, 11 5, 10 9 C13 9, 15 11, 16 13" fill="#3d8c3d" opacity="0.7"/>
+          <path d="M20 10 C23 6, 29 5, 30 9 C27 9, 25 11, 24 13" fill="#3d8c3d" opacity="0.7"/>
+          <path d="M16 13 C10 14, 6 18, 6 23 C6 31, 12 39, 20 41 C28 39, 34 31, 34 23 C34 18, 30 14, 24 13 Z" fill="url(#berry-grad-footer)"/>
+          <ellipse cx="16" cy="21" rx="1.2" ry="1.6" fill="white" opacity="0.2" transform="rotate(-10 16 21)"/>
+          <ellipse cx="22" cy="19" rx="1.2" ry="1.6" fill="white" opacity="0.2" transform="rotate(5 22 19)"/>
+          <ellipse cx="20" cy="30" rx="1.2" ry="1.6" fill="white" opacity="0.2"/>
+          <ellipse cx="26" cy="25" rx="1.2" ry="1.6" fill="white" opacity="0.2" transform="rotate(10 26 25)"/>
+          <defs>
+            <linearGradient id="berry-grad-footer" x1="6" y1="13" x2="34" y2="41" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#e03535"/>
+              <stop offset="100%" stop-color="#8a1f1f"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="footer-wordmark"><span class="brand-adj" id="brand-adj-footer">Dark</span><span style="color: var(--accent);">Strawberry</span></span>
+      </a>
+      <p class="footer-copy">Your idea. Your app. No compromises.</p>
+      <div class="footer-links">
+        <a href="https://apps.darkstrawberry.com" class="footer-link">Apps portal</a>
+        <a href="https://discord.gg/MuqGY2yHNh" class="footer-link">Discord</a>
+      </div>
+      <span class="footer-credit">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-neeko"/></svg>
+        Icons designed by Neeko
+      </span>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // ── Theme toggle — Dark Strawberry ↔ White Strawberry ──
+  const root = document.documentElement;
+  const icon = document.getElementById('toggle-icon');
+  const label = document.getElementById('toggle-label');
+  const brandAdjs = document.querySelectorAll('.brand-adj');
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    const isDark = theme === 'dark';
+    icon.innerHTML = isDark
+      ? '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-sun"/></svg>'
+      : '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ds-icon-moon"/></svg>';
+    label.textContent = isDark ? 'Light mode' : 'Dark mode';
+    brandAdjs.forEach(el => { el.textContent = isDark ? 'Dark' : 'White'; });
+    document.title = isDark
+      ? 'Dark Strawberry — Apps built for you. Literally.'
+      : 'White Strawberry — Apps built for you. Literally.';
+    try { localStorage.setItem('ds-theme', theme); } catch(e) {}
+  }
+
+  function toggleTheme() {
+    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  // Restore saved preference — default is dark (HTML attr already set)
+  try {
+    const saved = localStorage.getItem('ds-theme');
+    if (saved) applyTheme(saved);
+  } catch(e) {}
+</script>
+
+</body>
+</html>

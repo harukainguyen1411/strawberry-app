@@ -1,0 +1,33 @@
+{
+  "name": "darkstrawberry",
+  "private": true,
+  "workspaces": [
+    "apps/portal",
+    "apps/myapps",
+    "apps/landing",
+    "apps/shared",
+    "apps/myapps/*",
+    "apps/yourApps/*",
+    "apps/myapps/functions",
+    "dashboards/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test:run",
+    "lint": "turbo run lint",
+    "deploy": "bash scripts/composite-deploy.sh",
+    "scaffold": "bash scripts/scaffold-app.sh"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "turbo": "^2.9.6"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.7.0",
+  "overrides": {
+    "protobufjs": "7.5.5",
+    "undici": "6.24.0"
+  }
+}

@@ -1,0 +1,24 @@
+# Hardcoded-slug allowlist
+# One path or glob per line (relative to repo root).
+# Lines starting with # are comments.
+# Paths listed here are exempt from the check-no-hardcoded-slugs.sh guard.
+# Each entry must include a rationale comment on the preceding line.
+
+# package.json: canonical metadata field — "repository" may use the literal slug
+package.json
+
+# README.md: top-level public-facing doc — illustrative owner/repo examples OK
+README.md
+
+# docs/**: architecture and setup docs use $GITHUB_REPOSITORY env-example form;
+#   any residual literal kept here as illustration is acceptable prose context.
+docs/**
+
+# .github/dependabot.yml: may reference the repo slug for clarity in the config
+.github/dependabot.yml
+
+# The guard script itself (contains the patterns it scans for)
+scripts/hooks/check-no-hardcoded-slugs.sh
+
+# The allowlist file itself
+scripts/hooks/slug-allowlist.txt

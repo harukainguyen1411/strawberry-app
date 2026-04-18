@@ -1,0 +1,26 @@
+name: Portfolio Tracker Issue (PT)
+description: Create an issue for the Portfolio Tracker app
+title: "PT: [Issue Title]"
+body:
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of issue is this?
+      options:
+        - Bug
+        - Enhancement
+        - Documentation
+        - Question
+        - Feature Request
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a clear and detailed description of the issue
+      placeholder: Describe the issue, what you expected to happen, and what actually happened...
+    validations:
+      required: true

@@ -1,0 +1,5 @@
+reviewers:
+  # Default reviewers assigned to every coder-worker PR.
+  # Override at runtime with CODER_WORKER_DEFAULT_REVIEWERS env var (comma-separated).
+  default:
+    - Duongntd
