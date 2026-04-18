@@ -1,0 +1,15 @@
+/* Base styles — Tailwind CDN handles utilities; this file holds non-utility overrides. */
+
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: light; }
+  body {
+    background-color: #eff1f5;
+    color: #4c4f69;
+  }
+  header { background-color: #e6e9ef; border-color: #ccd0da; }
+  section { background-color: #e6e9ef !important; border-color: #ccd0da !important; }
+  footer { border-color: #ccd0da; }
+}
+
+tr.expandable { cursor: pointer; }
+tr.expandable:hover td { opacity: 0.8; }
