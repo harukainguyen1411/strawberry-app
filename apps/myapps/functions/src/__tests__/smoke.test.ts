@@ -101,33 +101,29 @@ describe("beeIntakeStart — auth guard", () => {
   });
 
   it("throws permission-denied when UID is not in the allowed list", async () => {
-    // defineString mock returns "", but BEE_SISTER_UIDS value() returns "" (allow all).
-    // Override the mock for this test to simulate a restricted list.
-    const { defineString } = await import("firebase-functions/params");
-    vi.mocked(defineString).mockReturnValueOnce({
-      value: vi.fn(() => "allowed-uid-1,allowed-uid-2"),
-    } as ReturnType<typeof defineString>);
-
-    // Re-import to pick up the new mock — vi.resetModules not needed here
-    // because defineString is called at module init time. Instead, re-invoke
-    // the handler with a UID not in the mocked allowed list.
+    // beeSisterUids is captured at module-load time as the 3rd defineString call
+    // (after GITHUB_TOKEN and BEE_GITHUB_REPO). Its .value() fn is called at
+    // handler invocation time — so we can override it here to return a restricted list.
     //
-    // The allowed list is evaluated at call time via beeSisterUids.value().
-    // The test confirms the guard rejects a UID absent from that list.
-    const { defineString: ds } = await import("firebase-functions/params");
-    const mockValue = vi.fn(() => "allowed-uid-1,allowed-uid-2");
-    vi.mocked(ds).mockImplementation(() => ({ value: mockValue }) as ReturnType<typeof ds>);
+    // defineString call order in beeIntake.ts:
+    //   [0] GITHUB_TOKEN, [1] BEE_GITHUB_REPO, [2] BEE_SISTER_UIDS
+    const { defineString } = await import("firebase-functions/params");
+    const beeSisterUidsMock = vi.mocked(defineString).mock.results[2]?.value as { value: ReturnType<typeof vi.fn> };
+    const originalValue = beeSisterUidsMock.value;
+    beeSisterUidsMock.value = vi.fn(() => "allowed-uid-1,allowed-uid-2");
 
     const handler = beeIntakeStart as unknown as (req: ReturnType<typeof makeRequest>) => Promise<unknown>;
-    // "stranger-uid" is not in "allowed-uid-1,allowed-uid-2"
-    // Note: beeSisterUids is captured at module load. To exercise the permission
-    // branch we provide a UID and rely on the existing module-level defineString
-    // mock (which returns ""), which means allowed = "" => all UIDs pass.
-    // The unauthenticated path is the primary guard we prove here.
-    // The permission-denied path is exercised directly below via beeIntakeTurn.
-    await expect(handler(makeRequest(undefined))).rejects.toMatchObject({
-      code: "unauthenticated",
-    });
+    try {
+      // "stranger-uid" is authenticated but NOT in "allowed-uid-1,allowed-uid-2"
+      // assertBeeAuth must reach the permission-denied branch.
+      await expect(handler(makeRequest("stranger-uid", { textInput: "hello" }))).rejects.toMatchObject({
+        code: "permission-denied",
+        message: "not_authorized_for_bee",
+      });
+    } finally {
+      // Restore original mock so other tests are not affected.
+      beeSisterUidsMock.value = originalValue;
+    }
   });
 });
 
