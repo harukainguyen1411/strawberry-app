@@ -7,6 +7,6 @@
     "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs"
   },
   "devDependencies": {
-    "ccusage": "^0.8.0"
+    "ccusage": "0.8.0"
   }
 }
