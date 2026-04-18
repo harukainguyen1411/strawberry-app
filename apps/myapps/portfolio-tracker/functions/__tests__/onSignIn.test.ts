@@ -50,8 +50,6 @@ describe('A.1 — onSignIn allowlist guard', () => {
 })
 
 // A.1.7–A.1.8 — onSignIn handler-level tests (trigger type + per-invocation allowlist check)
-// A.1.7 is marked it.fails because onSignIn currently uses beforeUserCreated (fires only at
-// account creation). The fix is to switch to beforeUserSignedIn (fires on every sign-in).
 // Refs: Jhin blocker findings on PR #32.
 
 describe('A.1 — onSignIn handler trigger and per-invocation guard', () => {
@@ -91,9 +89,7 @@ describe('A.1 — onSignIn handler trigger and per-invocation guard', () => {
   // A.1.7 — trigger type must be beforeSignIn (fires on every sign-in), not beforeCreate
   // (fires only at account creation). Pre-existing Firebase Auth UIDs must not bypass the
   // allowlist on subsequent sign-ins.
-  // xfail: current impl uses beforeUserCreated → eventType is "user.beforeCreate".
-  // After fix (beforeUserSignedIn) → eventType becomes "user.beforeSignIn".
-  it.fails('A.1.7 onSignIn blocking trigger eventType is beforeSignIn not beforeCreate', async () => {
+  it('A.1.7 onSignIn blocking trigger eventType is beforeSignIn not beforeCreate', async () => {
     vi.resetModules()
     const { onSignIn } = await import('../onSignIn.js')
     const endpoint = (onSignIn as any).__endpoint
