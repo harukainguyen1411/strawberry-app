@@ -34,6 +34,9 @@ export interface ParseResult {
   trades: Trade[]
   positions: Position[]
   errors: ImportError[]
+  /** Account settlement currency derived from 'Currency (Total)' column.
+   *  null if the column is absent or no data rows exist. */
+  accountCurrency: string | null
 }
 
 /**
@@ -50,7 +53,7 @@ export function parseT212Csv(text: string): ParseResult {
   const nonEmpty = lines.filter((l) => l.trim().length > 0)
 
   if (nonEmpty.length === 0) {
-    return { trades: [], positions: [], errors: [] }
+    return { trades: [], positions: [], errors: [], accountCurrency: null }
   }
 
   const headerLine = nonEmpty[0]
@@ -70,6 +73,7 @@ export function parseT212Csv(text: string): ParseResult {
           message: `Missing required columns: ${missingHeaders.join(', ')}`,
         },
       ],
+      accountCurrency: null,
     }
   }
 
@@ -78,12 +82,17 @@ export function parseT212Csv(text: string): ParseResult {
   const dataRows = nonEmpty.slice(1)
 
   if (dataRows.length === 0) {
-    return { trades: [], positions: [], errors: [] }
+    return { trades: [], positions: [], errors: [], accountCurrency: null }
   }
 
   const trades: Trade[] = []
   const errors: ImportError[] = []
   const positionMap = new Map<string, Position>()
+  // Derive account settlement currency from 'Currency (Total)' column.
+  // T212 settles all transactions in the account's base currency — the first
+  // non-empty value in this column is the account currency.
+  let accountCurrency: string | null = null
+  const totalCurrencyIdx = headers.indexOf('Currency (Total)')
 
   for (let i = 0; i < dataRows.length; i++) {
     const rowNum = i + 2 // 1-indexed, +1 for header
@@ -96,6 +105,12 @@ export function parseT212Csv(text: string): ParseResult {
     const priceStr = row[idx('Price / share')] ?? ''
     const priceCurrency = (row[idx('Currency (Price / share)')] ?? 'USD') as 'USD' | 'EUR'
     const tradeId = row[idx('ID')] ?? ''
+
+    // Capture account currency from the first row that has a value in Currency (Total)
+    if (accountCurrency === null && totalCurrencyIdx >= 0) {
+      const val = (row[totalCurrencyIdx] ?? '').trim()
+      if (val.length > 0) accountCurrency = val
+    }
 
     // Validate price
     if (!priceStr || priceStr.trim() === '') {
@@ -146,7 +161,7 @@ export function parseT212Csv(text: string): ParseResult {
 
   const positions = [...positionMap.values()]
 
-  return { trades, positions, errors }
+  return { trades, positions, errors, accountCurrency }
 }
 
 // ---------------------------------------------------------------------------

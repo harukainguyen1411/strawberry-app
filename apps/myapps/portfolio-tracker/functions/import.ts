@@ -85,13 +85,13 @@ export async function importCsv(params: ImportCsvParams): Promise<ImportResult> 
     await posRef.set(position)
   }
 
-  // Write cash (overwrite per broker — only if source provides cash data)
-  // T212 and IB parsers don't provide explicit cash yet at v0 (needs v1 API data)
-  // For CSV import, we just note the source; real cash comes from broker polling in v1
+  // Write cash (overwrite per broker — placeholder at v0; real balance from broker API in v1).
+  // currency is derived from the CSV (T212: Currency (Total) column; IB: Cash Report section).
+  // null means the CSV did not expose account currency — DashboardView will surface a warn-banner.
   const cashRef = userRef.collection('cash').doc(source)
   await cashRef.set({
     broker: source,
-    currency: 'USD',
+    currency: parsed.accountCurrency ?? null, // NOT POPULATED if null — see V0.17 warn-banner
     amount: 0,  // placeholder — real cash from broker API in v1
     updatedAt: new Date(),
   })
