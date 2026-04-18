@@ -140,6 +140,14 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
+@test "xfail-P1.2: check-no-raw-age gate catches backslash-continuation decrypt bypass" {
+  # Proves the gate detects `age` and the decrypt flag split across two physical
+  # lines via backslash continuation (the multiline-age-caller.sh fixture does this).
+  FIXTURE="${REPO_ROOT}/scripts/deploy/__tests__/fixtures/multiline-age-caller.sh"
+  run bash "${REPO_ROOT}/scripts/deploy/__tests__/check-no-raw-age.sh" "${FIXTURE}"
+  [ "$status" -eq 1 ]
+}
+
 @test "xfail-P1.2: dl_decrypt_env age stub never invoked even when age is on PATH" {
   export AGE_STUB_LOG="${BATS_TEST_TMPDIR}/age-invocations.log"
   WORK="${BATS_TEST_TMPDIR}/repo"
