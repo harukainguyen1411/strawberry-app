@@ -1,31 +1,84 @@
+/**
+ * Portfolio Tracker router.
+ *
+ * Routes:
+ *   /            → DashboardView (auth required)
+ *   /import      → CsvImport (auth required)
+ *   /sign-in     → SignInView (public)
+ *   /sign-in-callback → SignInCallback (public — handles email-link redirect from V0.2)
+ *
+ * Legacy routes retained for the existing portfolio tracker sub-app.
+ *
+ * Refs V0.9
+ */
+
 import { createRouter, createWebHistory } from 'vue-router'
-import PortfolioTrackerLayout from '@/views/PortfolioTrackerLayout.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
 
 const router = createRouter({
   history: createWebHistory('/myApps/portfolio-tracker/'),
   routes: [
+    // Portfolio v0 routes
     {
       path: '/',
-      component: PortfolioTrackerLayout,
+      name: 'portfolio-dashboard',
+      component: () => import('@/views/DashboardView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/import',
+      name: 'csv-import',
+      component: () => import('@/views/CsvImport.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/sign-in',
+      name: 'sign-in',
+      component: () => import('@/views/SignInView.vue'),
+    },
+    {
+      path: '/sign-in-callback',
+      name: 'sign-in-callback',
+      component: () => import('@/views/auth/SignInCallbackView.vue'),
+    },
+    // Legacy routes for the existing portfolio sub-app
+    {
+      path: '/legacy',
+      component: () => import('@/views/PortfolioTrackerLayout.vue'),
       meta: { requiresAuth: true },
       children: [
         { path: '', redirect: 'dashboard' },
-        { path: 'dashboard', name: 'dashboard', component: () => import('@/views/Dashboard.vue') },
+        { path: 'dashboard', name: 'legacy-dashboard', component: () => import('@/views/Dashboard.vue') },
         { path: 'transactions', name: 'transactions', component: () => import('@/views/Transactions.vue') },
         { path: 'settings', name: 'settings', component: () => import('@/views/Settings.vue') },
-      ]
-    }
-  ]
+      ],
+    },
+  ],
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
+  // Use both auth systems during transition: existing authStore + new useAuth
   const authStore = useAuthStore()
+
+  // Wait for initial auth check
   if (authStore.loading) {
-    const check = () => authStore.loading ? setTimeout(check, 50) : (to.meta.requiresAuth && !authStore.isAuthenticated ? next('/') : next())
-    check()
+    await new Promise<void>((resolve) => {
+      const check = () => {
+        if (!authStore.loading) resolve()
+        else setTimeout(check, 50)
+      }
+      check()
+    })
+  }
+
+  const { isAuthenticated } = useAuth()
+  const authed = isAuthenticated.value || authStore.isAuthenticated
+
+  if (to.meta.requiresAuth && !authed) {
+    next({ name: 'sign-in' })
   } else {
-    to.meta.requiresAuth && !authStore.isAuthenticated ? next('/') : next()
+    next()
   }
 })
 
