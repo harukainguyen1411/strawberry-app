@@ -1,16 +1,10 @@
 import { describe, it } from 'vitest'
 
-// xfail: emulator boot + deny-all rule tests.
-// Flipped to passing in the V0.1 implementation commit once:
-//   1. firebase.json + .firebaserc are in place for the portfolio-tracker
-//   2. firestore.rules is a deny-all stub
-//   3. `firebase emulators:exec --only firestore` boots cleanly
-//
-// These tests require the Firebase Firestore emulator to be running.
+// V0.1 bootstrap tests — verifies firebase project config files are in place.
 // Run via: firebase emulators:exec --only firestore "npx vitest run functions/__tests__/emulator-boot.test.ts"
 
 describe('V0.1 — Firebase project bootstrap', () => {
-  it.fails('firebase.json exists at apps/myapps/portfolio-tracker/', async () => {
+  it('firebase.json exists at apps/myapps/portfolio-tracker/', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')
@@ -18,7 +12,7 @@ describe('V0.1 — Firebase project bootstrap', () => {
     if (!exists) throw new Error('firebase.json not found at portfolio-tracker root')
   })
 
-  it.fails('.firebaserc exists and references myapps-b31ea', async () => {
+  it('.firebaserc exists and references myapps-b31ea', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')
@@ -30,7 +24,7 @@ describe('V0.1 — Firebase project bootstrap', () => {
     }
   })
 
-  it.fails('firestore.rules is a deny-all stub (no allow read/write: if true)', async () => {
+  it('firestore.rules is a deny-all stub (no allow read/write: if true)', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')
@@ -45,7 +39,7 @@ describe('V0.1 — Firebase project bootstrap', () => {
     }
   })
 
-  it.fails('firestore.indexes.json exists and is empty (no composite indexes)', async () => {
+  it('firestore.indexes.json exists and is empty (no composite indexes)', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')
@@ -57,7 +51,7 @@ describe('V0.1 — Firebase project bootstrap', () => {
     }
   })
 
-  it.fails('storage.rules is a deny-all stub', async () => {
+  it('storage.rules is a deny-all stub', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')

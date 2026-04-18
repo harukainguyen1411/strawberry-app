@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // v0 deny-all stub — portfolio-tracker does not use Storage in v0.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
