@@ -1,11 +1,11 @@
 /**
  * B.2 — importCsv HTTPS callable integration tests (Refs V0.8)
  *
- * xfail-first: all tests use it.fails() until implementation lands.
+ * Implementation commit: all tests flipped from it.fails() to it().
  *
- * These are unit-level tests with a mock Firestore db (no real emulator needed
- * for CI at v0 — emulator integration is covered in the rules test V0.3).
- * The mock tracks writes so we can assert idempotency.
+ * Uses in-memory Firestore mock (no emulator needed for unit tests).
+ * Cross-user isolation is proven at the handler level: data written under
+ * users/{uid}/ is only accessible with the same uid.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -14,7 +14,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const FIXTURES = path.resolve(__dirname, '../../../test/fixtures')
+const FIXTURES = path.resolve(__dirname, '../../test/fixtures')
 
 function fixture(name: string) {
   return fs.readFileSync(path.join(FIXTURES, name), 'utf8')
@@ -85,7 +85,7 @@ describe('B.2 — importCsv callable', () => {
     vi.resetModules()
   })
 
-  it.fails('B.2.1 import T212 fixture: 47 trades added, 0 skipped, 12 positions written', async () => {
+  it('B.2.1 import T212 fixture: 47 trades added, 0 skipped, 12 positions written', async () => {
     const { importCsv } = await import('../import.js')
     const result = await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('t212-sample.csv') })
     expect(result.tradesAdded).toBe(47)
@@ -94,7 +94,7 @@ describe('B.2 — importCsv callable', () => {
     expect(result.errors).toEqual([])
   })
 
-  it.fails('B.2.2 re-import same fixture is idempotent (0 trades added, 47 skipped)', async () => {
+  it('B.2.2 re-import same fixture is idempotent (0 trades added, 47 skipped)', async () => {
     const { importCsv } = await import('../import.js')
     const csv = fixture('t212-sample.csv')
     await importCsv({ uid: 'userA', db, source: 'T212', csv })
@@ -103,7 +103,7 @@ describe('B.2 — importCsv callable', () => {
     expect(result2.tradesSkipped).toBe(47)
   })
 
-  it.fails('B.2.3 import fixture + 1 new trade row → tradesAdded === 1', async () => {
+  it('B.2.3 import fixture + 1 new trade row → tradesAdded === 1', async () => {
     const { importCsv } = await import('../import.js')
     const csv = fixture('t212-sample.csv')
     await importCsv({ uid: 'userA', db, source: 'T212', csv })
@@ -113,7 +113,7 @@ describe('B.2 — importCsv callable', () => {
     expect(result.tradesAdded).toBe(1)
   })
 
-  it.fails('B.2.4 mutated existing trade (same ID, different price) is NOT updated (immutability)', async () => {
+  it('B.2.4 mutated existing trade (same ID, different price) is NOT updated (immutability)', async () => {
     const { importCsv } = await import('../import.js')
     const csv = fixture('t212-sample.csv')
     await importCsv({ uid: 'userA', db, source: 'T212', csv })
@@ -127,14 +127,14 @@ describe('B.2 — importCsv callable', () => {
     expect((storedTrade?.price as { amount: number })?.amount).toBe(148.50)
   })
 
-  it.fails('B.2.5 unauthenticated call throws HttpsError unauthenticated', async () => {
+  it('B.2.5 unauthenticated call throws HttpsError unauthenticated', async () => {
     const { importCsv } = await import('../import.js')
     await expect(
       importCsv({ uid: null as unknown as string, db, source: 'T212', csv: fixture('t212-sample.csv') })
     ).rejects.toMatchObject({ code: 'unauthenticated' })
   })
 
-  it.fails('B.2.6 import as userA, data not visible to userB (cross-user isolation)', async () => {
+  it('B.2.6 import as userA, data not visible to userB (cross-user isolation)', async () => {
     const { importCsv } = await import('../import.js')
     await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('t212-sample.csv') })
     // userB queries should return zero trades (separate uid path)
@@ -142,7 +142,7 @@ describe('B.2 — importCsv callable', () => {
     expect(userBTrades.length).toBe(0)
   })
 
-  it.fails('B.2.7 source T212 but body is IB CSV → parser error, no Firestore write', async () => {
+  it('B.2.7 source T212 but body is IB CSV → parser error, no Firestore write', async () => {
     const { importCsv } = await import('../import.js')
     const initialWriteCount = db.writes.length
     const result = await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('ib-sample.csv') })
@@ -152,21 +152,21 @@ describe('B.2 — importCsv callable', () => {
     expect(db.writes.length).toBe(initialWriteCount)
   })
 
-  it.fails('B.2.8 partial-bad fixture: 45 good rows written + 2 errors', async () => {
+  it('B.2.8 partial-bad fixture: 45 good rows written + 2 errors', async () => {
     const { importCsv } = await import('../import.js')
     const result = await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('t212-partial-bad.csv') })
     expect(result.tradesAdded).toBe(45)
     expect(result.errors.length).toBe(2)
   })
 
-  it.fails('B.2.9 unknown source throws HttpsError invalid-argument', async () => {
+  it('B.2.9 unknown source throws HttpsError invalid-argument', async () => {
     const { importCsv } = await import('../import.js')
     await expect(
       importCsv({ uid: 'userA', db, source: 'UNKNOWN' as 'T212', csv: fixture('t212-sample.csv') })
     ).rejects.toMatchObject({ code: 'invalid-argument' })
   })
 
-  it.fails('B.2.10 import overwrites cash but leaves other broker cash intact', async () => {
+  it('B.2.10 import overwrites T212 cash but leaves IB cash intact', async () => {
     const { importCsv } = await import('../import.js')
     // Pre-seed IB cash
     db.store.set('users/userA/cash/IB', { broker: 'IB', currency: 'USD', amount: 5000 })
@@ -176,7 +176,7 @@ describe('B.2 — importCsv callable', () => {
     expect(ibCash?.amount).toBe(5000)
   })
 
-  it.fails('B.2.11 positions are overwritten not merged on re-import', async () => {
+  it('B.2.11 positions are overwritten not merged on re-import', async () => {
     const { importCsv } = await import('../import.js')
     // First import
     await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('t212-sample.csv') })

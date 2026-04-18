@@ -15,6 +15,7 @@
  */
 
 import { notImplemented } from './_notImplemented.js'
+import { importCsv } from '../import.js'
 import type { HandlerContext, ImportResult } from './types.js'
 
 // ---------------------------------------------------------------------------
@@ -74,15 +75,9 @@ export async function portfolio_set_base_currency(
  * Real parsing + commit logic lives in import.ts (V0.8). This stub delegates.
  */
 export async function portfolio_import_csv(
-  _ctx: HandlerContext & { source: string; csv: string }
+  ctx: HandlerContext & { source: string; csv: string }
 ): Promise<ImportResult> {
-  // Full implementation in V0.8 — this stub compiles the surface only
-  return {
-    tradesAdded: 0,
-    tradesSkipped: 0,
-    positionsWritten: 0,
-    errors: [],
-  }
+  return importCsv({ uid: ctx.uid, db: ctx.db, source: ctx.source as 'T212' | 'IB', csv: ctx.csv })
 }
 
 // ---------------------------------------------------------------------------
