@@ -1,0 +1,13 @@
+{
+  "name": "usage-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test __tests__/html.test.mjs",
+    "build": "bash ../../scripts/usage-dashboard/build.sh",
+    "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
+}
