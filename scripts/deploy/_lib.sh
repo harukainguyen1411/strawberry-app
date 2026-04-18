@@ -34,8 +34,20 @@ _DL_LIB_DIR="$(cd "$(dirname "${_DL_LIB_SELF}")" && pwd)"
 _DL_SOURCE_ROOT="$(cd "${_DL_LIB_DIR}/../.." && pwd)"
 
 if [ -z "${DL_REPO_ROOT:-}" ]; then
-    # Heuristic: if decrypt.sh is on PATH as a bare command, its parent's
-    # parent is the project root (test-harness convention).
+    # Priority order for repo-root detection:
+    #   1. DL_REPO_ROOT env var (checked above by the outer if).
+    #   2. BASH_SOURCE[0] two levels up — authoritative when _lib.sh is sourced
+    #      directly from the repo (real and test-worktree invocations).
+    #   3. command -v decrypt.sh fallback — only used when the lib is sourced
+    #      from a location where BASH_SOURCE two levels up would NOT reach the
+    #      actual repo root (e.g. a symlinked copy outside the tree). The parent
+    #      of decrypt.sh's directory is treated as repo root only when that
+    #      parent's basename is "tools" — otherwise we fall back to source-root.
+    DL_REPO_ROOT="${_DL_SOURCE_ROOT}"
+
+    # Override with command-v heuristic only when decrypt.sh is findable on
+    # PATH AND its containing directory is named "tools" (i.e. it lives at
+    # <repo-root>/tools/decrypt.sh — the project convention).
     _DL_DECRYPT_ON_PATH=""
     if command -v decrypt.sh >/dev/null 2>&1; then
         _DL_DECRYPT_ON_PATH="$(command -v decrypt.sh)"
@@ -43,9 +55,11 @@ if [ -z "${DL_REPO_ROOT:-}" ]; then
 
     if [ -n "${_DL_DECRYPT_ON_PATH}" ]; then
         _DL_TOOLS_DIR="$(cd "$(dirname "${_DL_DECRYPT_ON_PATH}")" && pwd)"
-        DL_REPO_ROOT="$(dirname "${_DL_TOOLS_DIR}")"
-    else
-        DL_REPO_ROOT="${_DL_SOURCE_ROOT}"
+        _DL_TOOLS_BASENAME="$(basename "${_DL_TOOLS_DIR}")"
+        if [ "${_DL_TOOLS_BASENAME}" = "tools" ]; then
+            DL_REPO_ROOT="$(dirname "${_DL_TOOLS_DIR}")"
+        fi
+        # If dirname is not "tools" (e.g. /usr/local/bin), keep _DL_SOURCE_ROOT.
     fi
 fi
 
