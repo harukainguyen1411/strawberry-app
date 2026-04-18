@@ -1,7 +1,7 @@
 /**
  * A.5 — IB CSV parser tests (Refs V0.7)
  *
- * xfail-first: all tests use it.fails() until implementation lands.
+ * Implementation commit: all tests flipped from it.fails() to it().
  *
  * Note: uses synthetic fixtures (TODO: replace with real anonymized IB Activity
  * Statement at V0.20 when DV0-4 lands — see plans/approved/2026-04-19-portfolio-tracker-v0-tasks.md §DV0-4).
@@ -20,7 +20,7 @@ function fixture(name: string) {
 }
 
 describe('A.5 — IB CSV parser', () => {
-  it.fails('A.5.1 happy-path multi-section: trades from Trades section, positions from Open Positions', async () => {
+  it('A.5.1 happy-path multi-section: trades from Trades section, positions from Open Positions', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const result = parseIbCsv(fixture('ib-sample.csv'))
     expect(result.trades.length).toBeGreaterThan(0)
@@ -29,7 +29,7 @@ describe('A.5 — IB CSV parser', () => {
     expect(result.trades[0].broker).toBe('IB')
   })
 
-  it.fails('A.5.2 bad-headers: both sections rejected, errors[0].kind === bad_headers', async () => {
+  it('A.5.2 bad-headers: both sections rejected, errors[0].kind === bad_headers', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const result = parseIbCsv(fixture('ib-bad-headers.csv'))
     expect(result.trades.length).toBe(0)
@@ -37,7 +37,7 @@ describe('A.5 — IB CSV parser', () => {
     expect(result.errors[0].kind).toBe('bad_headers')
   })
 
-  it.fails('A.5.3 missing Open Positions section: positions.length === 0, no error', async () => {
+  it('A.5.3 missing Open Positions section: positions.length === 0, no error', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const csv = [
       'Statement,Header,Field Name,Field Value',
@@ -50,7 +50,7 @@ describe('A.5 — IB CSV parser', () => {
     expect(result.errors.length).toBe(0)
   })
 
-  it.fails('A.5.4 only Open Positions section: trades.length === 0, positions populated', async () => {
+  it('A.5.4 only Open Positions section: trades.length === 0, positions populated', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const csv = [
       'Statement,Header,Field Name,Field Value',
@@ -63,7 +63,7 @@ describe('A.5 — IB CSV parser', () => {
     expect(result.errors.length).toBe(0)
   })
 
-  it.fails('A.5.5 partial-bad: one bad row in Trades has section name in errors[i].section', async () => {
+  it('A.5.5 partial-bad: one bad row in Trades has section name in errors[i].section', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const result = parseIbCsv(fixture('ib-partial-bad.csv'))
     expect(result.errors.length).toBe(1)
@@ -71,7 +71,7 @@ describe('A.5 — IB CSV parser', () => {
     expect(result.trades.length).toBe(3)  // 4 data rows minus 1 bad
   })
 
-  it.fails('A.5.6 trade IDs are stable across two parses of the same fixture', async () => {
+  it('A.5.6 trade IDs are stable across two parses of the same fixture', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const csv = fixture('ib-sample.csv')
     const r1 = parseIbCsv(csv)
@@ -79,14 +79,14 @@ describe('A.5 — IB CSV parser', () => {
     expect(r1.trades[0].id).toBe(r2.trades[0].id)
   })
 
-  it.fails('A.5.7 unknown section (e.g. Statement Info) is silently ignored', async () => {
+  it('A.5.7 unknown section (e.g. Statement Info) is silently ignored', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const result = parseIbCsv(fixture('ib-sample.csv'))
     // The Statement section in ib-sample.csv should be silently ignored
     expect(result.errors.length).toBe(0)
   })
 
-  it.fails('A.5.8 sections in different order: Positions before Trades both parsed', async () => {
+  it('A.5.8 sections in different order: Positions before Trades both parsed', async () => {
     const { parseIbCsv } = await import('../ib.js')
     const csv = [
       'Open Positions,Header,DataDiscriminator,Asset Category,Currency,Symbol,Quantity,Mult,Cost Price,Cost Basis,Close Price,Value,Unrealized P/L,Code',
