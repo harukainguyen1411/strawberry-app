@@ -72,7 +72,7 @@ fi
 # ---------------------------------------------------------------------------
 # Self-meta paths that legitimately mention the armor header in comments,
 # vendored libraries, or policy files.
-header_allowlist_pattern='^(secrets/encrypted/|tools/age-bundle\.js$|scripts/hooks/pre-commit-secrets-guard\.sh$|\.gitleaks\.toml$|secrets/README\.md$|architecture/security-debt\.md$|plans/|agents/.*/learnings/|agents/.*/journal/|CLAUDE\.md$)'
+header_allowlist_pattern='^(secrets/encrypted/|secrets/env/|tools/age-bundle\.js$|scripts/hooks/pre-commit-secrets-guard\.sh$|\.gitleaks\.toml$|secrets/README\.md$|architecture/security-debt\.md$|plans/|agents/.*/learnings/|agents/.*/journal/|CLAUDE\.md$)'
 for f in "${staged[@]}"; do
     if [[ "$f" =~ $header_allowlist_pattern ]]; then continue; fi
     # Use git show to read the staged blob, not the working tree.
@@ -160,6 +160,7 @@ if command -v age >/dev/null 2>&1 && [[ -f "$KEY_FILE" ]]; then
                 # values and are not themselves secret storage.
                 case "$f" in
                     secrets/encrypted/*) continue ;;
+                    secrets/env/*) continue ;;
                     secrets/age-key.txt) continue ;;
                     agents/*/memory/*) continue ;;
                     agents/*/journal/*) continue ;;
