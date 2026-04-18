@@ -6,17 +6,26 @@
 #
 # Prerequisites:
 #   - gh CLI authenticated (gh auth login)
-#   - Run from within the strawberry repo
 #
 # Usage:
-#   bash scripts/setup-github-labels.sh
+#   bash scripts/setup-github-labels.sh [OWNER/REPO]
+#
+#   If OWNER/REPO is not provided as $1, falls back to:
+#     1. GITHUB_REPOSITORY env var
+#     2. gh repo view (requires running from within the repo)
 
 set -euo pipefail
 
-REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null)
-if [ -z "${REPO}" ]; then
-  echo "ERROR: Could not resolve repo. Run 'gh auth login' and ensure you are inside the repo."
-  exit 1
+if [ -n "${1:-}" ]; then
+  REPO="$1"
+elif [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  REPO="$GITHUB_REPOSITORY"
+else
+  REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null)
+  if [ -z "${REPO}" ]; then
+    echo "ERROR: Could not resolve repo. Pass OWNER/REPO as \$1 or run 'gh auth login' inside the repo."
+    exit 1
+  fi
 fi
 
 echo "Creating labels in ${REPO}..."
