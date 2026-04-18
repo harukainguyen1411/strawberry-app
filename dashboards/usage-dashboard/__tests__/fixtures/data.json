@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-04-19T00:00:00Z",
+  "window": {
+    "startTime": "2026-04-19T00:00:00Z",
+    "endTime": "2026-04-19T05:00:00Z",
+    "inputTokens": 1000,
+    "outputTokens": 500,
+    "totalCost": 0.05
+  },
+  "sessions": [
+    {
+      "sessionId": "s1",
+      "agent": "Jayce",
+      "project": "strawberry",
+      "cwd": "/home/user/strawberry",
+      "tokensIn": 600,
+      "tokensOut": 300,
+      "cacheRead": 10,
+      "cacheCreate": 5,
+      "cost": 0.01,
+      "model": "claude-opus-4-7",
+      "startedAt": "2026-04-10T10:00:00Z"
+    },
+    {
+      "sessionId": "s2",
+      "agent": "Evelynn",
+      "project": "strawberry",
+      "cwd": "/home/user/strawberry",
+      "tokensIn": 400,
+      "tokensOut": 200,
+      "cacheRead": 0,
+      "cacheCreate": 0,
+      "cost": 0.008,
+      "model": "claude-sonnet-4-6",
+      "startedAt": "2026-04-15T11:00:00Z"
+    },
+    {
+      "sessionId": "s3",
+      "agent": "unknown",
+      "project": "work/mmp",
+      "cwd": "/home/user/work",
+      "tokensIn": 200,
+      "tokensOut": 100,
+      "cacheRead": 0,
+      "cacheCreate": 0,
+      "cost": 0.003,
+      "model": "claude-haiku-4-5",
+      "startedAt": "2026-04-01T09:00:00Z"
+    }
+  ],
+  "daily": [
+    { "date": "2026-04-01", "tokens": 300, "cost": 0.003, "byAgent": { "unknown": 300 } },
+    { "date": "2026-04-10", "tokens": 900, "cost": 0.01, "byAgent": { "Jayce": 900 } },
+    { "date": "2026-04-15", "tokens": 600, "cost": 0.008, "byAgent": { "Evelynn": 600 } }
+  ],
+  "roster": ["Evelynn", "Jayce", "Viktor"],
+  "unknownCount": 1
+}
