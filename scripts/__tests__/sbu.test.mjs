@@ -23,7 +23,7 @@ function runSbu(args = [], env = {}) {
 // --- Test 1: sbu with stubbed build.sh (true) and shimmed open exits 0 and records no PID file ---
 test(
   'sbu with stubbed build.sh (true) and shimmed open exits 0 and records no PID file',
-  { todo: 'xfail — sbu.sh not yet implemented' },
+  {},
   () => {
     const dir = mkdtempSync(join(tmpdir(), 'sbu-t1-'));
     const pidDir = mkdtempSync(join(tmpdir(), 'sbu-pid-'));
@@ -59,7 +59,7 @@ test(
 // --- Test 2: sbu --serve spawns refresh-server and writes PID file ---
 test(
   'sbu --serve spawns refresh-server and writes PID file',
-  { todo: 'xfail — sbu.sh not yet implemented' },
+  {},
   () => {
     const dir = mkdtempSync(join(tmpdir(), 'sbu-t2-'));
     const pidDir = mkdtempSync(join(tmpdir(), 'sbu-pid2-'));
@@ -105,7 +105,7 @@ test(
 // --- Test 3: second sbu --serve while PID file alive refuses to start ---
 test(
   'second sbu --serve while PID file is alive refuses to start another instance',
-  { todo: 'xfail — sbu.sh not yet implemented' },
+  {},
   () => {
     const dir = mkdtempSync(join(tmpdir(), 'sbu-t3-'));
     const pidDir = mkdtempSync(join(tmpdir(), 'sbu-pid3-'));
