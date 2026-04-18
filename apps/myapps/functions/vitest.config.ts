@@ -17,10 +17,6 @@ export default defineConfig({
     environment: "node",
     globals: true,
     include: ["src/__tests__/**/*.{test,spec}.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      exclude: ["node_modules/", "**/*.d.ts", "**/*.config.*", "lib/"],
-    },
+    // coverage block removed — @vitest/coverage-v8 not installed; add with P1.5
   },
 });
