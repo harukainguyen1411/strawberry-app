@@ -8,7 +8,7 @@
  * users/{uid}/ is only accessible with the same uid.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, test } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -175,6 +175,18 @@ describe('B.2 — importCsv callable', () => {
     const ibCash = db.store.get('users/userA/cash/IB')
     expect(ibCash?.amount).toBe(5000)
   })
+
+  // xfail: cash currency derived from CSV, not hardcoded USD (Refs V0.8 blocker 1)
+  // Will fail until import.ts reads parsed.accountCurrency instead of hardcoding 'USD'
+  test.fails('B.2.12 IB import with EUR account writes cash.currency = EUR not USD', async () => {
+    const { importCsv } = await import('../import.js')
+    const result = await importCsv({ uid: 'userA', db, source: 'IB', csv: fixture('ib-eur-account.csv') })
+    expect(result.errors).toEqual([])
+    const ibCash = db.store.get('users/userA/cash/IB')
+    // Currently writes 'USD' hardcoded — must write 'EUR' derived from Cash Report section
+    expect(ibCash?.currency).toBe('EUR')
+  })
+
 
   it('B.2.11 positions are overwritten not merged on re-import', async () => {
     const { importCsv } = await import('../import.js')

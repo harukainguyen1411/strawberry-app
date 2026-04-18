@@ -1,0 +1,17 @@
+Statement,Header,Field Name,Field Value
+Statement,Data,BrokerName,Interactive Brokers LLC
+Statement,Data,AccountID,U9876543
+Statement,Data,FromDate,2026-04-01
+Statement,Data,ToDate,2026-04-19
+
+Cash Report,Header,Currency,Description,Total
+Cash Report,Data,EUR,Cash & Cash Equivalents,12500.00
+Cash Report,Data,EUR,Net Cash (Long),12500.00
+
+Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Quantity,T. Price,C. Price,Proceeds,Comm/Fee,Basis,Realized P/L,MTM P/L,Code
+Trades,Data,Order,Stocks,EUR,ASML,2026-04-01 09:30:00,5,840.00,845.00,-4200.00,-2.00,-4202.00,0.00,25.00,IB-E001
+Trades,Data,Order,Stocks,EUR,SAP,2026-04-02 10:00:00,10,182.00,184.00,-1820.00,-1.00,-1821.00,0.00,20.00,IB-E002
+
+Open Positions,Header,DataDiscriminator,Asset Category,Currency,Symbol,Quantity,Mult,Cost Price,Cost Basis,Close Price,Value,Unrealized P/L,Code
+Open Positions,Data,Summary,Stocks,EUR,ASML,5,1,840.00,4200.00,845.00,4225.00,25.00,
+Open Positions,Data,Summary,Stocks,EUR,SAP,10,1,182.00,1820.00,184.00,1840.00,20.00,
