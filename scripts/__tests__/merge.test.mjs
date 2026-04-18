@@ -45,24 +45,35 @@ const AGENTS_FIXTURE = {
   generatedAt: '2026-04-19T00:00:00Z',
 };
 
-function writeFixtures(dir) {
+const ROSTER_FIXTURE = {
+  agents: [
+    { name: 'Jayce', role: 'builder' },
+    { name: 'Evelynn', role: 'coordinator' },
+    { name: 'Viktor', role: 'builder' },
+  ],
+  generatedAt: '2026-04-19T00:00:00Z',
+};
+
+function writeFixtures(dir, rosterOverride) {
   const sessions = join(dir, 'sessions.json');
   const blocks = join(dir, 'blocks.json');
   const daily = join(dir, 'daily.json');
   const agents = join(dir, 'agents.json');
+  const roster = join(dir, 'roster.json');
   writeFileSync(sessions, JSON.stringify(SESSIONS_FIXTURE));
   writeFileSync(blocks, JSON.stringify(BLOCKS_FIXTURE));
   writeFileSync(daily, JSON.stringify(DAILY_FIXTURE));
   writeFileSync(agents, JSON.stringify(AGENTS_FIXTURE));
-  return { sessions, blocks, daily, agents };
+  writeFileSync(roster, JSON.stringify(rosterOverride ?? ROSTER_FIXTURE));
+  return { sessions, blocks, daily, agents, roster };
 }
 
 test('golden fixtures produce expected data.json shape', { todo: 'xfail — merge.mjs not yet implemented' }, () => {
   const dir = makeTmp();
   try {
-    const { sessions, blocks, daily, agents } = writeFixtures(dir);
+    const { sessions, blocks, daily, agents, roster } = writeFixtures(dir);
     const out = join(dir, 'data.json');
-    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --out ${out}`);
+    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --roster ${roster} --out ${out}`);
     const data = JSON.parse(readFileSync(out, 'utf8'));
     assert.equal(data.schemaVersion, 1);
     assert.ok(data.generatedAt, 'generatedAt present');
@@ -80,14 +91,14 @@ test('golden fixtures produce expected data.json shape', { todo: 'xfail — merg
 test('missing "totals" key in ccusage session JSON throws with key name in message', { todo: 'xfail — merge.mjs not yet implemented' }, () => {
   const dir = makeTmp();
   try {
-    const { blocks, daily, agents } = writeFixtures(dir);
+    const { blocks, daily, agents, roster } = writeFixtures(dir);
     const badSessions = join(dir, 'bad-sessions.json');
     const { sessions: _, ...noTotals } = SESSIONS_FIXTURE;
     writeFileSync(badSessions, JSON.stringify({ sessions: SESSIONS_FIXTURE.sessions })); // missing totals
     const out = join(dir, 'data.json');
     let threw = false;
     try {
-      run(`--sessions ${badSessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --out ${out}`);
+      run(`--sessions ${badSessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --roster ${roster} --out ${out}`);
     } catch (err) {
       threw = true;
       const msg = err.stderr?.toString() || err.stdout?.toString() || '';
@@ -102,11 +113,11 @@ test('missing "totals" key in ccusage session JSON throws with key name in messa
 test('session in ccusage but not in agents.json -> agent == "unknown", counted in unknownCount', { todo: 'xfail — merge.mjs not yet implemented' }, () => {
   const dir = makeTmp();
   try {
-    const { sessions, blocks, daily } = writeFixtures(dir);
+    const { sessions, blocks, daily, roster } = writeFixtures(dir);
     const emptyAgents = join(dir, 'empty-agents.json');
     writeFileSync(emptyAgents, JSON.stringify({ sessions: [], unknowns: [], generatedAt: '2026-04-19T00:00:00Z' }));
     const out = join(dir, 'data.json');
-    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${emptyAgents} --out ${out}`);
+    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${emptyAgents} --roster ${roster} --out ${out}`);
     const data = JSON.parse(readFileSync(out, 'utf8'));
     assert.ok(data.sessions.every(s => s.agent === 'unknown'), 'all sessions should be unknown');
     assert.equal(data.unknownCount, 2);
@@ -118,9 +129,9 @@ test('session in ccusage but not in agents.json -> agent == "unknown", counted i
 test('sparkline daily[].byAgent token sums equal daily[].tokens', { todo: 'xfail — merge.mjs not yet implemented' }, () => {
   const dir = makeTmp();
   try {
-    const { sessions, blocks, daily, agents } = writeFixtures(dir);
+    const { sessions, blocks, daily, agents, roster } = writeFixtures(dir);
     const out = join(dir, 'data.json');
-    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --out ${out}`);
+    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --roster ${roster} --out ${out}`);
     const data = JSON.parse(readFileSync(out, 'utf8'));
     for (const day of data.daily) {
       const byAgentSum = Object.values(day.byAgent || {}).reduce((a, b) => a + b, 0);
@@ -134,9 +145,9 @@ test('sparkline daily[].byAgent token sums equal daily[].tokens', { todo: 'xfail
 test('output passes JSON.parse and matches v1 schema', { todo: 'xfail — merge.mjs not yet implemented' }, () => {
   const dir = makeTmp();
   try {
-    const { sessions, blocks, daily, agents } = writeFixtures(dir);
+    const { sessions, blocks, daily, agents, roster } = writeFixtures(dir);
     const out = join(dir, 'data.json');
-    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --out ${out}`);
+    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --roster ${roster} --out ${out}`);
     const raw = readFileSync(out, 'utf8');
     const data = JSON.parse(raw); // throws if invalid JSON
     // v1 schema required keys
@@ -149,6 +160,60 @@ test('output passes JSON.parse and matches v1 schema', { todo: 'xfail — merge.
         assert.ok(k in s, `session missing key: ${k}`);
       }
     }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// regression: roster.json is the authoritative source — all 10 agents appear even with only 2 in sessions
+test('roster.json with 10 names + sessions covering 2 -> data.roster.length === 10', () => {
+  const dir = makeTmp();
+  try {
+    const tenAgents = Array.from({ length: 10 }, (_, i) => ({ name: `Agent${i}`, role: 'agent' }));
+    const bigRoster = { agents: tenAgents, generatedAt: '2026-04-19T00:00:00Z' };
+    const sparseAgents = {
+      sessions: [
+        { sessionId: 'abc123', agent: 'Agent0', project: 'strawberry', cwd: '/home', firstSeen: '2026-04-01T10:00:00Z' },
+        { sessionId: 'def456', agent: 'Agent1', project: 'strawberry', cwd: '/home', firstSeen: '2026-04-02T11:00:00Z' },
+      ],
+      unknowns: [],
+      generatedAt: '2026-04-19T00:00:00Z',
+    };
+    const { sessions, blocks, daily } = writeFixtures(dir, bigRoster);
+    const rosterFile = join(dir, 'roster.json'); // written by writeFixtures with bigRoster
+    const agentsFile = join(dir, 'sparse-agents.json');
+    writeFileSync(agentsFile, JSON.stringify(sparseAgents));
+    const out = join(dir, 'data.json');
+    run(`--sessions ${sessions} --blocks ${blocks} --daily ${daily} --agents ${agentsFile} --roster ${rosterFile} --out ${out}`);
+    const data = JSON.parse(readFileSync(out, 'utf8'));
+    assert.equal(data.roster.length, 10, `expected 10 roster entries, got ${data.roster.length}`);
+    assert.ok(data.roster.includes('Agent0'), 'Agent0 in roster');
+    assert.ok(data.roster.includes('Agent9'), 'Agent9 in roster');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// regression: session record missing startTime key -> fail-loud with key name in error
+test('session record missing "startTime" -> exits non-zero, error mentions "startTime"', () => {
+  const dir = makeTmp();
+  try {
+    const { blocks, daily, agents, roster } = writeFixtures(dir);
+    const badSessions = join(dir, 'no-starttime.json');
+    writeFileSync(badSessions, JSON.stringify({
+      totals: SESSIONS_FIXTURE.totals,
+      sessions: [{ sessionId: 'xyz', model: 'claude-opus-4-7', inputTokens: 10, outputTokens: 5, totalCost: 0 }],
+    }));
+    const out = join(dir, 'data.json');
+    let threw = false;
+    try {
+      run(`--sessions ${badSessions} --blocks ${blocks} --daily ${daily} --agents ${agents} --roster ${roster} --out ${out}`);
+    } catch (err) {
+      threw = true;
+      const msg = err.stderr?.toString() || err.stdout?.toString() || '';
+      assert.ok(msg.includes('startTime'), `error should mention "startTime", got: ${msg}`);
+    }
+    assert.ok(threw, 'should exit non-zero');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

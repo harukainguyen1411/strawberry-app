@@ -9,11 +9,12 @@ const { values: args } = parseArgs({
     blocks:   { type: 'string' },
     daily:    { type: 'string' },
     agents:   { type: 'string' },
+    roster:   { type: 'string' },
     out:      { type: 'string' },
   },
 });
 
-for (const key of ['sessions', 'blocks', 'daily', 'agents', 'out']) {
+for (const key of ['sessions', 'blocks', 'daily', 'agents', 'roster', 'out']) {
   if (!args[key]) { process.stderr.write(`Error: --${key} is required\n`); process.exit(1); }
 }
 
@@ -37,6 +38,7 @@ const sessionsData = load(args.sessions, 'sessions');
 const blocksData   = load(args.blocks,   'blocks');
 const dailyData    = load(args.daily,    'daily');
 const agentsData   = load(args.agents,   'agents');
+const rosterData   = load(args.roster,   'roster');
 
 // Validate expected top-level keys — fail loudly on drift
 assertKey(sessionsData, 'totals',   'sessions JSON');
@@ -44,6 +46,15 @@ assertKey(sessionsData, 'sessions', 'sessions JSON');
 assertKey(blocksData,   'window',   'blocks JSON');
 assertKey(dailyData,    'daily',    'daily JSON');
 assertKey(agentsData,   'sessions', 'agents JSON');
+assertKey(rosterData,   'agents',   'roster JSON');
+
+// Validate each session record has required timestamp key
+for (const s of sessionsData.sessions) {
+  if (!('startTime' in s)) {
+    process.stderr.write(`Schema error in sessions JSON: session "${s.sessionId}" missing required key "startTime"\n`);
+    process.exit(1);
+  }
+}
 
 // Build sessionId -> agent info map
 const agentMap = new Map();
@@ -51,8 +62,8 @@ for (const s of agentsData.sessions) {
   agentMap.set(s.sessionId, s);
 }
 
-// Collect roster names from agents
-const rosterNames = new Set(agentsData.sessions.map(s => s.agent).filter(a => a && a !== 'unknown'));
+// Roster comes from roster.json (authoritative — T1), not derived from sessions seen
+const rosterNames = rosterData.agents.map(a => a.name);
 
 let unknownCount = 0;
 
@@ -96,7 +107,7 @@ const output = {
   window:        blocksData.window,
   sessions,
   daily,
-  roster:        [...rosterNames].sort(),
+  roster:        [...rosterNames].sort((a, b) => a.localeCompare(b)),
   unknownCount,
 };
 
@@ -104,4 +115,4 @@ mkdirSync(dirname(args.out), { recursive: true });
 writeFileSync(args.out, JSON.stringify(output, null, 2) + '\n');
 
 const totalTokens = sessions.reduce((a, s) => a + s.tokensIn + s.tokensOut, 0);
-process.stdout.write(`data.json written: ${sessions.length} sessions, ${rosterNames.size} agents, ${unknownCount} unknown, ${totalTokens} tokens -> ${args.out}\n`);
+process.stdout.write(`data.json written: ${sessions.length} sessions, ${rosterNames.length} agents, ${unknownCount} unknown, ${totalTokens} tokens -> ${args.out}\n`);
