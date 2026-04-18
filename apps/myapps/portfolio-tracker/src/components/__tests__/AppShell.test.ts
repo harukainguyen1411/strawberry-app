@@ -1,19 +1,19 @@
 /**
  * A.16 — AppShell component tests (Refs V0.9)
  *
- * xfail-first: all tests use it.fails() until implementation lands.
+ * Implementation: all it.fails() flipped to it() — component is implemented.
  */
 
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref, computed } from 'vue'
 
-// Mock useAuth composable
+// Mock useAuth composable — email must be a Vue ref so .value works in the component
 vi.mock('@/composables/useAuth', () => ({
   useAuth: () => ({
-    email: 'duong@allowed.test',
-    uid: 'user123',
-    isAuthenticated: true,
+    email: computed(() => 'duong@allowed.test'),
+    uid: computed(() => 'user123'),
+    isAuthenticated: computed(() => true),
   }),
 }))
 
@@ -28,7 +28,7 @@ vi.mock('vue-router', () => ({
 }))
 
 describe('A.16 — AppShell', () => {
-  it.fails('A.16.1 header has sticky class, height 56px, brand text "Strawberry · Portfolio"', async () => {
+  it('A.16.1 header has sticky class, height 56px, brand text "Strawberry · Portfolio"', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell, {
       slots: { default: '<div>content</div>' },
@@ -42,7 +42,7 @@ describe('A.16 — AppShell', () => {
     expect(wrapper.text()).toMatch(/Strawberry.*Portfolio/)
   })
 
-  it.fails('A.16.2 desktop viewport: menu icon hidden', async () => {
+  it('A.16.2 desktop viewport: menu icon hidden at lg', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell, {
       attachTo: document.body,
@@ -56,7 +56,7 @@ describe('A.16 — AppShell', () => {
     wrapper.unmount()
   })
 
-  it.fails('A.16.3 mobile viewport: menu icon visible', async () => {
+  it('A.16.3 mobile viewport: menu icon present in DOM', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell)
     // Menu icon should exist in the DOM (mobile-visible)
@@ -64,7 +64,7 @@ describe('A.16 — AppShell', () => {
     expect(menuBtn.exists()).toBe(true)
   })
 
-  it.fails('A.16.4 avatar circle initials derived from email', async () => {
+  it('A.16.4 avatar circle initials derived from email', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell)
     // "duong@allowed.test" → "DA"
