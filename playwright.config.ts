@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/test'
-import path from 'path'
 
 /**
  * Playwright config for usage-dashboard E2E smoke tests.
@@ -29,18 +28,8 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    // Copies the fixture into the serve directory, then starts the static server.
-    // npx serve is available via node_modules (transitively from myapps workspace).
-    command: [
-      'node -e "',
-      "const fs=require('fs');",
-      "const src=require('path').resolve('tests/e2e/fixtures/usage-dashboard-data.json');",
-      "const dst=require('path').resolve('dashboards/usage-dashboard/data.json');",
-      "fs.copyFileSync(src,dst);",
-      "console.log('fixture installed');",
-      '"',
-      '&& npx --yes serve dashboards/usage-dashboard -l 7891 --no-clipboard',
-    ].join(' '),
+    // Install the fixture data.json then start a static server.
+    command: "node -e \"const fs=require('fs'),p=require('path');fs.copyFileSync(p.resolve('tests/e2e/fixtures/usage-dashboard-data.json'),p.resolve('dashboards/usage-dashboard/data.json'));console.log('fixture installed');\" && npx --yes serve dashboards/usage-dashboard -l 7891 --no-clipboard",
     url: 'http://127.0.0.1:7891',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
