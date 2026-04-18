@@ -102,6 +102,62 @@ test(
   }
 );
 
+// --- Test 4: open_url() errors when no open/xdg-open/start is on PATH ---
+test(
+  'open_url errors with readable hint when open, xdg-open, and start are all absent',
+  {},
+  () => {
+    const dir = mkdtempSync(join(tmpdir(), 'sbu-t4-'));
+    const pidDir = mkdtempSync(join(tmpdir(), 'sbu-pid4-'));
+    try {
+      // build.sh shim that succeeds
+      const buildShim = join(dir, 'build.sh');
+      writeFileSync(buildShim, '#!/bin/sh\nexit 0\n');
+      execSync(`chmod +x ${buildShim}`);
+
+      // Build a synthetic PATH: symlink every executable from /usr/bin and /bin
+      // into a fake bin dir, EXCEPT open/xdg-open/start, so sbu.sh can still
+      // find dirname, nohup, etc. but not any browser opener.
+      const fakeBin = join(dir, 'bin');
+      execSync(`mkdir -p ${fakeBin}`);
+      for (const srcDir of ['/bin', '/usr/bin']) {
+        execSync(
+          `for f in ${srcDir}/*; do [ -x "$f" ] && b=$(basename "$f"); ` +
+          `case "$b" in open|xdg-open|start) ;; *) ln -sf "$f" ${fakeBin}/"$b" 2>/dev/null || true ;; esac; done`,
+          { shell: '/bin/sh' }
+        );
+      }
+
+      // Use the full original PATH but replace /usr/bin entries with fakeBin
+      const safePath = [
+        dir,       // build.sh shim lives here
+        fakeBin,   // /usr/bin tools minus open/xdg-open/start
+        ...process.env.PATH.split(':').filter((d) => !/\/usr\/bin(\/|$)/.test(d)),
+      ].join(':');
+
+      const pidFile = join(pidDir, 'refresh-server.pid');
+
+      const result = runSbu([], {
+        PATH: safePath,
+        BUILD_SH: buildShim,
+        PID_FILE: pidFile,
+        REPO_ROOT,
+      });
+
+      // sbu should exit non-zero because open_url cannot find any opener
+      assert.notEqual(result.status, 0, `Expected non-zero exit, got ${result.status}`);
+      const stderr = result.stderr.toString();
+      assert.ok(
+        stderr.includes('open') || stderr.includes('xdg-open') || stderr.includes('start'),
+        `Expected hint mentioning open helpers, got stderr: ${stderr}`
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      rmSync(pidDir, { recursive: true, force: true });
+    }
+  }
+);
+
 // --- Test 3: second sbu --serve while PID file alive refuses to start ---
 test(
   'second sbu --serve while PID file is alive refuses to start another instance',

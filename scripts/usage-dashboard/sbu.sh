@@ -67,12 +67,36 @@ if [ "$DO_SERVE" = "1" ]; then
   SERVER_PID=$!
   printf '%s' "$SERVER_PID" > "$PID_FILE"
   printf 'sbu: refresh-server started (PID %s), PID recorded at %s\n' "$SERVER_PID" "$PID_FILE"
+
+  # Quick liveness check — catches immediate bind failures
+  sleep 0.5
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    printf 'sbu: refresh-server exited immediately after launch — check port conflicts.\n' >&2
+    rm -f "$PID_FILE"
+    exit 1
+  fi
 fi
+
+# --- Cross-platform open helper ---
+open_url() {
+  _url="$1"
+  if command -v open >/dev/null 2>&1; then
+    open "$_url"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$_url"
+  elif command -v start >/dev/null 2>&1; then
+    start "$_url"
+  else
+    printf 'sbu: cannot open browser automatically — no open/xdg-open/start found on PATH.\n' >&2
+    printf 'sbu: open this file manually: %s\n' "$_url" >&2
+    return 1
+  fi
+}
 
 # --- Open dashboard ---
 if [ "$DO_OPEN" = "1" ]; then
   printf 'sbu: opening %s\n' "$DASHBOARD_INDEX"
-  open "$DASHBOARD_INDEX"
+  open_url "$DASHBOARD_INDEX"
 fi
 
 printf 'sbu: done.\n'
