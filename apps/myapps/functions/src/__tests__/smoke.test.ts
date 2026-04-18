@@ -75,11 +75,14 @@ import { BEE_INTRO_MESSAGE } from "../beeIntake";
 
 describe("BEE_INTRO_MESSAGE — exported constant contract", () => {
   /**
-   * DELIBERATELY FAILING: the expected string below is wrong.
-   * This commit proves the harness is wired and catches assertion failures.
-   * The second commit corrects the expected value and the test passes.
+   * Pins the exact Vietnamese greeting contract.
+   * If beeIntake.ts changes BEE_INTRO_MESSAGE, the frontend BeeIntake.vue
+   * must also change (they hardcode the same string for immediate display).
+   * This test ensures the two stay in sync by catching any drift here.
    */
-  it("starts with the correct Vietnamese greeting (xfail-seed — wrong expected value)", () => {
-    expect(BEE_INTRO_MESSAGE).toBe("THIS_IS_WRONG_AND_WILL_FAIL");
+  it("equals the expected Vietnamese greeting (contract pin)", () => {
+    expect(BEE_INTRO_MESSAGE).toBe(
+      "Chào Haruka! Mình là trợ lý của Bee. Bạn cứ mô tả hoặc tải tài liệu lên — mình sẽ hỏi vài câu để chắc chắn hiểu đúng yêu cầu trước khi giao cho Bee xử lý."
+    );
   });
 });
