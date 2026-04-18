@@ -3,6 +3,14 @@
 # Usage: bash check-no-raw-age.sh <file>
 # Exit 0 = clean; exit 1 = violation found.
 # Mirrors the pre-commit hook's secret-scan pattern (Rule 6).
+#
+# Detection scope:
+#   1. Single-line:    age -d ...
+#   2. Multiline via backslash continuation: age \\\n  -d ...
+#
+# Strategy: use awk to join backslash-continued lines into a single logical
+# line, then grep for the pattern on the joined output. This prevents defeating
+# the gate by splitting `age` and `-d` across two physical lines.
 
 set -eu
 
@@ -25,7 +33,12 @@ AGE_CMD="age"
 DECRYPT_FLAG="-d"
 PATTERN="(^|[^a-zA-Z_])${AGE_CMD}[[:space:]]+${DECRYPT_FLAG}"
 
-VIOLATIONS=$(grep -En "${PATTERN}" "${TARGET}" 2>/dev/null || true)
+# Step 1: join backslash-continued lines using awk so multiline invocations
+# of `age -d` (split across physical lines) collapse onto one logical line.
+JOINED=$(awk '/\\$/ { printf "%s ", substr($0, 1, length($0)-1); next } { print }' "${TARGET}")
+
+# Step 2: grep the joined logical-line stream for the pattern.
+VIOLATIONS=$(printf '%s\n' "${JOINED}" | grep -En "${PATTERN}" 2>/dev/null || true)
 
 if [ -n "${VIOLATIONS}" ]; then
   printf 'FAIL: raw %s %s found in %s:\n%s\n' "${AGE_CMD}" "${DECRYPT_FLAG}" "${TARGET}" "${VIOLATIONS}" >&2
