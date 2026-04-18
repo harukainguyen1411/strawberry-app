@@ -24,7 +24,8 @@ DAILY_JSON="$CACHE_DIR/daily.json"
 AGENTS_JSON="$CACHE_DIR/agents.json"
 ROSTER_JSON="$DASHBOARD_DIR/roster.json"
 DATA_JSON="$DASHBOARD_DIR/data.json"
-DATA_JSON_TMP="$CACHE_DIR/data.json.tmp"
+# Tmp file in same directory as destination — guarantees same filesystem for atomic mv
+DATA_JSON_TMP="$DASHBOARD_DIR/data.json.tmp"
 
 # Create cache dir if missing
 mkdir -p "$CACHE_DIR"
@@ -55,9 +56,9 @@ node "$SCRIPT_DIR/merge.mjs" \
 # Atomic replace: only clobber data.json if merge succeeded
 mv "$DATA_JSON_TMP" "$DATA_JSON"
 
-# Summary line
-SESSIONS_COUNT=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$DATA_JSON','utf8')).sessions.length))" 2>/dev/null || printf '?')
-AGENTS_COUNT=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$DATA_JSON','utf8')).roster.length))" 2>/dev/null || printf '?')
-UNKNOWN_COUNT=$(node -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync('$DATA_JSON','utf8')).unknownCount))" 2>/dev/null || printf '?')
+# Summary line — pass path via argv to handle spaces/special chars in $DATA_JSON
+SESSIONS_COUNT=$(node -e 'var d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(d.sessions.length))' -- "$DATA_JSON" 2>/dev/null || printf '?')
+AGENTS_COUNT=$(node -e 'var d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(d.roster.length))' -- "$DATA_JSON" 2>/dev/null || printf '?')
+UNKNOWN_COUNT=$(node -e 'var d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(d.unknownCount))' -- "$DATA_JSON" 2>/dev/null || printf '?')
 
 printf 'built data.json (%s sessions, %s agents, %s unknown)\n' "$SESSIONS_COUNT" "$AGENTS_COUNT" "$UNKNOWN_COUNT"
