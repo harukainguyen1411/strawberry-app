@@ -49,6 +49,72 @@ describe('A.1 — onSignIn allowlist guard', () => {
   })
 })
 
+// A.1.7–A.1.8 — onSignIn handler-level tests (trigger type + per-invocation allowlist check)
+// A.1.7 is marked it.fails because onSignIn currently uses beforeUserCreated (fires only at
+// account creation). The fix is to switch to beforeUserSignedIn (fires on every sign-in).
+// Refs: Jhin blocker findings on PR #32.
+
+describe('A.1 — onSignIn handler trigger and per-invocation guard', () => {
+  const allowlistedEmail = 'harukainguyen1411@gmail.com'
+
+  // Mock firebase-admin before importing onSignIn so admin.initializeApp() and
+  // admin.firestore() don't require a live Firebase project.
+  const mockGet = vi.fn()
+
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockGet.mockResolvedValue({
+      exists: true,
+      data: () => ({ emails: [allowlistedEmail] }),
+    })
+
+    vi.doMock('firebase-admin', () => ({
+      default: {
+        apps: ['stub'], // non-empty so initializeApp() is skipped
+        initializeApp: vi.fn(),
+        firestore: vi.fn().mockReturnValue({
+          collection: vi.fn().mockReturnValue({
+            doc: vi.fn().mockReturnValue({ get: mockGet }),
+          }),
+        }),
+      },
+      apps: ['stub'],
+      initializeApp: vi.fn(),
+      firestore: vi.fn().mockReturnValue({
+        collection: vi.fn().mockReturnValue({
+          doc: vi.fn().mockReturnValue({ get: mockGet }),
+        }),
+      }),
+    }))
+  })
+
+  // A.1.7 — trigger type must be beforeSignIn (fires on every sign-in), not beforeCreate
+  // (fires only at account creation). Pre-existing Firebase Auth UIDs must not bypass the
+  // allowlist on subsequent sign-ins.
+  // xfail: current impl uses beforeUserCreated → eventType is "user.beforeCreate".
+  // After fix (beforeUserSignedIn) → eventType becomes "user.beforeSignIn".
+  it.fails('A.1.7 onSignIn blocking trigger eventType is beforeSignIn not beforeCreate', async () => {
+    vi.resetModules()
+    const { onSignIn } = await import('../onSignIn.js')
+    const endpoint = (onSignIn as any).__endpoint
+    expect(endpoint.blockingTrigger.eventType).toMatch(/beforeSignIn/)
+  })
+
+  // A.1.8 — allowlist is consulted (Firestore get() called) on every handler invocation.
+  // This is a regression guard: if a future cache implementation incorrectly skips the
+  // allowlist on second call, this test will catch it.
+  it('A.1.8 allowlist Firestore read occurs on every onSignIn invocation', async () => {
+    vi.resetModules()
+    const { onSignIn } = await import('../onSignIn.js')
+    const event = makeAuthBlockingEvent(allowlistedEmail)
+
+    await (onSignIn as any).run(event)
+    await (onSignIn as any).run(event)
+
+    expect(mockGet).toHaveBeenCalledTimes(2)
+  })
+})
+
 function makeMockDb(emails: string[]) {
   return {
     collection: vi.fn().mockReturnValue({
@@ -59,5 +125,11 @@ function makeMockDb(emails: string[]) {
         }),
       }),
     }),
+  }
+}
+
+function makeAuthBlockingEvent(email: string) {
+  return {
+    data: { email },
   }
 }
