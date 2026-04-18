@@ -2,11 +2,14 @@
   "name": "usage-dashboard",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "bash ../../scripts/usage-dashboard/build.sh",
-    "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs"
+    "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs",
+    "test": "node --test __tests__/html.test.mjs"
   },
   "devDependencies": {
-    "ccusage": "^0.8.0"
+    "ccusage": "^0.8.0",
+    "jsdom": "^25.0.0"
   }
 }
