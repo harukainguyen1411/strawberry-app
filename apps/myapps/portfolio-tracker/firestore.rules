@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // config/auth_allowlist: readable only by server-side Admin SDK.
+    // Client reads are explicitly denied — this doc contains the allowlist
+    // and must not be accessible to browser clients.
+    match /config/{docId} {
+      allow read, write: if false;
+    }
+
+    // Per-user data: each user can only read/write their own subtree.
+    match /users/{uid} {
+      // User profile — read+write own doc only.
+      // baseCurrency is required on create and must be USD or EUR.
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasAll(['baseCurrency'])
+        && request.resource.data.baseCurrency in ['USD', 'EUR'];
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && (!request.resource.data.keys().hasAny(['baseCurrency'])
+            || request.resource.data.baseCurrency in ['USD', 'EUR']);
+      allow delete: if false;
+
+      // Positions — derived from poll/import, overwritten on each sync.
+      // Users can read their own; writes allowed (positions are mutable).
+      match /positions/{ticker} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // Trades — immutable ledger. Users can read own trades and create new
+      // ones (via import). Update and delete are denied to enforce immutability.
+      match /trades/{tradeId} {
+        allow read, create: if request.auth != null && request.auth.uid == uid;
+        allow update, delete: if false;
+      }
+
+      // Cash balances — mutable, overwritten on sync.
+      match /cash/{broker} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // Intents — user-owned, fully mutable.
+      match /intents/{intentId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // FX metadata + snapshots + digests — user reads own only.
+      match /meta/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      match /snapshots/{date} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if false; // snapshots written by Cloud Functions (Admin SDK)
+      }
+
+      match /digests/{date} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if false; // digests written by Cloud Functions (Admin SDK)
+      }
+    }
+
+    // Deny everything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
