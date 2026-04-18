@@ -11,7 +11,7 @@ curl https://api.github.com/repos/owner/repo/issues/42
 
 **Private Repository (with token)**:
 ```bash
-curl -H "Authorization: token YOUR_TOKEN" \ # gitleaks:allow
+curl -H "Authorization: token YOUR_TOKEN" \
      https://api.github.com/repos/owner/repo/issues/42
 ```
 
@@ -56,7 +56,7 @@ curl "https://api.github.com/repos/owner/repo/issues?state=all&per_page=100" \
 **Alternative**: If using GitHub Projects, check Projects API:
 ```bash
 # List project items (requires Projects API)
-curl -H "Authorization: token YOUR_TOKEN" \ # gitleaks:allow
+curl -H "Authorization: token YOUR_TOKEN" \
      "https://api.github.com/repos/owner/repo/projects"
 ```
 
@@ -65,7 +65,7 @@ curl -H "Authorization: token YOUR_TOKEN" \ # gitleaks:allow
 **Assign to user**:
 ```bash
 curl -X PATCH \
-  -H "Authorization: token YOUR_TOKEN" \ # gitleaks:allow
+  -H "Authorization: token YOUR_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/owner/repo/issues/42" \
   -d '{"assignees": ["username"]}'
@@ -78,7 +78,7 @@ git config user.name
 git config github.user
 
 # Or from GitHub API
-curl -H "Authorization: token YOUR_TOKEN" \ # gitleaks:allow
+curl -H "Authorization: token YOUR_TOKEN" \
      "https://api.github.com/user"
 ```
 
