@@ -177,7 +177,9 @@ teardown() {
     return 1
   }
 
-  run bash -c "
+  # run --separate-stderr populates $stderr (bats-core 1.5+) so we can assert
+  # on stderr independently; without it $stderr is always empty/undefined.
+  run --separate-stderr bash -c "
     export PATH='${WORK}/bin:${WORK}/tools:${PATH}'
     export DECRYPT_STUB_EMIT='${SENTINEL}'
     export DECRYPT_STUB_LOG='${BATS_TEST_TMPDIR}/decrypt-invocations.log'
@@ -189,7 +191,7 @@ teardown() {
 
   # sentinel must not appear in stdout or stderr
   [[ "$output" != *"${SENTINEL}"* ]]
-  [[ "${stderr:-}" != *"${SENTINEL}"* ]]
+  [[ "${stderr}" != *"${SENTINEL}"* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -391,6 +393,13 @@ teardown() {
   export GOOGLE_APPLICATION_CREDENTIALS="/nonexistent/path/sa.json"
   WORK="${BATS_TEST_TMPDIR}/repo"
 
+  # _lib.sh must exist — without it, source fails non-zero vacuously, making
+  # [ "$status" -ne 0 ] pass before the function is ever implemented.
+  [ -f "${LIB}" ] || {
+    echo "_lib.sh not found — xfail: lib absent" >&2
+    return 1
+  }
+
   run bash -c "
     export PATH='${WORK}/bin:${WORK}/tools:${PATH}'
     export GOOGLE_APPLICATION_CREDENTIALS='/nonexistent/path/sa.json'
@@ -454,10 +463,12 @@ teardown() {
 # ---------------------------------------------------------------------------
 
 @test "xfail-P1.2: no bare firebase deploy in scripts/deploy real tree" {
-  # Real scripts/deploy/ tree should be clean — exclude __tests__/fixtures which
-  # intentionally contain a bad-caller.sh for gate self-testing (G2 design).
+  # Real scripts/deploy/ tree should be clean — exclude __tests__/fixtures/ only
+  # (that subdir intentionally contains bad-caller.sh for gate self-testing).
+  # Excluding the entire __tests__/ directory would also hide any accidental
+  # bare-deploy calls added to __tests__/ scripts themselves.
   run bash "${REPO_ROOT}/scripts/deploy/__tests__/check-no-bare-deploy.sh" \
-    "${REPO_ROOT}/scripts/deploy" --exclude "__tests__"
+    "${REPO_ROOT}/scripts/deploy" --exclude "__tests__/fixtures/"
   [ "$status" -eq 0 ]
 }
 
@@ -476,4 +487,49 @@ teardown() {
   run bash -c "set -euo pipefail; source '${LIB}'; echo OK"
   [ "$status" -eq 0 ]
   [[ "$output" == *"OK"* ]]
+}
+
+# ---------------------------------------------------------------------------
+# I1 — Repo-root detection: off-PATH decrypt.sh must not corrupt DL_REPO_ROOT
+# Regression for Jhin review I1: if decrypt.sh is on PATH but NOT located at
+# <repo>/tools/decrypt.sh (e.g. /usr/local/bin), DL_REPO_ROOT must still
+# resolve to the BASH_SOURCE[0]-derived root, not /usr/local.
+# ---------------------------------------------------------------------------
+
+@test "xfail-P1.2: DL_REPO_ROOT uses BASH_SOURCE root when decrypt.sh is outside tools/" {
+  WORK="${BATS_TEST_TMPDIR}/repo"
+
+  # Place a decrypt.sh stub in a non-tools/ directory (simulating /usr/local/bin)
+  FAKE_BIN="${BATS_TEST_TMPDIR}/usr-local-bin"
+  mkdir -p "${FAKE_BIN}"
+  cp "${FIXTURES_BIN}/decrypt.sh" "${FAKE_BIN}/decrypt.sh"
+  chmod +x "${FAKE_BIN}/decrypt.sh"
+
+  # Put the fake bin FIRST on PATH — but not the real WORK/tools
+  run bash -c "
+    export PATH='${FAKE_BIN}:${PATH}'
+    unset DL_REPO_ROOT
+    source '${LIB}'
+    printf '%s\n' \"\${DL_REPO_ROOT}\"
+  "
+  [ "$status" -eq 0 ]
+
+  # The resolved root must be the BASH_SOURCE-derived root (two levels above _lib.sh)
+  EXPECTED_ROOT="$(cd "${REPO_ROOT}" && pwd)"
+  [ "$output" = "${EXPECTED_ROOT}" ]
+}
+
+@test "xfail-P1.2: DL_REPO_ROOT env override takes precedence over BASH_SOURCE root" {
+  WORK="${BATS_TEST_TMPDIR}/repo"
+  OVERRIDE_ROOT="${BATS_TEST_TMPDIR}/custom-root"
+  mkdir -p "${OVERRIDE_ROOT}"
+
+  run bash -c "
+    export PATH='${WORK}/bin:${WORK}/tools:${PATH}'
+    export DL_REPO_ROOT='${OVERRIDE_ROOT}'
+    source '${LIB}'
+    printf '%s\n' \"\${DL_REPO_ROOT}\"
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "${OVERRIDE_ROOT}" ]
 }
