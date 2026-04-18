@@ -14,7 +14,7 @@
  * does not require a live project, emulator, or GOOGLE_APPLICATION_CREDENTIALS.
  */
 
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect } from "vitest";
 
 // ── Module mocks (must precede any import that transitively loads firebase-admin) ──
 
