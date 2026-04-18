@@ -1,5 +1,4 @@
-// xfail: plan plans/approved/2026-04-19-claude-usage-dashboard-tasks.md T7
-// These tests will pass once index.html is implemented.
+// plan: plans/approved/2026-04-19-claude-usage-dashboard-tasks.md T7
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { test, describe } from 'node:test';
@@ -11,7 +10,7 @@ const html = readFileSync(
 );
 const { document } = new JSDOM(html).window;
 
-describe('T7 index.html shell (xfail)', { todo: true }, () => {
+describe('T7 index.html shell', () => {
   test('required section IDs exist', () => {
     assert.ok(document.getElementById('window-strip'), '#window-strip missing');
     assert.ok(document.getElementById('agent-leaderboard'), '#agent-leaderboard missing');

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strawberry Usage</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#1e1e2e',
+              secondary: '#181825',
+              tertiary: '#313244',
+            },
+            accent: {
+              DEFAULT: '#cba6f7',
+              green: '#a6e3a1',
+              red: '#f38ba8',
+              yellow: '#f9e2af',
+              blue: '#89b4fa',
+              sky: '#89dceb',
+            },
+            muted: '#6c7086',
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+  <script src="app.js" type="module" defer></script>
+  <style>
+    body { font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace; }
+    @media (prefers-color-scheme: light) {
+      :root { color-scheme: light; }
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { color-scheme: dark; }
+    }
+    .spinner {
+      display: inline-block;
+      width: 1em; height: 1em;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    tr.expandable { cursor: pointer; }
+    tr.expandable:hover td { opacity: 0.85; }
+  </style>
+</head>
+<body class="min-h-full bg-[#1e1e2e] dark:bg-[#1e1e2e] text-[#cdd6f4] antialiased">
+
+  <!-- Controls bar -->
+  <header class="sticky top-0 z-10 bg-[#181825] border-b border-[#313244] px-4 py-2 flex flex-wrap items-center gap-3 text-sm">
+    <span class="font-semibold text-[#cba6f7] tracking-wide mr-2">Strawberry Usage</span>
+
+    <label class="flex items-center gap-1" for="date-range">
+      <span class="text-[#6c7086]">Range</span>
+      <select
+        id="date-range"
+        name="date-range"
+        aria-label="Date range"
+        class="bg-[#313244] border border-[#45475a] rounded px-2 py-0.5 text-[#cdd6f4] focus:outline-none focus:ring-1 focus:ring-[#cba6f7]"
+      >
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="180">Last 180 days</option>
+        <option value="360">Last 360 days</option>
+      </select>
+    </label>
+
+    <label class="flex items-center gap-1 cursor-pointer" for="hide-unknown">
+      <input
+        type="checkbox"
+        id="hide-unknown"
+        aria-label="Hide unknown agent sessions"
+        class="accent-[#cba6f7]"
+      />
+      <span class="text-[#6c7086]">Hide unknown</span>
+    </label>
+
+    <button
+      id="refresh-btn"
+      hidden
+      aria-label="Refresh dashboard data"
+      class="flex items-center gap-1.5 px-3 py-0.5 rounded bg-[#313244] border border-[#45475a] hover:border-[#cba6f7] transition-colors"
+    >
+      <span id="refresh-spinner" class="spinner hidden" aria-hidden="true"></span>
+      <span id="refresh-label">Refresh</span>
+    </button>
+
+    <span id="live-indicator" hidden class="text-xs text-[#a6e3a1]">live-refresh available</span>
+
+    <span class="ml-auto text-xs text-[#6c7086]">
+      Updated: <span id="last-updated" aria-live="polite">—</span>
+    </span>
+  </header>
+
+  <!-- Error banner -->
+  <div id="error-banner" hidden role="alert" aria-live="assertive"
+    class="mx-4 mt-4 px-4 py-3 rounded border border-[#f38ba8] bg-[#f38ba8]/10 text-[#f38ba8] text-sm">
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" hidden role="status" aria-live="polite"
+    class="fixed bottom-4 right-4 px-4 py-2 rounded bg-[#313244] border border-[#45475a] text-sm shadow-lg z-50">
+  </div>
+
+  <main class="px-4 py-4 space-y-6 max-w-[1600px] mx-auto">
+
+    <!-- 5h billing window strip -->
+    <section id="window-strip" aria-label="5-hour billing window" class="rounded-lg bg-[#181825] border border-[#313244] p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-[#6c7086] mb-3">Billing Window (5h)</h2>
+      <div id="window-strip-content" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="space-y-0.5">
+          <div class="text-[#6c7086] text-xs">Tokens used</div>
+          <div id="window-tokens" class="text-lg font-semibold">—</div>
+        </div>
+        <div class="space-y-0.5">
+          <div class="text-[#6c7086] text-xs">% of budget</div>
+          <div id="window-pct" class="text-lg font-semibold">—</div>
+        </div>
+        <div class="space-y-0.5">
+          <div class="text-[#6c7086] text-xs">Cost</div>
+          <div id="window-cost" class="text-lg font-semibold">—</div>
+        </div>
+        <div class="space-y-0.5">
+          <div class="text-[#6c7086] text-xs">Resets in</div>
+          <div id="window-countdown" class="text-lg font-semibold">—</div>
+        </div>
+      </div>
+      <div id="window-models" class="mt-3 flex flex-wrap gap-2 text-xs text-[#6c7086]"></div>
+    </section>
+
+    <!-- Agent leaderboard -->
+    <section id="agent-leaderboard" aria-label="Agent leaderboard" class="rounded-lg bg-[#181825] border border-[#313244] p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-[#6c7086] mb-3">Agent Leaderboard</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse" aria-label="Agent usage leaderboard">
+          <thead>
+            <tr class="border-b border-[#313244] text-[#6c7086] text-xs uppercase tracking-wider">
+              <th class="text-left py-2 pr-4 font-medium">Agent</th>
+              <th class="text-right py-2 px-2 font-medium">Sessions</th>
+              <th class="text-right py-2 px-2 font-medium">Tokens</th>
+              <th class="text-right py-2 px-2 font-medium">In</th>
+              <th class="text-right py-2 px-2 font-medium">Out</th>
+              <th class="text-right py-2 px-2 font-medium">Cache</th>
+              <th class="text-right py-2 px-2 font-medium">Cost</th>
+              <th class="text-right py-2 pl-2 font-medium">Avg</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body" aria-live="polite">
+            <tr>
+              <td colspan="8" class="py-8 text-center text-[#6c7086]">Loading…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Project breakdown -->
+    <section id="project-breakdown" aria-label="Project breakdown" class="rounded-lg bg-[#181825] border border-[#313244] p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-[#6c7086] mb-3">Project Breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse" aria-label="Project usage breakdown">
+          <thead>
+            <tr class="border-b border-[#313244] text-[#6c7086] text-xs uppercase tracking-wider">
+              <th class="text-left py-2 pr-4 font-medium">Project</th>
+              <th class="text-right py-2 px-2 font-medium">Sessions</th>
+              <th class="text-right py-2 px-2 font-medium">Tokens</th>
+              <th class="text-right py-2 pl-2 font-medium">Cost</th>
+            </tr>
+          </thead>
+          <tbody id="project-body" aria-live="polite">
+            <tr>
+              <td colspan="4" class="py-8 text-center text-[#6c7086]">Loading…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Sparkline -->
+    <section id="sparkline" aria-label="Token usage over time" class="rounded-lg bg-[#181825] border border-[#313244] p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-[#6c7086] mb-3">Daily Tokens (top 5 agents)</h2>
+      <div class="relative h-48 sm:h-64">
+        <canvas id="sparkline-canvas" aria-label="Daily token usage sparkline chart" role="img"></canvas>
+      </div>
+      <div id="sparkline-day-detail" hidden class="mt-3 overflow-x-auto">
+        <table class="w-full text-xs border-collapse" aria-label="Day session detail">
+          <thead>
+            <tr class="border-b border-[#313244] text-[#6c7086] uppercase tracking-wider">
+              <th class="text-left py-1 pr-3 font-medium">Session</th>
+              <th class="text-right py-1 px-2 font-medium">Tokens</th>
+              <th class="text-right py-1 pl-2 font-medium">Cost</th>
+            </tr>
+          </thead>
+          <tbody id="sparkline-day-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Static footer -->
+  <footer class="mt-8 px-4 py-4 border-t border-[#313244] text-xs text-[#6c7086] flex flex-wrap justify-between gap-2">
+    <span>
+      Max x20 plan: $200/mo. On-demand equivalent for this period:
+      <span id="footer-cost" class="text-[#cdd6f4]">—</span>
+      (ccusage default pricing)
+    </span>
+    <span id="sbu-hint" hidden>
+      Tip: run <code class="bg-[#313244] px-1 rounded">sbu</code> to regenerate data
+    </span>
+  </footer>
+
+</body>
+</html>
