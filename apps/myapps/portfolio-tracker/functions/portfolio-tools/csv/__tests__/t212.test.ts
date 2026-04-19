@@ -118,4 +118,40 @@ describe('A.4 — T212 CSV parser', () => {
     expect(result.trades[0]).toBeTruthy()
     expect(result.errors.length).toBe(0)
   })
+
+  // Refs V0.6 bug-fix: EU comma-decimal normalization
+  it('A.4.11 EU comma-decimal price is parsed correctly (e.g. "1.234,56" → 1234.56)', async () => {
+    const { parseT212Csv } = await import('../t212.js')
+    const HEADER = 'Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Currency (Result),Total,Currency (Total),Withholding tax,Currency (Withholding tax),Notes,ID,Currency conversion fee,Currency (Currency conversion fee)'
+    // EU format: period as thousands separator, comma as decimal separator
+    const csv = [
+      HEADER,
+      'Market buy,2026-04-01 09:30:00,DE000BAY0017,BAYN,Bayer AG,10,"1.234,56",EUR,1,12345.60,EUR,12345.60,EUR,,,,T212-EU-001,0,EUR',
+    ].join('\n')
+    const result = parseT212Csv(csv)
+    expect(result.errors.length).toBe(0)
+    expect(result.trades.length).toBe(1)
+    expect(result.trades[0].price.amount).toBeCloseTo(1234.56, 2)
+  })
+
+  // Refs V0.6 bug-fix: non-trade rows must not become phantom BUYs
+  // A dividend row with a fully populated price/shares triggered the phantom BUY bug:
+  // action.toLowerCase().includes('sell') is false → side defaults to 'BUY'.
+  it('A.4.12 non-trade rows (dividend, deposit, interest, fee) are skipped, not phantom BUYs', async () => {
+    const { parseT212Csv } = await import('../t212.js')
+    const HEADER = 'Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Currency (Result),Total,Currency (Total),Withholding tax,Currency (Withholding tax),Notes,ID,Currency conversion fee,Currency (Currency conversion fee)'
+    const rows = [
+      'Market buy,2026-04-01 09:30:00,US0378331005,AAPL,Apple Inc.,10,148.50,USD,1,1485.00,USD,1485.00,USD,,,,T212-001,0,USD',
+      // Dividend with all fields populated — current code treats it as a BUY
+      'Dividend (Ordinary),2026-04-05 00:00:00,US0378331005,AAPL,Apple Inc.,10,5.00,USD,1,5.00,USD,5.00,USD,,,,T212-DIV-001,0,USD',
+      // Deposit with all fields populated — current code treats it as a BUY
+      'Deposit,2026-04-06 00:00:00,US0378331005,AAPL,Apple Inc.,1,1000.00,USD,1,1000.00,USD,1000.00,USD,,,,T212-DEP-001,0,USD',
+    ]
+    const csv = [HEADER, ...rows].join('\n')
+    const result = parseT212Csv(csv)
+    // Only 1 real trade (Market buy); non-trade rows must be skipped
+    expect(result.trades.length).toBe(1)
+    expect(result.trades[0].id).toBe('T212-001')
+    expect(result.trades[0].side).toBe('BUY')
+  })
 })

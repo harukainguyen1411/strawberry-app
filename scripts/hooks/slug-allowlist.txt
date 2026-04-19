@@ -23,6 +23,6 @@ scripts/hooks/check-no-hardcoded-slugs.sh
 # The allowlist file itself
 scripts/hooks/slug-allowlist.txt
 
-# Worktree copies of hook scripts — git worktrees are visible at .worktrees/;
-# any hook script there is a structural copy of the same guard, not a new violation.
+# .worktrees/**: git worktree checkouts mirror scripts/hooks/ verbatim;
+#   the guard script copies therein contain the literal patterns by necessity.
 .worktrees/**
