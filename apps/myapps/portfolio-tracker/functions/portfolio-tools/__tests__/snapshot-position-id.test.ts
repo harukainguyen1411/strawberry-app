@@ -33,7 +33,7 @@ function makeCtx(positionDocs: ReturnType<typeof makeDocStub>[]) {
 }
 
 describe('Regression — portfolio_get_snapshot position id shape (PR #34)', () => {
-  it.fails(
+  it(
     'A.7.1 each position.id is a string (Firestore doc ID), not an object',
     async () => {
       const docs = [
@@ -45,7 +45,7 @@ describe('Regression — portfolio_get_snapshot position id shape (PR #34)', () 
       const result = await portfolio_get_snapshot(ctx as any)
       for (const pos of result.positions) {
         expect(typeof pos.id).toBe('string')
-        expect(pos.id).not.toEqual(expect.objectContaining({}))
+        expect(pos.id).not.toBeTypeOf('object')
       }
     }
   )
