@@ -39,15 +39,25 @@ describe('V0.1 — Firebase project bootstrap', () => {
     }
   })
 
-  it('firestore.indexes.json exists and is empty (no composite indexes)', async () => {
+  it('firestore.indexes.json exists and contains the V0.3 trades schema indexes', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')
     const indexesPath = path.join(dir, 'firestore.indexes.json')
     if (!fs.existsSync(indexesPath)) throw new Error('firestore.indexes.json not found')
     const indexes = JSON.parse(fs.readFileSync(indexesPath, 'utf-8'))
-    if (!Array.isArray(indexes.indexes) || indexes.indexes.length !== 0) {
-      throw new Error('firestore.indexes.json should have empty indexes array at v0')
+    if (!Array.isArray(indexes.indexes)) {
+      throw new Error('firestore.indexes.json must have an indexes array')
+    }
+    // V0.3 intentionally added a composite index on trades.executedAt DESC
+    // (see PR #33 commit message). This assertion guards against accidental removal.
+    const tradesIndex = indexes.indexes.find(
+      (idx: { collectionGroup: string; fields: { fieldPath: string; order: string }[] }) =>
+        idx.collectionGroup === 'trades' &&
+        idx.fields?.some((f) => f.fieldPath === 'executedAt' && f.order === 'DESCENDING')
+    )
+    if (!tradesIndex) {
+      throw new Error('firestore.indexes.json is missing the V0.3 trades.executedAt DESC index')
     }
   })
 
