@@ -46,6 +46,8 @@ jobs:
         run: |
           cp apps/myapps/firebase.json firebase.json
           cp apps/myapps/.firebaserc .firebaserc
+          # composite-deploy.sh outputs to deploy/, not dist/; patch the public path
+          sed -i 's|"public": "dist"|"public": "deploy"|' firebase.json
 
       - name: Deploy preview channel
         id: firebase_deploy
