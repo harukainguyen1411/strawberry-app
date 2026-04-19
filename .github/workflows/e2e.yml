@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - main
+    # No paths filter — always run so the required "Playwright E2E" status check
+    # always reports. Steps are individually gated on what actually changed.
 
 permissions:
   contents: read
@@ -18,13 +20,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect TDD-enabled packages
+      - name: Detect TDD-enabled packages and myapps-only scope
         id: detect
         shell: bash
         run: |
-          changed=$(git diff --name-only origin/main...HEAD 2>/dev/null || true)
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          changed=$(git diff --name-only "$BASE" "$HEAD" 2>/dev/null || true)
           has_tdd=""
+          only_myapps="true"
           for f in $changed; do
+            # Check if this file is outside apps/myapps/
+            if ! echo "$f" | grep -qE '^apps/myapps/'; then
+              only_myapps="false"
+            fi
             dir=$(dirname "$f")
             while [ "$dir" != "." ]; do
               if [ -f "$dir/package.json" ]; then
@@ -37,27 +46,36 @@ jobs:
               dir=$(dirname "$dir")
             done
           done
+          # If nothing changed at all, treat as non-myapps so we don't skip
+          if [ -z "$changed" ]; then
+            only_myapps="false"
+          fi
           echo "has_tdd=$has_tdd" >> "$GITHUB_OUTPUT"
+          echo "only_myapps=$only_myapps" >> "$GITHUB_OUTPUT"
+
+      - name: Skip — myapps-only PR (myapps-test.yml is sole E2E authority)
+        if: steps.detect.outputs.only_myapps == 'true'
+        run: echo "Only apps/myapps/** changed — Playwright E2E skipped here (green no-op). myapps-test.yml owns E2E for this path."
 
       - name: Skip — no TDD-enabled packages changed
-        if: steps.detect.outputs.has_tdd != 'yes'
+        if: steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd != 'yes'
         run: echo "No TDD-enabled packages in this PR — E2E skipped (green no-op)."
 
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
-        if: steps.detect.outputs.has_tdd == 'yes'
+        if: steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd == 'yes'
         with:
           node-version: '20'
 
       - name: Install dependencies
-        if: steps.detect.outputs.has_tdd == 'yes'
+        if: steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd == 'yes'
         run: npm ci
 
       - name: Install Playwright browsers
-        if: steps.detect.outputs.has_tdd == 'yes'
+        if: steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd == 'yes'
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright E2E
-        if: steps.detect.outputs.has_tdd == 'yes'
+        if: steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd == 'yes'
         run: |
           for dir in dashboards/* apps/*; do
             if [ -f "$dir/package.json" ] && [ -f "$dir/playwright.config.ts" ]; then
@@ -79,7 +97,7 @@ jobs:
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
 
       - name: Upload Playwright report
-        if: always() && steps.detect.outputs.has_tdd == 'yes'
+        if: always() && steps.detect.outputs.only_myapps != 'true' && steps.detect.outputs.has_tdd == 'yes'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.6.1
         with:
           name: playwright-report
