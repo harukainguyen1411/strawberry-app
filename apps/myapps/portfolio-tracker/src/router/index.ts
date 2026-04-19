@@ -25,7 +25,11 @@ router.beforeEach((to, _from, next) => {
     const check = () => authStore.loading ? setTimeout(check, 50) : (to.meta.requiresAuth && !authStore.isAuthenticated ? next('/') : next())
     check()
   } else {
-    to.meta.requiresAuth && !authStore.isAuthenticated ? next('/') : next()
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+      next('/')
+    } else {
+      next()
+    }
   }
 })
 
