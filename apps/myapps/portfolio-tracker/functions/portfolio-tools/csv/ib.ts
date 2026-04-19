@@ -51,6 +51,10 @@ export interface IbParseResult {
   trades: Trade[]
   positions: Position[]
   errors: ImportError[]
+  /** Account base currency derived from the Cash Report section (first data row currency).
+   *  Falls back to the first trade currency if Cash Report is absent.
+   *  null if neither is available. */
+  accountCurrency: string | null
 }
 
 type SectionHeaders = { [col: string]: number }
@@ -101,6 +105,7 @@ export function parseIbCsv(text: string): IbParseResult {
   const trades: Trade[] = []
   const positions: Position[] = []
   const errors: ImportError[] = []
+  let accountCurrency: string | null = null
 
   // Parse Trades section
   const tradesSec = sections.get('Trades')
@@ -245,10 +250,30 @@ export function parseIbCsv(text: string): IbParseResult {
     }
   }
 
+  // Parse Cash Report section for account base currency.
+  // IB Cash Reports list each currency held; the first data row's Currency column
+  // is the account's primary settlement currency.
+  const cashReportSec = sections.get('Cash Report')
+  if (cashReportSec && 'Currency' in cashReportSec.headers) {
+    const currencyIdx = cashReportSec.headers['Currency']
+    for (const row of cashReportSec.dataRows) {
+      const val = (row[currencyIdx] ?? '').trim()
+      if (val.length > 0 && val.toLowerCase() !== 'base currency summary') {
+        accountCurrency = val
+        break
+      }
+    }
+  }
+
+  // Fallback: derive account currency from first parsed trade if Cash Report absent
+  if (accountCurrency === null && trades.length > 0) {
+    accountCurrency = trades[0].currency
+  }
+
   // If neither section was found but file has some content, it's not necessarily an error
   // (IB statements can have many sections we don't parse)
 
-  return { trades, positions, errors }
+  return { trades, positions, errors, accountCurrency }
 }
 
 // ---------------------------------------------------------------------------
