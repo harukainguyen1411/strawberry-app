@@ -96,7 +96,7 @@
 import { ref } from 'vue'
 import type { CurrencyCode } from '@/types/firestore'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
 }>()
 

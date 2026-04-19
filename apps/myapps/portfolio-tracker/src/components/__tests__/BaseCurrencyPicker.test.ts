@@ -8,7 +8,7 @@
  * directly for teleported elements.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount, VueWrapper } from '@vue/test-utils'
 import { defineComponent, h, ref, computed, nextTick } from 'vue'
 

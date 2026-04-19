@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, ref, computed } from 'vue'
+import { defineComponent, h, computed } from 'vue'
 
 // Mock useAuth composable — email must be a Vue ref so .value works in the component
 vi.mock('@/composables/useAuth', () => ({

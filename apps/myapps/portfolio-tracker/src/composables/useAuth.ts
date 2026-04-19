@@ -9,7 +9,7 @@
 
 import { ref, computed } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { app } from '@/firebase/config'
+import app from '@/firebase/config'
 
 const auth = getAuth(app)
 
