@@ -177,3 +177,34 @@ test('B.1.12 firestore.rules contains no allow read/write: if true', () => {
   expect(rulesText).not.toMatch(/allow\s+write.*if\s+true/)
   expect(rulesText).not.toMatch(/allow\s+read,\s*write.*if\s+true/)
 })
+
+// B.1.13 — hasOnly enforcement on create (Refs V0.10 Senna review)
+test('B.1.13 user A cannot create profile with extra field isAdmin (hasOnly enforcement)', async () => {
+  const ctx = testEnv.authenticatedContext('userA')
+  await assertFails(
+    ctx.firestore().collection('users').doc('userA').set({
+      email: 'a@test.com',
+      displayName: 'A',
+      baseCurrency: 'USD',
+      isAdmin: true,
+    })
+  )
+})
+
+// B.1.14 — hasOnly enforcement on update (Refs V0.10 Senna review)
+test('B.1.14 user A cannot update profile with extra field isAdmin (hasOnly enforcement)', async () => {
+  await testEnv.withSecurityRulesDisabled(async (db) => {
+    await db.firestore().collection('users').doc('userA').set({
+      email: 'a@test.com',
+      displayName: 'A',
+      baseCurrency: 'USD',
+    })
+  })
+  const ctx = testEnv.authenticatedContext('userA')
+  await assertFails(
+    ctx.firestore().collection('users').doc('userA').update({
+      baseCurrency: 'EUR',
+      isAdmin: true,
+    })
+  )
+})

@@ -30,6 +30,7 @@ import type { Trade, Position, ImportError } from '../types.js'
 
 const REQUIRED_TRADE_HEADERS = [
   'DataDiscriminator',
+  'Asset Category',
   'Currency',
   'Symbol',
   'Date/Time',
@@ -126,6 +127,21 @@ export function parseIbCsv(text: string): IbParseResult {
         // Skip Summary/SubTotal rows
         if (discriminator.toLowerCase() !== 'order') continue
 
+        // Enforce Stocks-only in v0. Non-Stocks categories (Options, Futures,
+        // Forex, etc.) require open/close semantics that v0 position-math does
+        // not implement.  Bucket them as unsupported with a warning so the user
+        // knows data was skipped — never silently parse them as stocks.
+        const assetCategory = (row[h['Asset Category']] ?? '').trim()
+        if (assetCategory !== 'Stocks') {
+          errors.push({
+            kind: 'unsupported_asset_category',
+            row: rowNum,
+            section: 'Trades',
+            message: `Trades row ${rowNum}: asset category "${assetCategory}" is not supported in v0 — only Stocks are parsed`,
+          })
+          continue
+        }
+
         const currency = (row[h['Currency']] ?? 'USD') as 'USD' | 'EUR'
         const symbol = (row[h['Symbol']] ?? '').trim()
         const dateStr = row[h['Date/Time']] ?? ''
@@ -159,7 +175,19 @@ export function parseIbCsv(text: string): IbParseResult {
         const side: 'BUY' | 'SELL' = quantity >= 0 ? 'BUY' : 'SELL'
         const absQty = Math.abs(quantity)
 
-        const id = tradeCode || deterministicId(symbol, dateStr, String(quantity))
+        // Parse IB Code flags (e.g. "O", "C", "O;P", "C;P").
+        // O = open trade (new position); C = close trade (reduces position).
+        // A short-open has qty < 0 + Code=O; a buy-to-cover has qty > 0 + Code=C.
+        // Store the open/close flag in rawPayload so v0.8 position-math can
+        // distinguish a cover from a long open without needing a Trade type change.
+        const codeFlags = tradeCode.split(';').map((f) => f.trim().toUpperCase())
+        const openClose: 'O' | 'C' | undefined = codeFlags.includes('O')
+          ? 'O'
+          : codeFlags.includes('C')
+          ? 'C'
+          : undefined
+
+        const id = deterministicId(symbol, dateStr, String(quantity))
 
         trades.push({
           id,
@@ -170,6 +198,7 @@ export function parseIbCsv(text: string): IbParseResult {
           price: { amount: price, currency },
           currency,
           executedAt,
+          ...(openClose !== undefined ? { rawPayload: { openClose } } : {}),
         })
       }
     }
