@@ -11,11 +11,15 @@ credentials.json
 *-oauth-keys.json
 secrets/*
 !secrets/encrypted/
+!secrets/env/
 !secrets/recipients.txt
 !secrets/README.md
 secrets/encrypted/*
 !secrets/encrypted/*.age
 !secrets/encrypted/*.age.sha256
+secrets/env/*
+!secrets/env/*.age
+!secrets/env/*.example
 
 # Agent-local settings (contains API keys)
 settings.local.json
@@ -79,6 +83,10 @@ deploy/
 .firebase/
 .playwright-mcp/
 apps/functions/lib/
+
+# Playwright test results (screenshots, videos, traces, HTML report)
+test-results/
+playwright-report/
 
 # Claude session sentinels
 .claude/*.sentinel
