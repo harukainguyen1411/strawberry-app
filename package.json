@@ -9,7 +9,8 @@
     "apps/myapps/*",
     "apps/yourApps/*",
     "apps/myapps/functions",
-    "dashboards/*"
+    "dashboards/*",
+    "packages/*"
   ],
   "scripts": {
     "build": "turbo run build",
