@@ -2,12 +2,12 @@
  * Portfolio Tracker router.
  *
  * Routes:
- *   /            → DashboardView (auth required)
- *   /import      → CsvImport (auth required)
- *   /sign-in     → SignInView (public)
+ *   /                → DashboardView (auth required)
+ *   /import          → CsvImport (auth required)
+ *   /sign-in         → auth/SignInView (public, V0.2 email-link abstraction)
+ *   /sign-in-callback → auth/SignInCallbackView (public, V0.2)
  *
  * Legacy routes retained for the existing portfolio tracker sub-app.
- * Note: /sign-in-callback route is registered in V0.2 (auth/SignInCallbackView.vue).
  *
  * Refs V0.9
  */
@@ -16,52 +16,49 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAuth } from '@/composables/useAuth'
 
+export const routes = [
+  // Portfolio v0 routes
+  {
+    path: '/sign-in',
+    name: 'sign-in',
+    component: () => import('@/views/auth/SignInView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/sign-in-callback',
+    name: 'sign-in-callback',
+    component: () => import('@/views/auth/SignInCallbackView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/',
+    name: 'portfolio-dashboard',
+    component: () => import('@/views/DashboardView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/import',
+    name: 'csv-import',
+    component: () => import('@/views/CsvImport.vue'),
+    meta: { requiresAuth: true },
+  },
+  // Legacy routes for the existing portfolio sub-app
+  {
+    path: '/legacy',
+    component: () => import('@/views/PortfolioTrackerLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', redirect: 'dashboard' },
+      { path: 'dashboard', name: 'legacy-dashboard', component: () => import('@/views/Dashboard.vue') },
+      { path: 'transactions', name: 'transactions', component: () => import('@/views/Transactions.vue') },
+      { path: 'settings', name: 'settings', component: () => import('@/views/Settings.vue') },
+    ],
+  },
+]
+
 const router = createRouter({
   history: createWebHistory('/myApps/portfolio-tracker/'),
-  routes: [
-    // Portfolio v0 routes
-    {
-      path: '/sign-in',
-      name: 'sign-in',
-      component: () => import('@/views/auth/SignInView.vue'),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/sign-in-callback',
-      name: 'sign-in-callback',
-      component: () => import('@/views/auth/SignInCallbackView.vue'),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/',
-      name: 'portfolio-dashboard',
-      component: () => import('@/views/DashboardView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/import',
-      name: 'csv-import',
-      component: () => import('@/views/CsvImport.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/sign-in',
-      name: 'sign-in',
-      component: () => import('@/views/SignInView.vue'),
-    },
-    // Legacy routes for the existing portfolio sub-app
-    {
-      path: '/legacy',
-      component: () => import('@/views/PortfolioTrackerLayout.vue'),
-      meta: { requiresAuth: true },
-      children: [
-        { path: '', redirect: 'dashboard' },
-        { path: 'dashboard', name: 'legacy-dashboard', component: () => import('@/views/Dashboard.vue') },
-        { path: 'transactions', name: 'transactions', component: () => import('@/views/Transactions.vue') },
-        { path: 'settings', name: 'settings', component: () => import('@/views/Settings.vue') },
-      ],
-    },
-  ],
+  routes,
 })
 
 router.beforeEach(async (to, _from, next) => {
