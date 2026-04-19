@@ -1,10 +1,16 @@
 {
   "name": "portfolio-tracker-functions",
+  "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
+  "type": "module",
+  "tdd": {
+    "enabled": true
+  },
   "scripts": {
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "engines": {
     "node": "20"
@@ -14,6 +20,7 @@
     "firebase-functions": "^5.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "typescript": "^5.4.5",
     "vitest": "^4.0.18"
   }

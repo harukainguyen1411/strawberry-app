@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "myapps-b31ea",
+    "staging": "myapps-b31ea-staging"
+  }
+}
