@@ -31,7 +31,7 @@ export async function portfolio_get_snapshot(ctx: HandlerContext) {
   const { uid, db } = ctx
   const posSnap = await db.collection('users').doc(uid).collection('positions').get()
   const cashSnap = await db.collection('users').doc(uid).collection('cash').get()
-  const positions = posSnap.docs.map((d: { data: () => unknown }) => ({ id: d.data(), ...d.data() }))
+  const positions = posSnap.docs.map((d: { id: string; data: () => unknown }) => ({ id: d.id, ...d.data() }))
   const cash = cashSnap.docs.map((d: { data: () => unknown }) => d.data())
   return { positions, cash }
 }

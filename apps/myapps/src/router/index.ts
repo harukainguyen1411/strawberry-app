@@ -150,7 +150,20 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
 
-  // Wait for auth to initialize
+  // If the route doesn't require auth, always allow immediately.
+  if (!to.meta.requiresAuth) {
+    next()
+    return
+  }
+
+  // If already authenticated (includes local-mode), allow immediately
+  // without waiting for Firebase loading to complete.
+  if (authStore.isAuthenticated) {
+    next()
+    return
+  }
+
+  // Auth is still initialising — poll until loading resolves.
   if (authStore.loading) {
     const checkAuth = () => {
       if (!authStore.loading) {
@@ -165,11 +178,8 @@ router.beforeEach((to, _from, next) => {
     }
     checkAuth()
   } else {
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-      next({ name: 'home' })
-    } else {
-      next()
-    }
+    // Loading finished and not authenticated.
+    next({ name: 'home' })
   }
 })
 

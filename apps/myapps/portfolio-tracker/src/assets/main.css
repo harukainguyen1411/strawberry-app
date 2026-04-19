@@ -20,6 +20,11 @@ html[data-theme="dark"] {
   --accent-soft: #e85555;
   --nav-bg:      rgba(17,17,16,0.88);
 
+  /* Portfolio semantic tokens (design spec §2) */
+  --positive:    #3fb96b;
+  --negative:    var(--accent);  /* coral — matches --accent */
+  --warn:        #e0a800;
+
   color-scheme: dark;
 }
 
