@@ -22,3 +22,7 @@ scripts/hooks/check-no-hardcoded-slugs.sh
 
 # The allowlist file itself
 scripts/hooks/slug-allowlist.txt
+
+# .worktrees/**: git worktree checkouts mirror scripts/hooks/ verbatim;
+#   the guard script copies therein contain the literal patterns by necessity.
+.worktrees/**
