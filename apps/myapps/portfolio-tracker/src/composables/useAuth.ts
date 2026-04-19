@@ -7,11 +7,9 @@
  * Refs V0.9
  */
 
-import { ref, computed, onUnmounted } from 'vue'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { app } from '@/firebase/config'
-
-const auth = getAuth(app)
+import { ref, computed } from 'vue'
+import { onAuthStateChanged, type User } from 'firebase/auth'
+import { auth } from '@/firebase/config'
 
 // Singleton state — shared across all useAuth() calls in the app
 const _user = ref<User | null>(null)
