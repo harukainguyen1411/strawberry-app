@@ -8,22 +8,20 @@
  */
 
 import { ref, computed } from 'vue'
-import { onAuthStateChanged, type User } from 'firebase/auth'
-import { auth } from '@/firebase/config'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import app from '@/firebase/config'
+
+const auth = getAuth(app)
 
 // Singleton state — shared across all useAuth() calls in the app
 const _user = ref<User | null>(null)
 const _loading = ref(true)
 
-// Set up one global listener
-let _listenerActive = false
-if (!_listenerActive) {
-  _listenerActive = true
-  onAuthStateChanged(auth, (u) => {
-    _user.value = u
-    _loading.value = false
-  })
-}
+// Set up one global listener (module executes once; singleton state is shared)
+onAuthStateChanged(auth, (u) => {
+  _user.value = u
+  _loading.value = false
+})
 
 /**
  * useAuth — reactive Firebase auth state.
