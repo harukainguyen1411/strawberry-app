@@ -26,7 +26,7 @@ if [ -d "$APP_DIR" ]; then
   exit 1
 fi
 
-TEMPLATE_DIR="$ROOT_DIR/apps/myapps/read-tracker"
+TEMPLATE_DIR="$ROOT_DIR/apps/darkstrawberry-apps/read-tracker"
 if [ ! -d "$TEMPLATE_DIR" ]; then
   echo "ERROR: Template dir not found: $TEMPLATE_DIR" >&2
   exit 1

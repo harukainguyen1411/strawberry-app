@@ -40,6 +40,6 @@ Deployment scripts: `scripts/gce/`. Service units: `scripts/gce/bee-worker.servi
 ## Hard Invariants
 
 1. **Separate git clones.** Mac and Windows must never share the same git clone directory. `git checkout -B` on Windows would destroy Mac's working tree if the clone were shared.
-2. **Windows never touches agent state.** `agents/`, `plans/`, `architecture/`, `.claude/` are off-limits for the coder-worker — enforced by the system prompt and by scoped `git add apps/myapps/`.
+2. **Windows never touches agent state.** `agents/`, `plans/`, `architecture/`, `.claude/` are off-limits for the coder-worker — enforced by the system prompt and by scoped `git add apps/darkstrawberry-apps/`.
 3. **Windows never pushes to main.** Branch protection requires PR review; the worker only pushes to `bot/issue-{number}` branches.
 4. **Mac owns the session lifecycle.** Only Mac sessions run `/end-session` or `/end-subagent-session`. The Windows worker has no slash commands and no closing protocol.

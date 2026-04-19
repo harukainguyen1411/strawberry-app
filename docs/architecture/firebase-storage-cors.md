@@ -68,7 +68,7 @@ Expected: `HTTP/2 200` with `access-control-allow-origin: https://apps.darkstraw
 
 ## Storage rules
 
-`apps/myapps/storage.rules` — deploy with `firebase deploy --only storage` from `apps/myapps/`.
+`apps/darkstrawberry-apps/storage.rules` — deploy with `firebase deploy --only storage` from `apps/darkstrawberry-apps/`.
 
 ## Server-side (bee-worker)
 

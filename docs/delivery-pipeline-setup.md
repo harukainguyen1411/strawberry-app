@@ -287,9 +287,9 @@ After steps 1–9 are green:
 Once the pipeline is live, when you review PRs authored by the coder-worker:
 
 - **Always review the diff tab**, not just the Firebase preview URL. Preview shows runtime behavior; diff shows install-time (package.json, lockfile) and build-time (scripts, configs) changes — different attack surfaces.
-- **Be extra cautious with PRs that touch `package.json`, `package-lock.json`, or anything outside `apps/myapps/`.** The `validate-scope` workflow blocks out-of-scope paths, but lockfile poisoning via a dependency update is a known supply-chain vector worth eyeballing.
+- **Be extra cautious with PRs that touch `package.json`, `package-lock.json`, or anything outside `apps/darkstrawberry-apps/`.** The `validate-scope` workflow blocks out-of-scope paths, but lockfile poisoning via a dependency update is a known supply-chain vector worth eyeballing.
 - **If Claude's PR looks dense or weird, reject and re-run.** You're the gate.
-- **Watch for prompt-injection exfil patterns.** Pyke REV 2 §11.6: a malicious issue body could try to steer Claude into `Read`ing files outside `apps/myapps/` (like `secrets/*.txt`) and exfiltrating their content via a commit body or a file written into `apps/myapps/`. Katarina's coder-worker scaffold locks this down at the tool level (drop `Bash` from allowed tools, restrict read paths where possible, log every tool call), but be alert if a PR has suspicious string literals in a commit message or contains base64-looking blobs in the diff.
+- **Watch for prompt-injection exfil patterns.** Pyke REV 2 §11.6: a malicious issue body could try to steer Claude into `Read`ing files outside `apps/darkstrawberry-apps/` (like `secrets/*.txt`) and exfiltrating their content via a commit body or a file written into `apps/darkstrawberry-apps/`. Katarina's coder-worker scaffold locks this down at the tool level (drop `Bash` from allowed tools, restrict read paths where possible, log every tool call), but be alert if a PR has suspicious string literals in a commit message or contains base64-looking blobs in the diff.
 
 ---
 
