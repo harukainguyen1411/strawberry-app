@@ -29,6 +29,7 @@ const TRADE_ACTIONS = new Set([
   'limit sell',
 ])
 
+
 const REQUIRED_HEADERS = [
   'Action',
   'Time',
@@ -111,6 +112,7 @@ export function parseT212Csv(text: string): ParseResult {
       continue
     }
 
+
     // Validate price
     if (!priceStr || priceStr.trim() === '') {
       errors.push({ kind: 'missing_price', row: rowNum, message: `Row ${rowNum}: missing price` })
@@ -189,6 +191,7 @@ function parseDecimal(s: string): number {
   // Standard format or bare integer — strip thousands commas then parse
   return parseFloat(trimmed.replace(/,(?=\d{3})/g, ''))
 }
+
 
 function parseT212Date(s: string): Date | null {
   if (!s || s.trim() === '') return null
