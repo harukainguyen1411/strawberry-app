@@ -1,19 +1,15 @@
 /**
  * Regression tests for Senna CHANGES_REQUESTED review (2026-04-19)
- * Refs V0.11, Rule 13 — xfail tests committed before fix
+ * Refs V0.11, Rule 13 — regression tests (xfails converted to passing after fix)
  *
  * A.17.R1 — parseResult is non-null after a successful parse (step-2 advancement)
  *   REGRESSION: `parseResult.value = useCsvParser().result.value` constructed a new
  *   composable instance whose result was always null. Fix: destructure `result` from
  *   the single setup-time call and assign `parseResult.value = result.value`.
  *
- * A.17.R2 — DropZone errorId stability (design issue — tests current behavior)
+ * A.17.R2 — DropZone errorId stability
  *   The `errorId` was a computed with `Math.random()` which could produce a different
- *   value across re-renders. In practice the computed caches per reactive-dependency
- *   change, but the design is fragile (no reactive dep = evaluated at random on first
- *   read only). Tests that errorId is stable within a component lifecycle.
- *   NOTE: not using it.fails because the bug doesn't manifest as a test assertion
- *   failure in jsdom — it is a code-quality issue addressed as part of the fix.
+ *   value across re-renders. Fixed to a module-scoped counter producing stable ids.
  *
  * A.17.R3 — DropZone emits error when multiple files are dropped simultaneously
  *   New behavior: drop of >1 file emits 'error'; before fix, files[0] was silently used.
@@ -27,9 +23,9 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { defineComponent, h, nextTick } from 'vue'
+import { defineComponent, h, ref, nextTick } from 'vue'
 
-// ---- Router + Auth stubs shared by all tests (top-level hoisting) ----------
+// ---- Router + Auth stubs (hoisted) -----------------------------------------
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -48,42 +44,55 @@ vi.mock('@/composables/useAuth', () => ({
   }),
 }))
 
-// ---- Minimal T212 fixture ---------------------------------------------------
+// Controlled mock for useCsvParser: parse() populates result.value so we can
+// assert that parseResult in CsvImport gets the same object.
+// This must be at module scope (vi.mock is hoisted; closures over inner consts fail).
+const FAKE_RESULT = { trades: [{ id: 'T1' }], positions: [], errors: [] } as const
 
-const T212_CSV = `Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Total,Currency (Total),Withholding tax,Currency (Withholding tax),Charge amount (GBP),Notes
-Market buy,2026-01-02 10:00:00,US0378331005,AAPL,Apple Inc,1,150.00,USD,1.0,0,150.00,USD,0,USD,0,
-`
+vi.mock('@/composables/useCsvParser', () => ({
+  useCsvParser: vi.fn(() => {
+    const result = ref<typeof FAKE_RESULT | null>(null)
+    const parseError = ref<string | null>(null)
+    const loading = ref(false)
+    const reset = vi.fn(() => { result.value = null; parseError.value = null })
+    const parse = vi.fn(async (_source: string, _text: string) => {
+      // Simulate a successful parse: populate result (no parseError)
+      result.value = FAKE_RESULT as unknown as typeof FAKE_RESULT
+      parseError.value = null
+    })
+    return { result, parseError, loading, parse, reset }
+  }),
+}))
 
 // ---- A.17.R1 — parseResult non-null after successful parse -----------------
 
 describe('A.17.R1 — parseResult populated after onParse (regression: double-instance bug)', () => {
-  beforeEach(() => {
-    vi.resetModules()
-  })
-
-  it.fails('xfail: parseResult is non-null when step advances to step2', async () => {
-    // Use real useCsvParser (unmocked) with a real T212 fixture.
-    // This will fail before the fix because the second useCsvParser() call
-    // constructs a new instance whose result is always null.
-    const CsvImport = (await import('@/views/CsvImport.vue')).default
+  it('A.17.R1 parseResult is non-null and equals result.value after parse() succeeds', async () => {
+    const { default: CsvImport } = await import('@/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 
+    // Select source
     const sourceSelect = wrapper.find('select')
     await sourceSelect.setValue('T212')
     await nextTick()
 
+    // Provide paste text so canParse becomes true
     const textarea = wrapper.find('textarea')
-    await textarea.setValue(T212_CSV)
+    await textarea.setValue('Date,Symbol\n2026-01-01,AAPL')
     await nextTick()
 
+    // Click "Parse →"
     const parseBtn = wrapper.find('[data-testid="parse-btn"]')
+    expect((parseBtn.element as HTMLButtonElement).disabled).toBe(false)
     await parseBtn.trigger('click')
     await flushPromises()
     await nextTick()
 
-    // REGRESSION: before fix parseResult is null; after fix it should be non-null
+    // After fix: result from the shared composable instance propagates to parseResult.
+    // Before fix: a second useCsvParser() call returned a fresh null instance.
     expect(wrapper.vm.parseResult).not.toBeNull()
+    expect(wrapper.vm.parseResult).toEqual(FAKE_RESULT)
     expect(wrapper.vm.step).toBe('step2')
 
     wrapper.unmount()
@@ -92,12 +101,7 @@ describe('A.17.R1 — parseResult populated after onParse (regression: double-in
 
 // ---- A.17.R2 — errorId stable in DropZone ----------------------------------
 
-describe('A.17.R2 — DropZone errorId does not change across re-renders', () => {
-  // Note: Math.random() in a computed() with no reactive deps is evaluated once
-  // and cached — stable within a single component lifecycle in Vue. The code smell
-  // is that the id could differ between component instances or across tick boundaries
-  // if reactive deps ever change. The fix replaces this with a module-scoped counter
-  // producing a deterministic id. This test verifies stability within one lifecycle.
+describe('A.17.R2 — DropZone errorId is stable (regression: Math.random in computed)', () => {
   it('A.17.R2 errorId is stable across multiple ticks in same instance', async () => {
     const { default: DropZone } = await import('@/components/DropZone.vue')
     const wrapper = mount(DropZone, {
@@ -106,7 +110,7 @@ describe('A.17.R2 — DropZone errorId does not change across re-renders', () =>
     })
     await nextTick()
 
-    // Trigger error state so the aria-describedby id is rendered in DOM
+    // Trigger error state so the aria-describedby id is rendered
     const file = new File(['x'], 'data.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     })
@@ -125,9 +129,13 @@ describe('A.17.R2 — DropZone errorId does not change across re-renders', () =>
 })
 
 // ---- A.17.R3 — Multi-file drop emits error ---------------------------------
+//
+// jsdom has neither DataTransfer nor DragEvent constructors.
+// DropZone exposes `onDrop` for testing so we can call it with a fake event
+// object that carries a fake FileList, bypassing the jsdom limitation.
 
 describe('A.17.R3 — DropZone rejects multi-file drop', () => {
-  it.fails('xfail: dropping >1 file emits an error instead of silently using files[0]', async () => {
+  it('A.17.R3 onDrop with >1 file emits error instead of silently using files[0]', async () => {
     const { default: DropZone } = await import('@/components/DropZone.vue')
     const wrapper = mount(DropZone, {
       props: { accept: '.csv', maxSizeMb: 10 },
@@ -137,16 +145,17 @@ describe('A.17.R3 — DropZone rejects multi-file drop', () => {
 
     const file1 = new File(['a,b'], 'first.csv', { type: 'text/csv' })
     const file2 = new File(['c,d'], 'second.csv', { type: 'text/csv' })
-    const dt = new DataTransfer()
-    dt.items.add(file1)
-    dt.items.add(file2)
+    const fakeFileList = Object.assign([file1, file2], {
+      length: 2,
+      item: (i: number) => [file1, file2][i] ?? null,
+    })
 
-    const dropEvent = new DragEvent('drop', { bubbles: true, cancelable: true })
-    Object.defineProperty(dropEvent, 'dataTransfer', { value: dt })
-    wrapper.element.dispatchEvent(dropEvent)
+    // Call the exposed onDrop directly with a fake DragEvent-like object
+    ;(wrapper.vm as { onDrop: (e: { dataTransfer?: { files: typeof fakeFileList } }) => void })
+      .onDrop({ dataTransfer: { files: fakeFileList } })
     await nextTick()
 
-    // REGRESSION: before fix no error is emitted, files[0] is silently used
+    // After fix: error is emitted for multi-file drop
     expect(wrapper.emitted('error')).toBeTruthy()
     const errorMsg = (wrapper.emitted('error') as string[][])[0][0]
     expect(errorMsg).toMatch(/multiple|one file/i)
@@ -158,7 +167,7 @@ describe('A.17.R3 — DropZone rejects multi-file drop', () => {
 // ---- A.17.R4 — CsvPasteArea hard-rejects > 10 MB --------------------------
 
 describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
-  it.fails('xfail: pasting > 10 MB emits too-large and update:modelValue is blocked', async () => {
+  it('A.17.R4 pasting > 10 MB emits too-large and does not propagate modelValue', async () => {
     const { default: CsvPasteArea } = await import('@/components/CsvPasteArea.vue')
     const wrapper = mount(CsvPasteArea, {
       props: { modelValue: '' },
@@ -166,7 +175,7 @@ describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
     })
     await nextTick()
 
-    // Build 11 MB of text and dispatch input event
+    // 11 MB of text
     const hugeText = 'A'.repeat(11 * 1024 * 1024)
     const textarea = wrapper.find('textarea')
     const inputEvent = new Event('input', { bubbles: true })
@@ -174,8 +183,9 @@ describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
     textarea.element.dispatchEvent(inputEvent)
     await nextTick()
 
-    // REGRESSION: before fix only soft warn is shown; no 'too-large' event emitted
+    // After fix: too-large is emitted; update:modelValue is NOT emitted
     expect(wrapper.emitted('too-large')).toBeTruthy()
+    expect(wrapper.emitted('update:modelValue')).toBeFalsy()
 
     wrapper.unmount()
   })
@@ -184,7 +194,7 @@ describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
 // ---- A.17.R5 — FileReader onerror surfaces via dropError -------------------
 
 describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
-  it.fails('xfail: FileReader read failure populates dropError and clears fileText', async () => {
+  it('A.17.R5 FileReader read failure populates dropError and keeps fileText null', async () => {
     // Stub FileReader to fire onerror synchronously
     const OriginalFileReader = globalThis.FileReader
     class FakeFileReader {
@@ -198,19 +208,15 @@ describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
     }
     globalThis.FileReader = FakeFileReader as unknown as typeof FileReader
 
-    vi.resetModules()
-
-    const CsvImport = (await import('@/views/CsvImport.vue')).default
+    const { default: CsvImport } = await import('@/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 
     const file = new File(['content'], 'data.csv', { type: 'text/csv' })
-    // Call the internal handler that triggers FileReader
     ;(wrapper.vm as { onFileDropped: (f: File) => void }).onFileDropped(file)
     await nextTick()
 
-    // REGRESSION: before fix onerror is absent; fileText may stay null but no error surface
-    // After fix: dropError should be set and fileText should remain null
+    // After fix: dropError is populated; fileText remains null
     const vm = wrapper.vm as { fileText: string | null; dropError: string | null }
     expect(vm.fileText).toBeNull()
     expect(vm.dropError).toBeTruthy()

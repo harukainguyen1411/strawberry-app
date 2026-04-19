@@ -40,7 +40,7 @@
 
       <!-- Paste area -->
       <div class="mb-6">
-        <CsvPasteArea v-model="pasteText" />
+        <CsvPasteArea v-model="pasteText" @too-large="onPasteTooLarge" />
       </div>
 
       <!-- Error banner (parse failure) -->
@@ -116,7 +116,7 @@ const fileText = ref<string | null>(null)
 const dropError = ref<string | null>(null)
 const parseResult = ref<ParseResult | null>(null)
 
-const { parse, parseError, loading: parsing, reset: resetParser } = useCsvParser()
+const { parse, result, parseError, loading: parsing, reset: resetParser } = useCsvParser()
 
 /** True when there's something to parse (file dropped or text pasted) */
 const canParse = computed(() => {
@@ -137,11 +137,22 @@ function onDropError(msg: string) {
   dropError.value = msg
 }
 
+function onPasteTooLarge(sizeBytes: number) {
+  const mb = (sizeBytes / 1024 / 1024).toFixed(0)
+  dropError.value = `Pasted content is too large (${mb} MB). Maximum is 10 MB.`
+}
+
 function onFileDropped(file: File) {
   dropError.value = null
+  fileText.value = null
   const reader = new FileReader()
   reader.onload = (e) => {
     fileText.value = e.target?.result as string ?? null
+  }
+  reader.onerror = () => {
+    // Surface read failure so the user gets feedback and canParse stays false
+    fileText.value = null
+    dropError.value = 'Could not read the file. Please try again.'
   }
   reader.readAsText(file)
 }
@@ -155,7 +166,10 @@ async function onParse() {
   await parse(source.value, text)
 
   if (!parseError.value) {
-    parseResult.value = useCsvParser().result.value
+    // Use `result` from the single composable instance created at setup time.
+    // Calling useCsvParser() again here would construct a fresh instance whose
+    // result ref is always null (the parse() above acted on the first instance).
+    parseResult.value = result.value
     step.value = 'step2'
   }
 }

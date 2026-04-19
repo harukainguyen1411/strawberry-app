@@ -50,9 +50,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  /** Emitted when pasted content exceeds the hard size limit (10 MB). */
+  'too-large': [sizeBytes: number]
 }>()
 
-const MAX_BYTES = 1 * 1024 * 1024 // 1 MB soft warning
+const HARD_MAX_BYTES = 10 * 1024 * 1024  // 10 MB hard reject — mirrors DropZone maxSizeMb default
+const MAX_BYTES = 1 * 1024 * 1024        // 1 MB soft warning (warn only)
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
@@ -61,6 +64,16 @@ const isTooLarge = computed(() => byteLength.value > MAX_BYTES)
 const sizeMb = computed(() => (byteLength.value / 1024 / 1024).toFixed(1))
 
 function onInput(e: Event) {
-  emit('update:modelValue', (e.target as HTMLTextAreaElement).value)
+  const value = (e.target as HTMLTextAreaElement).value
+  const bytes = new Blob([value]).size
+  if (bytes > HARD_MAX_BYTES) {
+    // Hard reject: do not propagate the oversized value to the parent.
+    // Restore the previous (valid) value in the textarea and emit 'too-large'
+    // so the parent can surface a user-facing error.
+    ;(e.target as HTMLTextAreaElement).value = props.modelValue
+    emit('too-large', bytes)
+    return
+  }
+  emit('update:modelValue', value)
 }
 </script>

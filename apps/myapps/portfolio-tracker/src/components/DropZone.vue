@@ -113,7 +113,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+
+// Module-scoped counter produces a deterministic, stable id per DropZone instance.
+// A computed(() => 'id-' + Math.random()) regenerates unpredictably; a ref set once
+// in setup is stable for the component's entire lifetime.
+let _dropzoneCounter = 0
 
 const props = withDefaults(defineProps<{
   accept?: string
@@ -133,7 +138,8 @@ type State = 'idle' | 'dragover' | 'error'
 const state = ref<State>('idle')
 const errorMessage = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
-const errorId = computed(() => 'dropzone-error-' + Math.random().toString(36).slice(2, 8))
+// Stable, unique id for this instance — used as the aria-describedby target.
+const errorId = ref(`dropzone-error-${++_dropzoneCounter}`)
 
 function openFilePicker() {
   inputRef.value?.click()
@@ -146,7 +152,10 @@ function reset() {
 }
 
 function validateFile(file: File): string | null {
-  // Check extension or MIME
+  // Check extension or MIME.
+  // text/plain is intentionally accepted as a UX convenience — many OS/browser
+  // combinations report .csv files with text/plain. This is a UX gate only;
+  // actual CSV structure validation happens in the parser.
   const name = file.name.toLowerCase()
   const isCsvMime = file.type === 'text/csv' || file.type === 'application/csv' || file.type === 'text/plain'
   const isCsvExt = name.endsWith('.csv')
@@ -189,6 +198,13 @@ function onDrop(e: DragEvent) {
   state.value = 'idle'
   const files = e.dataTransfer?.files
   if (!files || files.length === 0) return
+  if (files.length > 1) {
+    const msg = `Please drop one file at a time (${files.length} files dropped).`
+    state.value = 'error'
+    errorMessage.value = msg
+    emit('error', msg)
+    return
+  }
   handleFile(files[0])
 }
 
@@ -198,6 +214,8 @@ function onFileInputChange(e: Event) {
   handleFile(files[0])
 }
 
-// Expose handleFile for testing (DragEvent.dataTransfer is read-only in jsdom)
-defineExpose({ handleFile, reset })
+// Expose handleFile, onDrop, and reset for testing.
+// DragEvent.dataTransfer is read-only in jsdom so tests call onDrop with a
+// fake event object (Object.assign) or call handleFile directly.
+defineExpose({ handleFile, onDrop, reset })
 </script>
