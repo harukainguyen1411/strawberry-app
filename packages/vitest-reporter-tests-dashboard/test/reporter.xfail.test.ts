@@ -3,10 +3,9 @@
  *
  * Refs plan: tests-dashboard, task TD.1 (xfail-first per CLAUDE.md Rule 12)
  *
- * This test is expected to fail until the reporter package is implemented.
- * It uses `test.fails` (Vitest's xfail equivalent).
- *
- * Once the implementation lands, this test MUST pass (not just fail-as-expected).
+ * Originally committed as test.fails() (xfail) before the implementation existed.
+ * Converted to a plain test() in the implementation commit — the assertions now
+ * pass because the implementation is in place.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest'
@@ -80,7 +79,7 @@ describe('TestsDashboardReporter — xfail-first integration test', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  test.fails('reporter emits test-results.json that validates against shared schema', async () => {
+  test('reporter emits test-results.json that validates against shared schema', async () => {
     const reporter = new TestsDashboardReporter()
 
     const { files } = buildFinishedPayload({ testName: 'example test', status: 'pass' })
