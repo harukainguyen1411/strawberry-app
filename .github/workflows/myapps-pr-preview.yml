@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   preview:
-    # Do not run for PRs from forks — FIREBASE_SERVICE_ACCOUNT must not leak.
+    # Do not run for PRs from forks — FIREBASE_SERVICE_ACCOUNT_MYAPPS_B31EA must not leak.
     # Fork PRs still get a passing check because the job exits at the
     # "Check if myapps changed" step (changed=false path), reporting success.
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -62,7 +62,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MYAPPS_B31EA }}
           projectId: ${{ vars.FIREBASE_PROJECT_ID }}
           channelId: pr-${{ github.event.number }}
           entryPoint: apps/myapps
