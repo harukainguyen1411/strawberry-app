@@ -1,0 +1,32 @@
+#!/bin/sh
+# Stub for git — used by _lib.sh tests.
+# Behaviour is controlled by env vars set in individual bats tests.
+#   GIT_STUB_PORCELAIN   — value to emit for "git status --porcelain"
+#   GIT_STUB_BRANCH      — value to emit for "git rev-parse --abbrev-ref HEAD"
+
+case "$*" in
+  "status --porcelain")
+    printf '%s' "${GIT_STUB_PORCELAIN:-}"
+    if [ -n "${GIT_STUB_PORCELAIN:-}" ]; then
+      exit 0
+    fi
+    exit 0
+    ;;
+  "rev-parse --abbrev-ref HEAD")
+    printf '%s\n' "${GIT_STUB_BRANCH:-main}"
+    exit 0
+    ;;
+  "log --oneline -1"*)
+    printf '%s\n' "${GIT_STUB_SHA:-abc1234} test commit"
+    exit 0
+    ;;
+  "rev-parse HEAD")
+    printf '%s\n' "${GIT_STUB_SHA:-abc1234def5678}"
+    exit 0
+    ;;
+  *)
+    # Pass through anything else to real git if needed
+    printf 'git-stub: unhandled args: %s\n' "$*" >&2
+    exit 1
+    ;;
+esac
