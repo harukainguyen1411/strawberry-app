@@ -21,7 +21,7 @@
  *   REGRESSION: missing onerror handler left fileText stale on read failure.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { defineComponent, h, ref, nextTick } from 'vue'
 
@@ -114,7 +114,7 @@ describe('A.17.R2 — DropZone errorId is stable (regression: Math.random in com
     const file = new File(['x'], 'data.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     })
-    ;(wrapper.vm as { handleFile: (f: File) => void }).handleFile(file)
+    ;(wrapper.vm as unknown as { handleFile: (f: File) => void }).handleFile(file)
     await nextTick()
 
     const idBefore = wrapper.find('[id^="dropzone-error-"]').attributes('id')
@@ -151,7 +151,7 @@ describe('A.17.R3 — DropZone rejects multi-file drop', () => {
     })
 
     // Call the exposed onDrop directly with a fake DragEvent-like object
-    ;(wrapper.vm as { onDrop: (e: { dataTransfer?: { files: typeof fakeFileList } }) => void })
+    ;(wrapper.vm as unknown as { onDrop: (e: { dataTransfer?: { files: typeof fakeFileList } }) => void })
       .onDrop({ dataTransfer: { files: fakeFileList } })
     await nextTick()
 
@@ -213,11 +213,11 @@ describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
     await nextTick()
 
     const file = new File(['content'], 'data.csv', { type: 'text/csv' })
-    ;(wrapper.vm as { onFileDropped: (f: File) => void }).onFileDropped(file)
+    ;(wrapper.vm as unknown as { onFileDropped: (f: File) => void }).onFileDropped(file)
     await nextTick()
 
     // After fix: dropError is populated; fileText remains null
-    const vm = wrapper.vm as { fileText: string | null; dropError: string | null }
+    const vm = wrapper.vm as unknown as { fileText: string | null; dropError: string | null }
     expect(vm.fileText).toBeNull()
     expect(vm.dropError).toBeTruthy()
 
