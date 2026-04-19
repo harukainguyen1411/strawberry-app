@@ -6,7 +6,7 @@
 
 ## What MyApps is
 
-MyApps is a personal multi-app productivity platform built by Duong. It lives at `apps/myapps/` inside the Strawberry monorepo and is hosted on Firebase Hosting at `myapps-b31ea.web.app`. The platform bundles three independent tools — Read Tracker, Portfolio Tracker, and Task List — under a single Vue 3 SPA with shared authentication, a dual-mode data layer (Firestore when authenticated, localStorage in local mode), and a responsive Tailwind UI. The platform is designed for daily personal use by Duong and for task coordination with Evelynn (Duong's AI agent, which writes tasks directly to Firestore via MCP tools). GitHub issues filed against MyApps live in the app repo (configured via `GITHUB_REPOSITORY` env var — e.g. `owner/strawberry-app`) and are tagged with the `myapps` label for downstream routing.
+MyApps is a personal multi-app productivity platform built by Duong. It lives at `apps/darkstrawberry-apps/` inside the Strawberry monorepo and is hosted on Firebase Hosting at `myapps-b31ea.web.app`. The platform bundles three independent tools — Read Tracker, Portfolio Tracker, and Task List — under a single Vue 3 SPA with shared authentication, a dual-mode data layer (Firestore when authenticated, localStorage in local mode), and a responsive Tailwind UI. The platform is designed for daily personal use by Duong and for task coordination with Evelynn (Duong's AI agent, which writes tasks directly to Firestore via MCP tools). GitHub issues filed against MyApps live in the app repo (configured via `GITHUB_REPOSITORY` env var — e.g. `owner/strawberry-app`) and are tagged with the `myapps` label for downstream routing.
 
 ---
 
@@ -40,7 +40,7 @@ Vue 3 (Composition API, `<script setup>`) + TypeScript. Pinia for state manageme
 ## Directory structure
 
 ```
-apps/myapps/
+apps/darkstrawberry-apps/
 ├── src/
 │   ├── views/                  # Route-level page components
 │   │   ├── Home.vue            # Landing page, app card grid

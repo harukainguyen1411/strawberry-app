@@ -38,7 +38,7 @@ export async function commitAndPush(
   if (!status.trim()) {
     throw new Error("No changes to commit — Claude made no file modifications");
   }
-  await git(root, ["add", "apps/myapps/"]);
+  await git(root, ["add", "apps/darkstrawberry-apps/"]);
   await git(root, ["commit", "-m", message]);
   await git(root, ["push", "origin", branch]);
 }

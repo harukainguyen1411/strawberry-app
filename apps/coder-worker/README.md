@@ -45,4 +45,4 @@ Shares `%USERPROFILE%\.claude-runlock\claude.lock` with the Bee worker via `prop
 
 ## System prompt
 
-Lives at `.github/coder-agent/system.md` in the repo root. Scopes Claude to `apps/myapps/` only.
+Lives at `.github/coder-agent/system.md` in the repo root. Scopes Claude to `apps/darkstrawberry-apps/` only.

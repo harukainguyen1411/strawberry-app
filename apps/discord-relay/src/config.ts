@@ -30,7 +30,7 @@ export const config = {
     repository: optional("GITHUB_REPOSITORY", ""),
   },
   triage: {
-    targetSubtree: optional("TRIAGE_TARGET_SUBTREE", "apps/myapps"),
+    targetSubtree: optional("TRIAGE_TARGET_SUBTREE", "apps/darkstrawberry-apps"),
     targetLabel: optional("TRIAGE_TARGET_LABEL", "myapps"),
     contextRefreshHours: Number(optional("TRIAGE_CONTEXT_REFRESH_HOURS", "6")),
     dailyQuota: Number(optional("TRIAGE_DAILY_QUOTA", "1000")),

@@ -57,7 +57,7 @@ Functions run at http://localhost:5001.
 ### 4. Start the frontend dev server (separate terminal)
 
 ```bash
-cd apps/myapps && npm run dev
+cd apps/darkstrawberry-apps && npm run dev
 ```
 
 ### 5. Open the app
