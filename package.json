@@ -29,7 +29,8 @@
   "packageManager": "npm@11.7.0",
   "overrides": {
     "protobufjs": "7.5.5",
-    "undici": "6.24.0"
+    "undici": "6.24.0",
+    "vitest": "^4.0.18"
   },
   "version": "0.0.1"
 }
