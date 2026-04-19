@@ -63,7 +63,7 @@ jobs:
         run: bash scripts/composite-deploy.sh
 
       - name: Stage firebase.json at repo root for action
-        run: cp apps/myapps/firebase.json firebase.json
+        run: cp apps/darkstrawberry-apps/firebase.json firebase.json
 
       - name: Deploy to Firebase Hosting (live)
         id: firebase_deploy
@@ -95,8 +95,8 @@ jobs:
     name: Deploy Cloud Functions
     runs-on: ubuntu-latest
     if: |
-      contains(toJson(github.event.head_commit.modified), 'apps/myapps/functions/') ||
-      contains(toJson(github.event.head_commit.added), 'apps/myapps/functions/')
+      contains(toJson(github.event.head_commit.modified), 'apps/darkstrawberry-apps/functions/') ||
+      contains(toJson(github.event.head_commit.added), 'apps/darkstrawberry-apps/functions/')
     steps:
       - uses: actions/checkout@v6
 
@@ -112,7 +112,7 @@ jobs:
         run: npx turbo run build --filter=@ds/functions
 
       - name: Deploy to Firebase Functions
-        working-directory: apps/myapps
+        working-directory: apps/darkstrawberry-apps
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json \
@@ -128,13 +128,13 @@ jobs:
     if: |
       contains(toJson(github.event.head_commit.modified), 'firestore.rules') ||
       contains(toJson(github.event.head_commit.modified), 'storage.rules') ||
-      contains(toJson(github.event.head_commit.modified), 'apps/myapps/firestore.rules') ||
-      contains(toJson(github.event.head_commit.modified), 'apps/myapps/storage.rules')
+      contains(toJson(github.event.head_commit.modified), 'apps/darkstrawberry-apps/firestore.rules') ||
+      contains(toJson(github.event.head_commit.modified), 'apps/darkstrawberry-apps/storage.rules')
     steps:
       - uses: actions/checkout@v6
 
       - name: Deploy Firestore rules + Storage rules
-        working-directory: apps/myapps
+        working-directory: apps/darkstrawberry-apps
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json \

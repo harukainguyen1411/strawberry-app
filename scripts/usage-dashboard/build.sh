@@ -31,7 +31,7 @@ DATA_JSON_TMP="$DASHBOARD_DIR/data.json.tmp"
 mkdir -p "$CACHE_DIR"
 
 printf 'Running ccusage session...\n'
-ccusage session -j -i -p > "$SESSIONS_JSON"
+ccusage session -j > "$SESSIONS_JSON"
 
 printf 'Running ccusage blocks...\n'
 ccusage blocks -j > "$BLOCKS_JSON"

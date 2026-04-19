@@ -52,7 +52,7 @@ export async function runClaude(
   issueBody: string,
 ): Promise<void> {
   const prompt = await buildPrompt(issueTitle, issueBody);
-  const cwd = `${repoRoot}/apps/myapps`;
+  const cwd = `${repoRoot}/apps/darkstrawberry-apps`;
   const logPath = await auditLogPath(jobId);
 
   log(`Invoking claude -p (max-turns=${config.claude.maxTurns}, allowed-tools=${ALLOWED_TOOLS}) in ${cwd}`);

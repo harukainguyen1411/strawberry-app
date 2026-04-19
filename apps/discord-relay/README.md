@@ -11,7 +11,7 @@ See the plan: `plans/proposed/2026-04-03-discord-cli-integration.md`
 ```
 Discord message
   → sanitize
-  → Gemini 2.0 Flash (context: apps/myapps/ + open issues)
+  → Gemini 2.0 Flash (context: apps/darkstrawberry-apps/ + open issues)
   → GitHub REST API (new issue or comment on dupe)
   → Discord reply with issue URL
 ```
@@ -47,7 +47,7 @@ GITHUB_TOKEN=...            # GitHub PAT with repo:issues scope
 TRIAGE_DISCORD_CHANNEL_ID=... # Discord channel ID to watch
 
 # Optional
-TRIAGE_TARGET_SUBTREE=apps/myapps   # Subtree to dump as context (default: apps/myapps)
+TRIAGE_TARGET_SUBTREE=apps/darkstrawberry-apps   # Subtree to dump as context (default: apps/darkstrawberry-apps)
 TRIAGE_TARGET_LABEL=myapps          # Label applied to every filed issue (default: myapps)
 TRIAGE_CONTEXT_REFRESH_HOURS=6      # Context cache TTL (default: 6)
 TRIAGE_DAILY_QUOTA=1000             # Max Gemini calls per UTC day (default: 1000)
@@ -152,4 +152,4 @@ apps/discord-relay/
 
 ## Context file
 
-`apps/myapps/triage-context.md` is the hand-written MyApps product overview at the top of Gemini's system prompt. Duong maintains it. Changes take effect on the next context refresh (6h by default) or immediately via `GET /webhook/github-push`.
+`apps/darkstrawberry-apps/triage-context.md` is the hand-written MyApps product overview at the top of Gemini's system prompt. Duong maintains it. Changes take effect on the next context refresh (6h by default) or immediately via `GET /webhook/github-push`.

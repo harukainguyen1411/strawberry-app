@@ -4,7 +4,7 @@ import { describe, it } from 'vitest'
 // Run via: firebase emulators:exec --only firestore "npx vitest run functions/__tests__/emulator-boot.test.ts"
 
 describe('V0.1 — Firebase project bootstrap', () => {
-  it('firebase.json exists at apps/myapps/portfolio-tracker/', async () => {
+  it('firebase.json exists at apps/darkstrawberry-apps/portfolio-tracker/', async () => {
     const fs = await import('fs')
     const path = await import('path')
     const dir = path.resolve(__dirname, '../..')

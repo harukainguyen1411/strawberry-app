@@ -2,12 +2,12 @@
   "name": "darkstrawberry",
   "private": true,
   "workspaces": [
-    "apps/myapps",
+    "apps/darkstrawberry-apps",
+    "apps/darkstrawberry-apps/*",
+    "apps/darkstrawberry-apps/functions",
+    "apps/yourApps/*",
     "apps/landing",
     "apps/shared",
-    "apps/myapps/*",
-    "apps/yourApps/*",
-    "apps/myapps/functions",
     "dashboards/*",
     "packages/*"
   ],

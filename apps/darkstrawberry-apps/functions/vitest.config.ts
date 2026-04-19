@@ -2,7 +2,7 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * Vitest configuration for apps/myapps/functions (Cloud Functions unit tests).
+ * Vitest configuration for apps/darkstrawberry-apps/functions (Cloud Functions unit tests).
  * Plan: plans/in-progress/2026-04-17-deployment-pipeline-tasks.md P1.4
  *
  * Notes:

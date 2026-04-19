@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /apps/myapps
+    directory: /apps/darkstrawberry-apps
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

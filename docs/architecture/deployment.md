@@ -4,45 +4,43 @@
 
 | Product | URL | Host | Build entry |
 |---------|-----|------|-------------|
-| Dark Strawberry portal | `apps.darkstrawberry.com` | Firebase Hosting (`myapps-b31ea`) | `apps/myapps/` |
+| Dark Strawberry portal | `apps.darkstrawberry.com` | Firebase Hosting (`myapps-b31ea`) | `apps/darkstrawberry-apps/` |
 | Dark Strawberry landing | `darkstrawberry.com` | Firebase Hosting (`myapps-b31ea`) | `apps/landing/` |
 
 Both products share one Firebase project (`myapps-b31ea`). The portal is the primary SPA; the landing page is a static site.
 
 ## Portal build — source paths
 
-The portal is a single Vite build from `apps/myapps/`. It imports code from multiple directories:
+The portal is a single Vite build from `apps/darkstrawberry-apps/`. It imports code from multiple directories:
 
 | Directory | Role |
 |-----------|------|
-| `apps/myapps/src/` | Active SPA entry — router, stores, views, Firebase config |
+| `apps/darkstrawberry-apps/src/` | Active SPA entry — router, stores, views, Firebase config |
 | `apps/platform/src/` | Platform shell — app loader, registry, access control, new views |
 | `apps/shared/` | Cross-app utilities — `appFirestore.ts` helpers, shared types |
-| `apps/myApps/` | Individual myApps (read-tracker, portfolio-tracker, task-list) |
-| `apps/yourApps/` | Individual yourApps (bee, future personal apps) |
+| `apps/darkstrawberry-apps/myApps/` | Individual myApps (read-tracker, portfolio-tracker, task-list) |
+| `apps/darkstrawberry-apps/yourApps/` | Individual yourApps (bee, future personal apps) |
 
 A change to any of these directories requires a portal rebuild and redeploy.
 
 ## CI workflows
 
-### `myapps-prod-deploy.yml` — production deploy
+### `darkstrawberry-apps-prod-deploy.yml` — production deploy
 - **Trigger:** push to `main` touching any of:
-  - `apps/myapps/**`
+  - `apps/darkstrawberry-apps/**`
   - `apps/platform/**`
   - `apps/shared/**`
-  - `apps/myApps/**`
-  - `apps/yourApps/**`
 - **Steps:** checkout → install → build (with `VITE_FIREBASE_*` secrets) → deploy to Firebase Hosting (live channel) → notify Discord
 - **Firebase project:** `myapps-b31ea`
-- **Entry point:** `apps/myapps/`
+- **Entry point:** `apps/darkstrawberry-apps/`
 
-### `myapps-pr-preview.yml` — PR preview deploy
+### `darkstrawberry-apps-pr-preview.yml` — PR preview deploy
 - **Trigger:** PR to `main` (no paths filter — always runs for required status check)
 - **Change detection:** skips build/deploy if no platform paths changed
 - **Steps:** checkout → change detect → install → build → deploy to preview channel `pr-{number}` (7-day TTL) → notify Discord
 - **Required status check on `main`:** yes (`Firebase Hosting PR Preview / preview`)
 
-### `myapps-test.yml` — test gate
+### `darkstrawberry-apps-test.yml` — test gate
 - **Trigger:** PR to `main` (no paths filter)
 - **Change detection:** skips if no platform paths changed
 - **Jobs:**
@@ -72,7 +70,7 @@ feature branch  →  PR  →  4 required checks pass  →  merge to main  →  a
 1. Developer pushes to a feature branch (always via `git worktree`, never raw checkout)
 2. PR opened against `main` — all 4 required checks must pass
 3. PR preview channel deployed automatically for visual review
-4. On merge: `myapps-prod-deploy.yml` triggers if any platform path changed → build → live deploy → Discord notification
+4. On merge: `darkstrawberry-apps-prod-deploy.yml` triggers if any platform path changed → build → live deploy → Discord notification
 
 ## Secrets required (on the app repo — `$GITHUB_REPOSITORY`)
 
