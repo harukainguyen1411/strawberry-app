@@ -66,7 +66,7 @@ test.describe('Navigation between views', () => {
     await page.goto('/read-tracker/dashboard')
     await expect(page).toHaveURL(/\/read-tracker\/dashboard/)
 
-    await page.getByRole('link', { name: 'MyApps' }).click()
+    await page.getByRole('link', { name: 'Dark Strawberry home' }).click()
     await expect(page).toHaveURL('/')
   })
 })
