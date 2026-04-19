@@ -9,6 +9,9 @@
   "engines": {
     "node": "20"
   },
+  "tdd": {
+    "enabled": true
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@octokit/rest": "^21.0.0",
