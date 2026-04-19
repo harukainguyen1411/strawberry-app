@@ -59,7 +59,7 @@ describe('A.5 — IB CSV parser xfail: short/cover + asset-category bugs', () =>
     }
   )
 
-  it.fails(
+  it(
     'A.5.11 missing Asset Category in Trades header → bad_headers error, no trades parsed',
     async () => {
       const { parseIbCsv } = await import('../ib.js')
@@ -76,7 +76,7 @@ describe('A.5 — IB CSV parser xfail: short/cover + asset-category bugs', () =>
     }
   )
 
-  it.fails(
+  it(
     'A.5.12 options row (Asset Category=Options) bucketed as unsupported, not added to trades',
     async () => {
       const { parseIbCsv } = await import('../ib.js')

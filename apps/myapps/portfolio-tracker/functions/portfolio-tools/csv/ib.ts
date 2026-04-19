@@ -30,6 +30,7 @@ import type { Trade, Position, ImportError } from '../types.js'
 
 const REQUIRED_TRADE_HEADERS = [
   'DataDiscriminator',
+  'Asset Category',
   'Currency',
   'Symbol',
   'Date/Time',
@@ -125,6 +126,21 @@ export function parseIbCsv(text: string): IbParseResult {
         const discriminator = row[h['DataDiscriminator']] ?? ''
         // Skip Summary/SubTotal rows
         if (discriminator.toLowerCase() !== 'order') continue
+
+        // Enforce Stocks-only in v0. Non-Stocks categories (Options, Futures,
+        // Forex, etc.) require open/close semantics that v0 position-math does
+        // not implement.  Bucket them as unsupported with a warning so the user
+        // knows data was skipped — never silently parse them as stocks.
+        const assetCategory = (row[h['Asset Category']] ?? '').trim()
+        if (assetCategory !== 'Stocks') {
+          errors.push({
+            kind: 'unsupported_asset_category',
+            row: rowNum,
+            section: 'Trades',
+            message: `Trades row ${rowNum}: asset category "${assetCategory}" is not supported in v0 — only Stocks are parsed`,
+          })
+          continue
+        }
 
         const currency = (row[h['Currency']] ?? 'USD') as 'USD' | 'EUR'
         const symbol = (row[h['Symbol']] ?? '').trim()
