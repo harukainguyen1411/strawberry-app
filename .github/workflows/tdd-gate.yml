@@ -34,7 +34,6 @@ jobs:
             HEAD="$GH_PR_HEAD_SHA"
             RANGE="$BASE..$HEAD"
           else
-            git fetch origin main --depth=0
             BASE=$(git merge-base HEAD origin/main)
             HEAD="$GH_SHA"
             RANGE="$BASE..$HEAD"
@@ -107,7 +106,6 @@ jobs:
           if [ "$GH_EVENT_NAME" = "pull_request" ]; then
             RANGE="$GH_PR_BASE_SHA..$GH_PR_HEAD_SHA"
           else
-            git fetch origin main --depth=0
             RANGE="$(git merge-base HEAD origin/main)..$GH_SHA"
           fi
 
