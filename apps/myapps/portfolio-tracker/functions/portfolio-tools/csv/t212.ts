@@ -20,6 +20,15 @@
 
 import type { Trade, Position, ImportError } from '../types.js'
 
+// Actions that represent actual market trades. All other action strings
+// (Dividend, Deposit, Interest, Fee, Currency conversion, etc.) are skipped.
+const TRADE_ACTIONS = new Set([
+  'market buy',
+  'market sell',
+  'limit buy',
+  'limit sell',
+])
+
 const REQUIRED_HEADERS = [
   'Action',
   'Time',
@@ -96,6 +105,11 @@ export function parseT212Csv(text: string): ParseResult {
     const priceStr = row[idx('Price / share')] ?? ''
     const priceCurrency = (row[idx('Currency (Price / share)')] ?? 'USD') as 'USD' | 'EUR'
     const tradeId = row[idx('ID')] ?? ''
+
+    // Skip non-trade rows (dividends, deposits, interest, fees, etc.)
+    if (!TRADE_ACTIONS.has(action.toLowerCase())) {
+      continue
+    }
 
     // Validate price
     if (!priceStr || priceStr.trim() === '') {

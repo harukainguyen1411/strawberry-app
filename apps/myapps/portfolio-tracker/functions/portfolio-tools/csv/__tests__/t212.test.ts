@@ -134,10 +134,10 @@ describe('A.4 — T212 CSV parser', () => {
     expect(result.trades[0].price.amount).toBeCloseTo(1234.56, 2)
   })
 
-  // xfail — Refs V0.6 bug-fix: non-trade rows must not become phantom BUYs
-  // A dividend row with a fully populated price/shares triggers the phantom BUY bug:
+  // Refs V0.6 bug-fix: non-trade rows must not become phantom BUYs
+  // A dividend row with a fully populated price/shares triggered the phantom BUY bug:
   // action.toLowerCase().includes('sell') is false → side defaults to 'BUY'.
-  it.fails('A.4.12 non-trade rows (dividend, deposit, interest, fee) are skipped, not phantom BUYs', async () => {
+  it('A.4.12 non-trade rows (dividend, deposit, interest, fee) are skipped, not phantom BUYs', async () => {
     const { parseT212Csv } = await import('../t212.js')
     const HEADER = 'Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Currency (Result),Total,Currency (Total),Withholding tax,Currency (Withholding tax),Notes,ID,Currency conversion fee,Currency (Currency conversion fee)'
     const rows = [
