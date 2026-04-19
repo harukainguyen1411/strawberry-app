@@ -103,7 +103,7 @@ export function parseT212Csv(text: string): ParseResult {
       continue
     }
 
-    const price = parseFloat(priceStr)
+    const price = parseDecimal(priceStr)
     if (isNaN(price)) {
       errors.push({ kind: 'missing_price', row: rowNum, message: `Row ${rowNum}: invalid price "${priceStr}"` })
       continue
@@ -152,6 +152,29 @@ export function parseT212Csv(text: string): ParseResult {
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * parseDecimal — parses a numeric string in either standard (1,234.56)
+ * or EU (1.234,56) decimal format.
+ *
+ * Detection logic:
+ *   - If the string contains a comma followed by exactly 2 digits at the end
+ *     (e.g. "1.234,56" or "1234,56"), treat as EU format: strip dots, replace
+ *     trailing comma with a period.
+ *   - Otherwise fall through to standard parseFloat (handles "1,234.56" and
+ *     bare "148.50").
+ */
+function parseDecimal(s: string): number {
+  const trimmed = s.trim()
+  // EU format: optional thousands (dot-separated groups), comma-decimal
+  // e.g. "1.234,56" or "1234,56"
+  if (/^\d{1,3}(\.\d{3})*,\d+$/.test(trimmed)) {
+    const normalized = trimmed.replace(/\./g, '').replace(',', '.')
+    return parseFloat(normalized)
+  }
+  // Standard format or bare integer — strip thousands commas then parse
+  return parseFloat(trimmed.replace(/,(?=\d{3})/g, ''))
+}
 
 function parseT212Date(s: string): Date | null {
   if (!s || s.trim() === '') return null

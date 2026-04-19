@@ -119,8 +119,8 @@ describe('A.4 — T212 CSV parser', () => {
     expect(result.errors.length).toBe(0)
   })
 
-  // xfail — Refs V0.6 bug-fix: EU comma-decimal normalization
-  it.fails('A.4.11 EU comma-decimal price is parsed correctly (e.g. "1.234,56" → 1234.56)', async () => {
+  // Refs V0.6 bug-fix: EU comma-decimal normalization
+  it('A.4.11 EU comma-decimal price is parsed correctly (e.g. "1.234,56" → 1234.56)', async () => {
     const { parseT212Csv } = await import('../t212.js')
     const HEADER = 'Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Currency (Result),Total,Currency (Total),Withholding tax,Currency (Withholding tax),Notes,ID,Currency conversion fee,Currency (Currency conversion fee)'
     // EU format: period as thousands separator, comma as decimal separator
