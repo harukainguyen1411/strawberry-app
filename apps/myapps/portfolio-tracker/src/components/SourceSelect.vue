@@ -36,7 +36,7 @@
 <script setup lang="ts">
 export type CsvSource = 'T212' | 'IB'
 
-const props = defineProps<{
+defineProps<{
   modelValue: CsvSource | ''
 }>()
 
