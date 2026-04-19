@@ -2,7 +2,7 @@
 # check-no-hardcoded-slugs.sh — pre-commit regression guard
 #
 # Greps staged (or all, when run standalone) source files for literal repo slugs:
-#   - harukainguyen1411/strawberry
+#   - harukainguyen1411/strawberry (bare — without the -app suffix; -app is the correct slug)
 #   - Duongntd/strawberry
 #
 # Fails with exit 1 if any hit is found outside the paths listed in
@@ -20,7 +20,9 @@ set -e
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 ALLOWLIST="$REPO_ROOT/scripts/hooks/slug-allowlist.txt"
 
-PATTERNS="harukainguyen1411/strawberry|Duongntd/strawberry"
+# Note: harukainguyen1411/strawberry([^-]|$) catches the bare slug (missing -app suffix)
+# without false-positive-matching the correct slug harukainguyen1411/strawberry-app.
+PATTERNS="harukainguyen1411/strawberry([^-]|$)|Duongntd/strawberry"
 
 SCAN_EXTENSIONS="-e .ts -e .tsx -e .js -e .yml -e .yaml -e .sh"
 
