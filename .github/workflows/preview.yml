@@ -42,8 +42,10 @@ jobs:
       - name: Composite deploy directory
         run: bash scripts/composite-deploy.sh
 
-      - name: Copy firebase.json to repo root
-        run: cp apps/myapps/firebase.json firebase.json
+      - name: Copy firebase.json and .firebaserc to repo root
+        run: |
+          cp apps/myapps/firebase.json firebase.json
+          cp apps/myapps/.firebaserc .firebaserc
 
       - name: Deploy preview channel
         id: firebase_deploy
