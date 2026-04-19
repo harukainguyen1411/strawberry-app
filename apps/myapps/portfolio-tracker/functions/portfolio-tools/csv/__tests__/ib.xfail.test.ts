@@ -23,7 +23,7 @@ function tradesCsv(...dataRows: string[]): string {
 }
 
 describe('A.5 — IB CSV parser xfail: short/cover + asset-category bugs', () => {
-  it.fails(
+  it(
     'A.5.9 short-open: negative qty + Code=O classified as SELL with rawPayload.openClose=O',
     async () => {
       const { parseIbCsv } = await import('../ib.js')
@@ -41,7 +41,7 @@ describe('A.5 — IB CSV parser xfail: short/cover + asset-category bugs', () =>
     }
   )
 
-  it.fails(
+  it(
     'A.5.10 buy-to-cover: positive qty + Code=C classified as BUY with rawPayload.openClose=C',
     async () => {
       const { parseIbCsv } = await import('../ib.js')

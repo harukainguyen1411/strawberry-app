@@ -159,7 +159,19 @@ export function parseIbCsv(text: string): IbParseResult {
         const side: 'BUY' | 'SELL' = quantity >= 0 ? 'BUY' : 'SELL'
         const absQty = Math.abs(quantity)
 
-        const id = tradeCode || deterministicId(symbol, dateStr, String(quantity))
+        // Parse IB Code flags (e.g. "O", "C", "O;P", "C;P").
+        // O = open trade (new position); C = close trade (reduces position).
+        // A short-open has qty < 0 + Code=O; a buy-to-cover has qty > 0 + Code=C.
+        // Store the open/close flag in rawPayload so v0.8 position-math can
+        // distinguish a cover from a long open without needing a Trade type change.
+        const codeFlags = tradeCode.split(';').map((f) => f.trim().toUpperCase())
+        const openClose: 'O' | 'C' | undefined = codeFlags.includes('O')
+          ? 'O'
+          : codeFlags.includes('C')
+          ? 'C'
+          : undefined
+
+        const id = deterministicId(symbol, dateStr, String(quantity))
 
         trades.push({
           id,
@@ -170,6 +182,7 @@ export function parseIbCsv(text: string): IbParseResult {
           price: { amount: price, currency },
           currency,
           executedAt,
+          ...(openClose !== undefined ? { rawPayload: { openClose } } : {}),
         })
       }
     }
