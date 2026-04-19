@@ -401,6 +401,85 @@ describe('TestsDashboardReporter — golden-file output', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Regression test — nodeIdOf precedence bug (Jhin review finding #2, PR #49)
+//
+// The while-loop condition in nodeIdOf:
+//   while (current && current.type !== 'suite' || (current as Suite)?.filepath === undefined)
+// evaluates as (A && B) || C rather than the intended A && (B || C).
+// For Task nodes, C is always true (Task has no .filepath), so the || C arm
+// masks the rest of the condition. For well-formed trees with a working
+// if (!parent) break guard this happens to produce correct output; but the
+// grouping is wrong and will misfire if the tree is extended or the guard
+// changes. This test pins the correct traversal for a nested describe block.
+// ---------------------------------------------------------------------------
+
+describe('TestsDashboardReporter — nodeIdOf nested-describe regression (Jhin finding #2)', () => {
+  test('test inside nested describe emits nodeId as filepath::describe::test', async () => {
+    const filePath = '/repo/src/nested.test.ts'
+    const reporter = new TestsDashboardReporter({ outputDir: path.join(tmpDir, '.test-dashboard') })
+
+    // Build the suite chain: File suite → Describe suite → Test task
+    // nodeIdOf walks up via .suite references; we set them explicitly to
+    // exercise the traversal path that the precedence bug affects.
+    const fileResult = { state: 'pass' as TaskState, duration: 50, errors: [] }
+    const fileSuite = {
+      id: filePath,
+      name: filePath,
+      filepath: filePath,
+      type: 'suite' as const,
+      tasks: [] as Task[],
+      result: fileResult,
+      mode: 'run' as const,
+      meta: {},
+      projectName: '',
+      suite: undefined,      // file suite has no parent
+    } as unknown as File
+
+    const describeResult = { state: 'pass' as TaskState, duration: 30, errors: [] }
+    const describeSuite = {
+      id: `${filePath}::my describe`,
+      name: 'my describe',
+      type: 'suite' as const,
+      tasks: [] as Task[],
+      result: describeResult,
+      mode: 'run' as const,
+      meta: {},
+      // No filepath — describe suites do not have filepath in Vitest
+      suite: fileSuite,       // parent is the file suite
+    } as unknown as Suite
+
+    const taskResult = { state: 'pass' as TaskState, duration: 10, errors: [] }
+    const nestedTask = {
+      id: `${filePath}::my describe::nested test`,
+      name: 'nested test',
+      type: 'test' as const,
+      mode: 'run' as const,
+      meta: {},
+      result: taskResult,
+      file: fileSuite,
+      suite: describeSuite,  // parent is the describe suite — this is what nodeIdOf walks
+    } as unknown as Task
+
+    // Wire up the suite tasks lists (mirrors real Vitest tree shape)
+    ;(describeSuite as unknown as Record<string, unknown>)['tasks'] = [nestedTask]
+    ;(fileSuite as unknown as Record<string, unknown>)['tasks'] = [describeSuite as unknown as Task]
+
+    await reporter.onFinished([fileSuite], [])
+
+    const data = readResults(tmpDir)
+    expect(data.tests).toHaveLength(1)
+
+    const record = data.tests[0]
+    // nodeId must be filepath::describe_name::test_name
+    // If the precedence bug were to cause incorrect traversal, the describe name
+    // would be dropped or duplicated, producing a divergent nodeId.
+    expect(record.nodeid).toBe(`${filePath}::my describe::nested test`)
+    expect(record.name).toBe('nested test')
+    expect(record.status).toBe('passed')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // xfail test — must pass post-implementation (converted from reporter.xfail.test.ts pattern)
 // ---------------------------------------------------------------------------
 
