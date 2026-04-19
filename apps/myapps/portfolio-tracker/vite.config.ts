@@ -30,5 +30,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // Exclude rules tests — those use @firebase/rules-unit-testing + Jest, not Vitest
+    exclude: ['**/test/rules/**', '**/node_modules/**'],
   }
 })
