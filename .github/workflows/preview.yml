@@ -39,8 +39,8 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
 
-      - name: Build myapps (ensure dist exists for composite deploy)
-        working-directory: apps/myapps
+      - name: Build darkstrawberry-apps (ensure dist exists for composite deploy)
+        working-directory: apps/darkstrawberry-apps
         run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -56,8 +56,8 @@ jobs:
 
       - name: Copy firebase.json and .firebaserc to repo root
         run: |
-          cp apps/myapps/firebase.json firebase.json
-          cp apps/myapps/.firebaserc .firebaserc
+          cp apps/darkstrawberry-apps/firebase.json firebase.json
+          cp apps/darkstrawberry-apps/.firebaserc .firebaserc
           # composite-deploy.sh outputs to deploy/, not dist/; patch the public path
           sed -i 's|"public": "dist"|"public": "deploy"|' firebase.json
 

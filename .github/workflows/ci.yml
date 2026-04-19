@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
-        working-directory: apps/myapps
+        working-directory: apps/darkstrawberry-apps
 
       - name: E2E tests (affected)
         run: npx turbo run test:e2e:ci --filter=...[origin/main]
@@ -69,14 +69,14 @@ jobs:
         with:
           name: playwright-report
           path: |
-            apps/myapps/playwright-report/
-            apps/myApps/*/playwright-report/
-            apps/yourApps/*/playwright-report/
+            apps/darkstrawberry-apps/playwright-report/
+            apps/darkstrawberry-apps/myApps/*/playwright-report/
+            apps/darkstrawberry-apps/yourApps/*/playwright-report/
           retention-days: 7
           if-no-files-found: ignore
 
       - name: Validate Firestore rules
-        working-directory: apps/myapps
+        working-directory: apps/darkstrawberry-apps
         run: |
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > /tmp/sa.json
           GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json \
