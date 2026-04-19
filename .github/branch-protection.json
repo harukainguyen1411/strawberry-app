@@ -1,24 +1,47 @@
 {
-  "required_status_checks": {
-    "strict": true,
-    "contexts": [
-      "xfail-first check",
-      "regression-test check",
-      "unit-tests",
-      "Playwright E2E",
-      "QA report present (UI PRs)"
-    ]
+  "_note": "This file documents the INTENDED ruleset configuration for main. It is NOT applied automatically. Run scripts/setup-branch-protection.sh as harukainguyen1411 to apply.",
+  "_api": "POST /repos/harukainguyen1411/strawberry-app/rulesets",
+  "_replaces": "classic PUT /branches/main/protection (retired — use ruleset API instead)",
+
+  "name": "main-branch-protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": { "include": ["refs/heads/main"], "exclude": [] }
   },
-  "enforce_admins": true,
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": true,
-    "require_code_owner_reviews": false,
-    "require_last_push_approval": true
-  },
-  "restrictions": null,
-  "required_linear_history": false,
-  "allow_force_pushes": false,
-  "allow_deletions": false,
-  "required_conversation_resolution": true
+  "bypass_actors": [
+    {
+      "actor_id": 273533031,
+      "actor_type": "User",
+      "bypass_mode": "pull_request",
+      "_note": "harukainguyen1411 — repo owner. Creates a PR but bypasses checks/reviews for audit trail."
+    }
+  ],
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": true,
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": [
+          { "context": "xfail-first check" },
+          { "context": "regression-test check" },
+          { "context": "unit-tests" },
+          { "context": "Playwright E2E" },
+          { "context": "QA report present (UI PRs)" }
+        ]
+      }
+    }
+  ]
 }
