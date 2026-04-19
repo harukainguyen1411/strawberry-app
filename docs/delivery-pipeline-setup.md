@@ -311,3 +311,4 @@ The Windows computer now holds long-lived production secrets (GitHub PAT, Discor
 - This runbook is the source-of-truth setup checklist. Update it whenever the team lands a new piece of the pipeline.
 - Plan of record: `plans/approved/2026-04-09-delivery-pipeline.md`
 - Security assessment: `assessments/2026-04-09-delivery-pipeline-security.md`
+
