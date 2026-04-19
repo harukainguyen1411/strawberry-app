@@ -128,7 +128,7 @@ export function parseT212Csv(text: string): ParseResult {
     // Validate date
     const executedAt = parseT212Date(timeStr)
     if (!executedAt) {
-      errors.push({ kind: 'bad_date', row: rowNum, message: `Row ${rowNum}: invalid date "${timeStr}"`, ...(timeStr ? { received: [timeStr] } : {}) })
+      errors.push({ kind: 'bad_date', row: rowNum, message: `Row ${rowNum}: invalid date "${timeStr}"`, ...(timeStr ? { received: timeStr } : {}) })
       continue
     }
 
