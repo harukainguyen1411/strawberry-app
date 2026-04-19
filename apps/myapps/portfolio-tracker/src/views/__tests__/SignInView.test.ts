@@ -4,11 +4,9 @@
  * Regression: handleSubmit must never fake success (set sent=true) without
  * calling the real auth API. When VITE_USE_AUTH_EMULATOR is not true the
  * view must show an error, not the "check your inbox" banner.
- *
- * xfail — flip xit -> it once SignInView calls sendSignInLinkToEmail for real.
  */
 
-import { describe, it, xit, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
@@ -30,7 +28,7 @@ describe('A.17 — SignInView regression: no fake success', () => {
     vi.unstubAllEnvs()
   })
 
-  xit('A.17.1 does NOT set sent=true when VITE_USE_AUTH_EMULATOR is not set', async () => {
+  it('A.17.1 does NOT set sent=true when VITE_USE_AUTH_EMULATOR is not set', async () => {
     vi.stubEnv('VITE_USE_AUTH_EMULATOR', '')
     const SignInView = (await import('@/views/SignInView.vue')).default
     const wrapper = mount(SignInView)
@@ -44,7 +42,7 @@ describe('A.17 — SignInView regression: no fake success', () => {
     expect(wrapper.text()).toMatch(/not yet available|V0\.2/i)
   })
 
-  xit('A.17.2 calls sendSignInLinkToEmail when VITE_USE_AUTH_EMULATOR=true', async () => {
+  it('A.17.2 calls sendSignInLinkToEmail when VITE_USE_AUTH_EMULATOR=true', async () => {
     vi.stubEnv('VITE_USE_AUTH_EMULATOR', 'true')
     mockSendSignInLinkToEmail.mockResolvedValue(undefined)
     const SignInView = (await import('@/views/SignInView.vue')).default

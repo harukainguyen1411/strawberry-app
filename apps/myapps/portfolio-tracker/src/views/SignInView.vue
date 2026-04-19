@@ -47,20 +47,33 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { sendSignInLinkToEmail } from 'firebase/auth'
+import { auth } from '@/firebase/config'
 
 const email = ref('')
 const sending = ref(false)
 const sent = ref(false)
 const error = ref('')
 
+// Email link auth is fully implemented in V0.2 (functions/onSignIn.ts).
+// When VITE_USE_AUTH_EMULATOR=true the Firebase emulator handles the link;
+// in all other environments the call is real. Faking success is never acceptable.
+const AUTH_READY = import.meta.env.VITE_USE_AUTH_EMULATOR === 'true'
+
 async function handleSubmit() {
   if (!email.value) return
+  if (!AUTH_READY) {
+    error.value = 'Sign-in is not yet available in this build (V0.2).'
+    return
+  }
   sending.value = true
   error.value = ''
   try {
-    // Email link auth implemented in V0.2 functions/onSignIn.ts
-    // For v0 shell: import { sendSignInLink } from '@/auth/emailLink'
-    // await sendSignInLink(email.value)
+    await sendSignInLinkToEmail(auth, email.value, {
+      url: window.location.origin + '/finish-sign-in',
+      handleCodeInApp: true,
+    })
+    window.localStorage.setItem('emailForSignIn', email.value)
     sent.value = true
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Sign-in failed. Please try again.'
