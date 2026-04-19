@@ -1,0 +1,29 @@
+#!/bin/sh
+# Stub for firebase CLI.
+# Behaviour controlled by env vars:
+#   FIREBASE_STUB_LOGIN_LIST  — output for "firebase login:list"
+#                               "active" means an account is logged in
+#                               "none" or empty means no accounts
+
+case "$1" in
+  "login:list")
+    case "${FIREBASE_STUB_LOGIN_LIST:-none}" in
+      active)
+        printf 'No users signed in\nUser: test@example.com\n'
+        exit 0
+        ;;
+      none|"")
+        printf 'No users signed in\n'
+        exit 0
+        ;;
+      *)
+        printf '%s\n' "${FIREBASE_STUB_LOGIN_LIST}"
+        exit 0
+        ;;
+    esac
+    ;;
+  *)
+    printf 'firebase-stub: unhandled args: %s\n' "$*" >&2
+    exit 1
+    ;;
+esac
