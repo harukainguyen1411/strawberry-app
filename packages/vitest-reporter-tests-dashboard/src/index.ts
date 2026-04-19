@@ -161,7 +161,7 @@ function nodeIdOf(task: Task, filePath: string): string {
   // Build a path of suite/test names from the task upward
   const parts: string[] = []
   let current: Task | Suite = task
-  while (current && current.type !== 'suite' || (current as Suite)?.filepath === undefined) {
+  while (current && (current.type !== 'suite' || (current as Suite).filepath === undefined)) {
     parts.unshift(current.name)
     const parent = (current as Task & { suite?: Suite }).suite
     if (!parent) break
