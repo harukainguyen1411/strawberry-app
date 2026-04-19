@@ -10,8 +10,11 @@ useDefault = true
 [allowlist]
 # Known false positives
 regexes = [
-    # Repo slug Duongntd/strawberry — triggers generic-api-key on high entropy
+    # Repo slug harukainguyen1411/strawberry-app — triggers generic-api-key on high entropy
     # from slash + mixed-case. Not a secret.
+    '''harukainguyen1411/strawberry-app''',
+    # Legacy private-repo slug Duongntd/strawberry — still present in the slug guard script
+    # and this file itself as a sentinel/comment. Not a secret; suppress false positives.
     '''Duongntd/strawberry''',
 ]
 # Files that are safe to ignore
