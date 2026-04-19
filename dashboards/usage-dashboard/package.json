@@ -9,7 +9,7 @@
     "test": "node --test __tests__/html.test.mjs __tests__/app.test.mjs"
   },
   "devDependencies": {
-    "ccusage": "0.8.0",
+    "ccusage": "18.0.11",
     "jsdom": "^25.0.0"
   }
 }
