@@ -71,9 +71,11 @@ export async function importCsv(params: ImportCsvParams): Promise<ImportResult> 
       continue
     }
 
+    // Destructure id out — Firestore throws on undefined field values by default.
+    // id is stored as the doc key (tradeRef.id), not as a document field.
+    const { id: _id, ...tradeData } = trade
     await tradeRef.set({
-      ...trade,
-      id: undefined, // id is the doc key, not a field
+      ...tradeData,
       executedAt: trade.executedAt,
     })
     tradesAdded++

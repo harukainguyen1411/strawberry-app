@@ -185,6 +185,14 @@ describe('B.2 — importCsv callable', () => {
     expect(ibCash?.currency).toBe('EUR')
   })
 
+  it('B.2.13 T212 EUR account import writes cash.currency = EUR not USD', async () => {
+    const { importCsv } = await import('../import.js')
+    const result = await importCsv({ uid: 'userA', db, source: 'T212', csv: fixture('t212-eur-account.csv') })
+    expect(result.errors).toEqual([])
+    const t212Cash = db.store.get('users/userA/cash/T212')
+    expect(t212Cash?.currency).toBe('EUR')
+  })
+
   it('B.2.11 positions are overwritten not merged on re-import', async () => {
     const { importCsv } = await import('../import.js')
     // First import

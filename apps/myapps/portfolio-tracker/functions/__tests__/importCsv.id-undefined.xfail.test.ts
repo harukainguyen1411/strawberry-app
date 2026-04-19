@@ -77,7 +77,7 @@ function makeStrictFirestoreMock() {
 }
 
 describe('B.2.x — id: undefined Firestore regression', () => {
-  it.fails(
+  it(
     'B.2.x strict-mock: set() with id: undefined throws (prod behavior), importCsv must not pass undefined fields',
     async () => {
       vi.resetModules()
