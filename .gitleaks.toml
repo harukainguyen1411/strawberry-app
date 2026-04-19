@@ -33,8 +33,8 @@ paths = [
     '''tools/encrypt\.html''',
     '''tools/encrypt\.html\.sha256''',
     '''tools/age-bundle\.js''',
-    # Cursor skill files under apps/myapps/.cursor/skills/ contain documentation
+    # Cursor skill files under apps/darkstrawberry-apps/.cursor/skills/ contain documentation
     # examples with placeholder strings (e.g. YOUR_TOKEN in curl examples).
     # These are doc placeholders, not real secrets.
-    '''apps/myapps/\.cursor/skills/.*''',
+    '''apps/darkstrawberry-apps/\.cursor/skills/.*''',
 ]
