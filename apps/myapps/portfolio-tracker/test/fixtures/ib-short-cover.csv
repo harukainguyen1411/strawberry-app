@@ -1,0 +1,10 @@
+Statement,Header,Field Name,Field Value
+Statement,Data,BrokerName,Interactive Brokers LLC
+Statement,Data,AccountID,U1234567
+
+Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Quantity,T. Price,C. Price,Proceeds,Comm/Fee,Basis,Realized P/L,MTM P/L,Code
+Trades,Data,Order,Stocks,USD,TSLA,2026-04-10 09:30:00,10,250.00,250.00,-2500.00,-1.00,-2501.00,0.00,0.00,O
+Trades,Data,Order,Stocks,USD,NVDA,2026-04-10 10:00:00,-5,875.00,875.00,4375.00,-0.50,4374.50,0.00,0.00,O
+Trades,Data,Order,Stocks,USD,NVDA,2026-04-12 09:30:00,5,860.00,860.00,-4300.00,-0.50,-4300.50,75.00,0.00,C
+Trades,Data,Order,Options,USD,AAPL 20261218C00150000,2026-04-10 10:00:00,2,3.50,3.50,-700.00,-0.50,-700.50,0.00,0.00,O
+Trades,Data,Order,Options,USD,AAPL 20261218C00150000,2026-04-15 14:30:00,-2,5.20,5.20,1040.00,-0.50,1039.50,339.50,0.00,C

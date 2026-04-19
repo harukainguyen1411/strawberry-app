@@ -17,8 +17,11 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
 
-// Validate that all required environment variables are set
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+// Validate that all required environment variables are set.
+// In E2E mode (VITE_E2E=true) the config may be placeholder-only; skip the
+// hard throw so `vite build` succeeds and the app falls back to local mode.
+const isE2E = import.meta.env.VITE_E2E === 'true'
+if (!isE2E && (!firebaseConfig.apiKey || !firebaseConfig.projectId)) {
   throw new Error(
     'Missing Firebase configuration. Please check your .env file and ensure all VITE_FIREBASE_* variables are set.'
   )
