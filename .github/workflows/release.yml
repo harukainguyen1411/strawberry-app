@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.inputs.ref || github.ref_name }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6.4.0
         with:
           node-version: 20
           cache: npm
@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6.4.0
         with:
           node-version: 20
           cache: npm
