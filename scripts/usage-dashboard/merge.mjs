@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 import { parseArgs } from 'node:util';
 
 const { values: args } = parseArgs({
+  strict: false,
   options: {
     sessions:     { type: 'string' },
     blocks:       { type: 'string' },
