@@ -10,6 +10,7 @@
             <th
               v-for="col in columns"
               :key="col.key"
+              scope="col"
               class="px-4 py-2 text-left font-medium text-xs uppercase tracking-wide"
               style="color: var(--muted);"
             >

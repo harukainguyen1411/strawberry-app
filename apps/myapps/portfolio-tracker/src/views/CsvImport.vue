@@ -39,7 +39,25 @@
 
       <!-- Paste area -->
       <div class="mb-6">
-        <CsvPasteArea v-model="pasteText" />
+        <CsvPasteArea v-model="pasteText" @too-large="onPasteTooLarge" />
+      </div>
+
+      <!-- Drop / paste rejection banner (file too large, bad MIME, paste too large) -->
+      <div
+        v-if="dropError"
+        role="alert"
+        aria-live="polite"
+        class="mb-4 rounded-lg px-4 py-3 text-sm"
+        style="
+          border: 1px solid var(--accent);
+          background: color-mix(in srgb, var(--accent) 10%, transparent);
+          color: var(--text);
+        "
+      >
+        <p class="font-medium mb-1" style="color: var(--accent);">
+          File / paste rejected
+        </p>
+        <p>{{ dropError }}</p>
       </div>
 
       <!-- Error banner (parse failure) -->
@@ -294,6 +312,11 @@ function onDropError(msg: string) {
   dropError.value = msg
 }
 
+function onPasteTooLarge(sizeBytes: number) {
+  const mb = (sizeBytes / 1024 / 1024).toFixed(0)
+  dropError.value = `Pasted content is too large (${mb} MB). Maximum is 10 MB.`
+}
+
 function onFileDropped(file: File) {
   dropError.value = null
   fileText.value = null
@@ -321,9 +344,24 @@ async function onParse() {
 
 async function onCommit() {
   if (!parseResult.value || committing.value || hasBadHeaders.value || !source.value) return
+  const csv = fileText.value ?? pasteText.value
+  if (!csv || !csv.trim()) {
+    showToast('No CSV content to import.', false)
+    return
+  }
   try {
-    const result = await importCsv(source.value, fileText.value ?? pasteText.value)
-    showToast(`Imported ${result.tradesAdded} trades`, false)
+    const result = await importCsv(source.value, csv)
+    if (result.errors && result.errors.length > 0 && result.tradesAdded === 0) {
+      // Server rejected everything (e.g. bad headers detected on the
+      // server side). Stay on Step 2 so the user can fix and retry.
+      showToast(`Import rejected: ${result.errors.length} errors. See preview.`, true)
+      return
+    }
+    if (result.errors && result.errors.length > 0) {
+      showToast(`Imported ${result.tradesAdded} trades, ${result.errors.length} skipped`, false)
+    } else {
+      showToast(`Imported ${result.tradesAdded} trades`, false)
+    }
     router.push('/')
   } catch {
     showToast("Couldn't save import. Retry?", true)
