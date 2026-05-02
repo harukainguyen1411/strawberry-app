@@ -1,0 +1,6 @@
+{
+  "records": [
+    { "sessionId": "s1", "messageIdx": 0, "phase": "Brainstorm", "projectSlug": "example", "planSlug": "2026-05-02-example", "tokens": 100, "durationSec": 60, "subagent": false },
+    { "sessionId": "s1", "messageIdx": 1, "phase": "Plan",       "projectSlug": "example", "planSlug": "2026-05-02-example", "tokens": 250, "durationSec": 120, "subagent": false }
+  ]
+}

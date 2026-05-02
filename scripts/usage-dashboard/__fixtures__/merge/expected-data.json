@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 2,
+  "cutoverDate": "2026-04-28",
+  "window": { "remaining": 12345, "tokensUsed": 350, "model": "claude-opus-4-7" },
+  "grid": {
+    "byProject": {
+      "example": {
+        "byPhase": {
+          "Brainstorm": { "tokens": 100, "durationSec": 60, "sessions": 1 },
+          "Plan":       { "tokens": 250, "durationSec": 120, "sessions": 1 }
+        },
+        "total": { "tokens": 350, "durationSec": 180, "sessions": 1 },
+        "byPlan": {
+          "2026-05-02-example": {
+            "byPhase": {
+              "Brainstorm": { "tokens": 100, "durationSec": 60, "sessions": 1 },
+              "Plan":       { "tokens": 250, "durationSec": 120, "sessions": 1 }
+            },
+            "total": { "tokens": 350, "durationSec": 180, "sessions": 1 }
+          }
+        }
+      }
+    }
+  },
+  "perRepo": [
+    { "repo": "strawberry-app", "tokens": 350, "durationSec": 180, "sessions": 1 }
+  ],
+  "sparkline": [
+    { "date": "2026-05-01", "byProject": { "example": 350 } }
+  ],
+  "sessions": [
+    {
+      "sessionId": "s1",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "tokensIn": 100,
+      "tokensOut": 50,
+      "cacheRead": 200,
+      "cacheCreate": 0,
+      "cost": 0.05,
+      "model": "claude-opus-4-7",
+      "startedAt": "2026-05-01T10:00:00Z"
+    }
+  ],
+  "plans": [
+    {
+      "slug": "2026-05-02-example",
+      "state": "active",
+      "concern": "personal",
+      "project": "example",
+      "path": "plans/personal/active/example/2026-05-02-example.md"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "example",
+      "name": "Example Project",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": ["example"]
+    }
+  ],
+  "unphasedCount": 0
+}
