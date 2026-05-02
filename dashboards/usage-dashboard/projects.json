@@ -1,0 +1,70 @@
+{
+  "projects": [
+    {
+      "slug": "portfolio-tracker",
+      "name": "Portfolio Tracker",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": [
+        "portfolio",
+        "portfolio-tracker",
+        "portfolio tracker",
+        "portfolio-v0",
+        "portfolio v0"
+      ]
+    },
+    {
+      "slug": "raspberry",
+      "name": "Raspberry — Agentic Workflow",
+      "concern": "personal",
+      "product": "raspberry",
+      "aliases": [
+        "raspberry-self",
+        "meta",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "raspberry-usage-dashboard",
+      "name": "Raspberry Usage Dashboard",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": [
+        "raspberry-usage",
+        "raspberry usage",
+        "usage-dashboard",
+        "claude usage dashboard",
+        "phase dashboard",
+        "sbu",
+        "raspberry dashboard"
+      ]
+    },
+    {
+      "slug": "demo-studio-go-live",
+      "name": "Demo Studio v3 — go-live end-to-end",
+      "concern": "work",
+      "product": "company-os",
+      "aliases": [
+        "demo-studio",
+        "demo-studio-v3",
+        "ds-v3",
+        "demo studio go-live",
+        "go-live",
+        "demo go-live"
+      ]
+    },
+    {
+      "slug": "demo-studio-v1-1-reliability",
+      "name": "Demo Studio v1.1 — optimization & reliability",
+      "concern": "work",
+      "product": "company-os",
+      "aliases": [
+        "demo-studio-v1.1",
+        "demo-studio-reliability",
+        "ds-v1-1",
+        "ds-reliability"
+      ]
+    }
+  ],
+  "generatedAt": "2026-05-02T09:10:23.982Z"
+}
