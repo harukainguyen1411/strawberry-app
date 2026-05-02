@@ -13,3 +13,35 @@
 
 tr.expandable { cursor: pointer; }
 tr.expandable:hover td { opacity: 0.8; }
+
+/* Heatmap cells: intensity is set per-cell via inline style --intensity (0..1) */
+.heatmap-cell {
+  background: rgba(203, 166, 247, calc(var(--intensity, 0) * 0.35));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Expandable rows */
+.grid-row { cursor: pointer; }
+.grid-row[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+.chevron {
+  display: inline-block;
+  width: 0.8em;
+  transition: transform 0.15s;
+  color: #6c7086;
+}
+.plan-row td:first-child { padding-left: 2.5em; }
+.plan-row { background: #181825; }
+
+/* State badges */
+.state-badge {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 0.1em 0.4em;
+  border-radius: 0.25em;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
+.state-badge.draft    { background: #313244; color: #a6adc8; }
+.state-badge.active   { background: #fab387; color: #1e1e2e; }
+.state-badge.done     { background: #a6e3a1; color: #1e1e2e; }
+.state-badge.archived { background: #45475a; color: #6c7086; }
