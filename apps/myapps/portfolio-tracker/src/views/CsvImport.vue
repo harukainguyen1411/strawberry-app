@@ -1,9 +1,8 @@
 <template>
   <!--
     CsvImport — two-step CSV import flow.
-    Step 1: Source select + DropZone + CsvPasteArea + "Parse →" CTA
+    Step 1: Source select + DropZone + CsvPasteArea + "Parse →" CTA (V0.11)
     Step 2: Preview + commit (V0.12)
-    Refs V0.11
   -->
   <div class="px-4 py-6 max-w-2xl mx-auto">
     <!-- Step 1 -->
@@ -41,6 +40,24 @@
       <!-- Paste area -->
       <div class="mb-6">
         <CsvPasteArea v-model="pasteText" @too-large="onPasteTooLarge" />
+      </div>
+
+      <!-- Drop / paste rejection banner (file too large, bad MIME, paste too large) -->
+      <div
+        v-if="dropError"
+        role="alert"
+        aria-live="polite"
+        class="mb-4 rounded-lg px-4 py-3 text-sm"
+        style="
+          border: 1px solid var(--accent);
+          background: color-mix(in srgb, var(--accent) 10%, transparent);
+          color: var(--text);
+        "
+      >
+        <p class="font-medium mb-1" style="color: var(--accent);">
+          File / paste rejected
+        </p>
+        <p>{{ dropError }}</p>
       </div>
 
       <!-- Error banner (parse failure) -->
@@ -92,23 +109,106 @@
       </p>
     </template>
 
-    <!-- Step 2 placeholder (V0.12) -->
-    <template v-else-if="step === 'step2'">
-      <!-- V0.12 implements this step -->
-      <slot name="step2" :parseResult="parseResult" :source="source" :onBack="goBack" />
+    <!-- Step 2: preview + commit -->
+    <template v-else-if="step === 'step2' && parseResult">
+      <button
+        type="button"
+        class="text-sm mb-3 inline-flex items-center gap-1"
+        style="color: var(--muted);"
+        data-testid="back-btn"
+        @click="goBack"
+      >
+        ← Back
+      </button>
+      <h1 class="text-2xl font-medium mb-1" style="color: var(--text);">
+        Preview · {{ parseResult.trades.length }} trades, {{ parseResult.positions.length }} positions
+      </h1>
+      <p class="text-sm mb-4" style="color: var(--muted);">
+        Source: {{ sourceLabel }}
+      </p>
+
+      <!-- Bad-headers parse → ErrorBanner instead of preview -->
+      <ErrorBanner
+        v-if="hasBadHeaders"
+        title="Could not parse CSV"
+        message="Required columns are missing. Re-export from your broker and try again."
+        :receivedHeaders="receivedHeaders"
+        class="mb-4"
+      />
+
+      <!-- Partial parse → warn banner -->
+      <WarnBanner
+        v-else-if="parseResult.errors.length > 0"
+        :count="parseResult.errors.length"
+        :message="`${parseResult.errors.length} rows skipped`"
+        :details="errorLines"
+        class="mb-4"
+      />
+
+      <template v-if="!hasBadHeaders">
+        <!-- Holdings preview -->
+        <div class="mb-4">
+          <ImportPreviewTable
+            title="Holdings"
+            :rows="positionRows"
+            :columns="positionColumns"
+            :maxVisible="5"
+          />
+        </div>
+
+        <!-- Trades preview -->
+        <div class="mb-6">
+          <ImportPreviewTable
+            title="Trades"
+            :rows="tradeRows"
+            :columns="tradeColumns"
+            :maxVisible="5"
+          />
+        </div>
+
+        <!-- CTAs -->
+        <div class="flex items-center gap-3">
+          <button type="button" class="ds-btn-ghost" @click="goBack">Cancel</button>
+          <button
+            data-testid="commit-btn"
+            type="button"
+            class="ds-btn-primary"
+            :disabled="committing"
+            :aria-disabled="committing"
+            @click="onCommit"
+          >
+            <span v-if="committing">Committing…</span>
+            <span v-else>Commit import →</span>
+          </button>
+        </div>
+      </template>
     </template>
+
+    <Toast
+      :show="toastVisible"
+      :message="toastMessage"
+      :onRetry="toastRetry ? onRetry : undefined"
+      @dismiss="toastVisible = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import DropZone from '@/components/DropZone.vue'
 import CsvPasteArea from '@/components/CsvPasteArea.vue'
 import SourceSelect from '@/components/SourceSelect.vue'
+import ImportPreviewTable from '@/components/ImportPreviewTable.vue'
+import WarnBanner from '@/components/WarnBanner.vue'
+import ErrorBanner from '@/components/ErrorBanner.vue'
+import Toast from '@/components/Toast.vue'
 import { useCsvParser, type CsvSource, type ParseResult } from '@/composables/useCsvParser'
+import { useImportCsv } from '@/composables/useImportCsv'
 
 type Step = 'step1' | 'step2'
 
+const router = useRouter()
 const step = ref<Step>('step1')
 const source = ref<CsvSource | ''>('')
 const pasteText = ref('')
@@ -116,15 +216,90 @@ const fileText = ref<string | null>(null)
 const dropError = ref<string | null>(null)
 const parseResult = ref<ParseResult | null>(null)
 
-const { parse, result, parseError, loading: parsing, reset: resetParser } = useCsvParser()
+const { parse, parseError, loading: parsing, reset: resetParser, result: parserResult } = useCsvParser()
+const { importCsv, loading: committing } = useImportCsv()
 
-/** True when there's something to parse (file dropped or text pasted) */
+const toastVisible = ref(false)
+const toastMessage = ref('')
+const toastRetry = ref(false)
+
 const canParse = computed(() => {
   return !!(fileText.value || pasteText.value.trim()) && !!source.value
 })
 
+const sourceLabel = computed(() => (source.value === 'T212' ? 'Trading 212' : 'Interactive Brokers'))
+
+const hasBadHeaders = computed(() => {
+  if (!parseResult.value) return false
+  return parseResult.value.errors.some((e) => e.kind === 'bad_headers')
+})
+
+const receivedHeaders = computed<string[]>(() => {
+  if (!parseResult.value) return []
+  const bad = parseResult.value.errors.find((e) => e.kind === 'bad_headers') as
+    | { kind: string; received?: string[] }
+    | undefined
+  return bad?.received ?? []
+})
+
+const errorLines = computed<string[]>(() => {
+  if (!parseResult.value) return []
+  return parseResult.value.errors.map((e) => {
+    const row = (e as { row?: number }).row
+    const reason = (e as { reason?: string; kind: string }).reason ?? e.kind
+    return row != null ? `Row ${row}: ${reason}` : reason
+  })
+})
+
+const positionColumns = [
+  { key: 'ticker', label: 'Ticker' },
+  { key: 'broker', label: 'Broker' },
+  { key: 'quantity', label: 'Qty', align: 'right' as const },
+  { key: 'avgCost', label: 'Avg cost', align: 'right' as const },
+]
+
+const positionRows = computed(() => {
+  if (!parseResult.value) return []
+  return parseResult.value.positions.map((p) => ({
+    ticker: p.ticker,
+    broker: p.broker,
+    quantity: p.quantity,
+    avgCost: formatMoney(p.avgCost),
+  }))
+})
+
+const tradeColumns = [
+  { key: 'executedAt', label: 'Date' },
+  { key: 'ticker', label: 'Ticker' },
+  { key: 'side', label: 'Side' },
+  { key: 'quantity', label: 'Qty', align: 'right' as const },
+  { key: 'price', label: 'Price', align: 'right' as const },
+]
+
+const tradeRows = computed(() => {
+  if (!parseResult.value) return []
+  return parseResult.value.trades.map((t) => ({
+    executedAt: formatDate(t.executedAt),
+    ticker: t.ticker,
+    side: t.side,
+    quantity: t.quantity,
+    price: formatMoney(t.price),
+  }))
+})
+
+function formatMoney(m: { amount: number; currency: string } | null | undefined): string {
+  if (!m) return ''
+  return `${m.currency} ${m.amount.toFixed(2)}`
+}
+
+function formatDate(d: Date | string | null | undefined): string {
+  if (!d) return ''
+  const date = d instanceof Date ? d : new Date(d)
+  if (isNaN(date.getTime())) return String(d)
+  return date.toISOString().slice(0, 10)
+}
+
 function onSourceChange() {
-  // Clear prior parse state when source changes
   parseResult.value = null
   parseError.value = null
   fileText.value = null
@@ -147,10 +322,9 @@ function onFileDropped(file: File) {
   fileText.value = null
   const reader = new FileReader()
   reader.onload = (e) => {
-    fileText.value = e.target?.result as string ?? null
+    fileText.value = (e.target?.result as string) ?? null
   }
   reader.onerror = () => {
-    // Surface read failure so the user gets feedback and canParse stays false
     fileText.value = null
     dropError.value = 'Could not read the file. Please try again.'
   }
@@ -159,19 +333,50 @@ function onFileDropped(file: File) {
 
 async function onParse() {
   if (!canParse.value || parsing.value) return
-
   const text = fileText.value ?? pasteText.value
   if (!text || !source.value) return
-
   await parse(source.value, text)
-
   if (!parseError.value) {
-    // Use `result` from the single composable instance created at setup time.
-    // Calling useCsvParser() again here would construct a fresh instance whose
-    // result ref is always null (the parse() above acted on the first instance).
-    parseResult.value = result.value
-    step.value = 'step2'
+    parseResult.value = parserResult.value
+    if (parseResult.value) step.value = 'step2'
   }
+}
+
+async function onCommit() {
+  if (!parseResult.value || committing.value || hasBadHeaders.value || !source.value) return
+  const csv = fileText.value ?? pasteText.value
+  if (!csv || !csv.trim()) {
+    showToast('No CSV content to import.', false)
+    return
+  }
+  try {
+    const result = await importCsv(source.value, csv)
+    if (result.errors && result.errors.length > 0 && result.tradesAdded === 0) {
+      // Server rejected everything (e.g. bad headers detected on the
+      // server side). Stay on Step 2 so the user can fix and retry.
+      showToast(`Import rejected: ${result.errors.length} errors. See preview.`, true)
+      return
+    }
+    if (result.errors && result.errors.length > 0) {
+      showToast(`Imported ${result.tradesAdded} trades, ${result.errors.length} skipped`, false)
+    } else {
+      showToast(`Imported ${result.tradesAdded} trades`, false)
+    }
+    router.push('/')
+  } catch {
+    showToast("Couldn't save import. Retry?", true)
+  }
+}
+
+function onRetry() {
+  toastVisible.value = false
+  void onCommit()
+}
+
+function showToast(message: string, retry: boolean) {
+  toastMessage.value = message
+  toastRetry.value = retry
+  toastVisible.value = true
 }
 
 function goBack() {
@@ -180,6 +385,5 @@ function goBack() {
   resetParser()
 }
 
-// Expose for parent / V0.12 slot
 defineExpose({ step, source, parseResult, goBack })
 </script>
