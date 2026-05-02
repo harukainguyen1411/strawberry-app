@@ -24,10 +24,7 @@ test('generate-plans: walks all four state dirs and records state', async () => 
     assert.equal(flatActive.state, 'active');
     assert.equal(projected.state, 'active');
     assert.equal(projected.project, 'example');
-    assert.ok(
-      data.plans.some(p => p.path.includes('example/')),
-      'expected at least one plan path to include the example/ project subdir',
-    );
+    assert.equal(projected.path, 'plans/personal/active/example/2026-04-30-projected.md');
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

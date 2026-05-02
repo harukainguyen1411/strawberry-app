@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, dirname, basename } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, dirname, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
-import { parseFrontmatter } from './generate-projects.mjs';
+import { parseFrontmatter, safeReaddir, isDir } from './generate-projects.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATES = ['draft', 'active', 'done', 'archived'];
@@ -19,14 +19,12 @@ export async function generatePlans({ raspberryDir, outPath }) {
       if (!isDir(stateDir)) continue;
       for (const entry of safeReaddir(stateDir)) {
         const entryPath = join(stateDir, entry);
-        if (entry.endsWith('.md') && isFile(entryPath)) {
+        if (entry.endsWith('.md')) {
           collectPlan(plans, entryPath, { raspberryDir, concern, state });
         } else if (isDir(entryPath)) {
           for (const sub of safeReaddir(entryPath)) {
             if (!sub.endsWith('.md')) continue;
-            const subPath = join(entryPath, sub);
-            if (!isFile(subPath)) continue;
-            collectPlan(plans, subPath, { raspberryDir, concern, state });
+            collectPlan(plans, join(entryPath, sub), { raspberryDir, concern, state });
           }
         }
       }
@@ -47,13 +45,9 @@ function collectPlan(plans, filePath, { raspberryDir, concern, state }) {
     state,
     concern: fm.concern ?? concern,
     project: fm.project ?? null,
-    path: filePath.replace(raspberryDir + '/', ''),
+    path: relative(raspberryDir, filePath),
   });
 }
-
-function safeReaddir(p) { try { return readdirSync(p); } catch { return []; } }
-function isDir(p)       { try { return statSync(p).isDirectory(); } catch { return false; } }
-function isFile(p)      { try { return statSync(p).isFile();      } catch { return false; } }
 
 const isCli = import.meta.url === `file://${process.argv[1]}`;
 if (isCli) {

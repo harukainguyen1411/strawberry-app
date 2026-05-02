@@ -7,6 +7,7 @@ import { homedir } from 'node:os';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function parseFrontmatter(text) {
+  text = text.replace(/\r\n/g, '\n');
   const match = /^---\n([\s\S]*?)\n---/.exec(text);
   if (!match) return null;
   const fm = {};
@@ -54,9 +55,9 @@ export async function generateProjects({ raspberryDir, outPath }) {
   return projects;
 }
 
-function safeReaddir(p) { try { return readdirSync(p); } catch { return []; } }
-function isDir(p)       { try { return statSync(p).isDirectory(); } catch { return false; } }
-function isFile(p)      { try { return statSync(p).isFile();      } catch { return false; } }
+export function safeReaddir(p) { try { return readdirSync(p); } catch { return []; } }
+export function isDir(p)       { try { return statSync(p).isDirectory(); } catch { return false; } }
+export function isFile(p)      { try { return statSync(p).isFile();      } catch { return false; } }
 
 const isCli = import.meta.url === `file://${process.argv[1]}`;
 if (isCli) {
