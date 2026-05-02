@@ -19,7 +19,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory, type Router } from 'vue-router'
-import type { CurrencyCode, Holding, Money } from '@/types/firestore'
+import type { CurrencyCode, Holding } from '@/types/firestore'
 import type { PortfolioStatus, PortfolioSummary, UsePortfolioReturn } from '@/composables/usePortfolio'
 
 // Mutable refs that the mocked composable returns; tests mutate these
