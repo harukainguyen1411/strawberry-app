@@ -135,4 +135,4 @@ After a week of confirmed-working new pipeline, remove the legacy directory:
 
     rm -rf ~/.claude/strawberry-usage-cache
 
-`sbu.sh` falls back to the legacy cache if the new one is missing, with a one-line warning.
+`sbu.sh` falls back to `~/.claude/strawberry-usage-cache/data.json` if `build.sh` produces no new output, printing a one-line warning to stderr. Post-cutover, a silently-failing build will surface legacy data instead of erroring — confirm new data is being generated (`tail ~/.claude/raspberry-usage-cache/cron.log` and check the `generatedAt` in `dashboards/usage-dashboard/data.json` is recent) before removing the legacy cache.
