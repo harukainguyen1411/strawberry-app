@@ -56,7 +56,7 @@ const SAMPLE_COLUMNS = [
 ]
 
 describe('A.18 — CsvImport Step 2', () => {
-  it.fails('A.18.1 ImportPreviewTable shows maxVisible rows with "Show all" expander when rows > maxVisible', async () => {
+  it('A.18.1 ImportPreviewTable shows maxVisible rows with "Show all" expander when rows > maxVisible', async () => {
     const ImportPreviewTable = (await import('@/components/ImportPreviewTable.vue')).default
     const wrapper = mount(ImportPreviewTable, {
       props: {
@@ -79,7 +79,7 @@ describe('A.18 — CsvImport Step 2', () => {
     wrapper.unmount()
   })
 
-  it.fails('A.18.2 ImportPreviewTable "Show all" expands to all rows', async () => {
+  it('A.18.2 ImportPreviewTable "Show all" expands to all rows', async () => {
     const ImportPreviewTable = (await import('@/components/ImportPreviewTable.vue')).default
     const wrapper = mount(ImportPreviewTable, {
       props: {
@@ -100,7 +100,7 @@ describe('A.18 — CsvImport Step 2', () => {
     wrapper.unmount()
   })
 
-  it.fails('A.18.3 WarnBanner click expands details list of skipped rows', async () => {
+  it('A.18.3 WarnBanner click expands details list of skipped rows', async () => {
     const WarnBanner = (await import('@/components/WarnBanner.vue')).default
     const wrapper = mount(WarnBanner, {
       props: {
@@ -113,7 +113,7 @@ describe('A.18 — CsvImport Step 2', () => {
 
     // Details should be hidden initially
     const details = wrapper.find('[data-testid="warn-details"]')
-    const isHidden = !details.exists() || details.element.style.display === 'none' || details.classes().includes('hidden')
+    const isHidden = !details.exists() || (details.element as HTMLElement).style.display === 'none' || details.classes().includes('hidden')
     expect(isHidden).toBe(true)
 
     // Click the banner
@@ -128,7 +128,7 @@ describe('A.18 — CsvImport Step 2', () => {
     wrapper.unmount()
   })
 
-  it.fails('A.18.4 Toast component auto-dismisses and renders retry message', async () => {
+  it('A.18.4 Toast component auto-dismisses and renders retry message', async () => {
     const Toast = (await import('@/components/Toast.vue')).default
     const wrapper = mount(Toast, {
       props: {
