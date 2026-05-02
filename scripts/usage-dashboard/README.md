@@ -123,3 +123,16 @@ The old cache was at `~/.claude/strawberry-usage-cache`. To migrate:
    ```sh
    rm -rf ~/.claude/strawberry-usage-cache
    ```
+
+## Cutover from strawberry agent dashboard
+
+This dashboard replaced the per-roster-agent attribution (strawberry-usage-cache) with phase × project attribution (raspberry-usage-cache). Schemas are not compatible.
+
+- Old cache (read-only, kept one week post-cutover): `~/.claude/strawberry-usage-cache/`
+- New cache (active): `~/.claude/raspberry-usage-cache/`
+
+After a week of confirmed-working new pipeline, remove the legacy directory:
+
+    rm -rf ~/.claude/strawberry-usage-cache
+
+`sbu.sh` falls back to the legacy cache if the new one is missing, with a one-line warning.
