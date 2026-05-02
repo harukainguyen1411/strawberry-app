@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bash ../../scripts/usage-dashboard/build.sh",
-    "roster": "node ../../scripts/usage-dashboard/generate-roster.mjs",
-    "test": "node --test __tests__/html.test.mjs __tests__/app.test.mjs"
+    "build": "bash ../../scripts/usage-dashboard/build.sh"
   },
   "devDependencies": {
     "ccusage": "0.8.0",
