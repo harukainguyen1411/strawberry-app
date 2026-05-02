@@ -200,16 +200,8 @@ function renderProjectGrid(data, { metric, hideUnphased, projectFilter }) {
     });
   });
 
-  // Wire cell drill-down (delegate to all cells with data-phase)
-  tbody.addEventListener('click', e => {
-    const cell = e.target.closest('td[data-phase]');
-    if (!cell) return;
-    e.stopPropagation();
-    const row     = cell.closest('tr');
-    const project = row.classList.contains('grid-row') ? row.dataset.project : row.dataset.parent;
-    const phase   = cell.dataset.phase;
-    showSessionDrill(data, { project, phase });
-  });
+  // Note: cell drill-down delegate is attached once at boot (DOMContentLoaded),
+  // not here — re-attaching on every render leaks listeners on tbody.
 }
 
 function showSessionDrill(data, { project, phase }) {
@@ -452,6 +444,22 @@ function load() {
 
 // --- wire controls ---
 document.addEventListener('DOMContentLoaded', () => {
+  // Cell drill-down: attach once, delegate from #grid-body. Re-attaching inside
+  // renderProjectGrid leaks listeners on tbody (innerHTML='' clears children
+  // but not listeners on tbody itself).
+  const gridBody = document.getElementById('grid-body');
+  if (gridBody) {
+    gridBody.addEventListener('click', e => {
+      const cell = e.target.closest('td[data-phase]');
+      if (!cell || !state.data) return;
+      e.stopPropagation();
+      const row     = cell.closest('tr');
+      const project = row.classList.contains('grid-row') ? row.dataset.project : row.dataset.parent;
+      const phase   = cell.dataset.phase;
+      showSessionDrill(state.data, { project, phase });
+    });
+  }
+
   const metricSelect = document.getElementById('metric');
   if (metricSelect) {
     metricSelect.addEventListener('change', e => {
