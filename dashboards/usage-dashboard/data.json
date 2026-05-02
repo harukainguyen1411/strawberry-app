@@ -1,1 +1,2958 @@
-{"sessions":[],"agents":[],"generatedAt":null}
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-02T10:24:53.399Z",
+  "cutoverDate": "2026-04-28",
+  "window": {
+    "startTime": "2026-05-02T07:00:00.000Z",
+    "endTime": "2026-05-02T12:00:00.000Z",
+    "inputTokens": 8848,
+    "outputTokens": 827168,
+    "totalCost": 112.42688725000012
+  },
+  "grid": {
+    "byProject": {
+      "(unscoped)": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 16625167900,
+            "durationSec": 2819893,
+            "sessions": 2326
+          },
+          "Plan": {
+            "tokens": 300359163,
+            "durationSec": 33630,
+            "sessions": 16
+          },
+          "Implement": {
+            "tokens": 648588538,
+            "durationSec": 57706,
+            "sessions": 16
+          },
+          "Debug": {
+            "tokens": 82169096,
+            "durationSec": 9172,
+            "sessions": 4
+          },
+          "Brainstorm": {
+            "tokens": 1084605730,
+            "durationSec": 134495,
+            "sessions": 23
+          },
+          "Verify": {
+            "tokens": 641401385,
+            "durationSec": 76660,
+            "sessions": 9
+          },
+          "Finish": {
+            "tokens": 99188462,
+            "durationSec": 8735,
+            "sessions": 3
+          },
+          "Review": {
+            "tokens": 37798525,
+            "durationSec": 5602,
+            "sessions": 2
+          }
+        },
+        "total": {
+          "tokens": 19519278799,
+          "durationSec": 3145893,
+          "sessions": 2326
+        },
+        "byPlan": {
+          "(unscoped)": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 16625167900,
+                "durationSec": 2819893,
+                "sessions": 2326
+              },
+              "Plan": {
+                "tokens": 300359163,
+                "durationSec": 33630,
+                "sessions": 16
+              },
+              "Implement": {
+                "tokens": 648588538,
+                "durationSec": 57706,
+                "sessions": 16
+              },
+              "Debug": {
+                "tokens": 82169096,
+                "durationSec": 9172,
+                "sessions": 4
+              },
+              "Brainstorm": {
+                "tokens": 1084605730,
+                "durationSec": 134495,
+                "sessions": 23
+              },
+              "Verify": {
+                "tokens": 641401385,
+                "durationSec": 76660,
+                "sessions": 9
+              },
+              "Finish": {
+                "tokens": 99188462,
+                "durationSec": 8735,
+                "sessions": 3
+              },
+              "Review": {
+                "tokens": 37798525,
+                "durationSec": 5602,
+                "sessions": 2
+              }
+            },
+            "total": {
+              "tokens": 19519278799,
+              "durationSec": 3145893,
+              "sessions": 2326
+            }
+          }
+        }
+      }
+    }
+  },
+  "perRepo": [
+    {
+      "repo": "(unknown)",
+      "tokens": 11730383494,
+      "durationSec": 0,
+      "sessions": 228
+    }
+  ],
+  "sparkline": [
+    {
+      "date": "2026-04-19",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-20",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-21",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-22",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-23",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-24",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-25",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-26",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-27",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-28",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-29",
+      "byProject": {}
+    },
+    {
+      "date": "2026-04-30",
+      "byProject": {}
+    },
+    {
+      "date": "2026-05-01",
+      "byProject": {}
+    },
+    {
+      "date": "2026-05-02",
+      "byProject": {}
+    }
+  ],
+  "sessions": [
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-raspberry",
+      "cwd": null,
+      "tokensIn": 30276,
+      "tokensOut": 4274016,
+      "cacheRead": 701352928,
+      "cacheCreate": 0,
+      "cost": 569.7279189999986,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 86,
+      "tokensOut": 12524,
+      "cacheRead": 4088803,
+      "cacheCreate": 0,
+      "cost": 1.7659914000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1706,
+      "tokensOut": 1116,
+      "cacheRead": 1957591,
+      "cacheCreate": 0,
+      "cost": 1.7176505000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 267,
+      "tokensOut": 30475,
+      "cacheRead": 19796127,
+      "cacheCreate": 0,
+      "cost": 7.9333381499999955,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 600,
+      "tokensOut": 46921,
+      "cacheRead": 14194940,
+      "cacheCreate": 0,
+      "cost": 9.361042500000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2270,
+      "tokensOut": 4675,
+      "cacheRead": 515452,
+      "cacheCreate": 0,
+      "cost": 1.22731975,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 20173,
+      "tokensOut": 21889,
+      "cacheRead": 20007726,
+      "cacheCreate": 0,
+      "cost": 9.167676399999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2982,
+      "tokensOut": 50753,
+      "cacheRead": 49716672,
+      "cacheCreate": 0,
+      "cost": 21.273578900000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-485a4440786148e5a6c37b51cced1c32",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 11069,
+      "cacheRead": 53489,
+      "cacheCreate": 0,
+      "cost": 0.28785045,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-9ec540333566458a8e2c67fa5e168096",
+      "cwd": null,
+      "tokensIn": 14,
+      "tokensOut": 10493,
+      "cacheRead": 84569,
+      "cacheCreate": 0,
+      "cost": 0.24866144999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-857f9118e7cd40f98403f7879fb373c2",
+      "cwd": null,
+      "tokensIn": 12,
+      "tokensOut": 9201,
+      "cacheRead": 41178,
+      "cacheCreate": 0,
+      "cost": 0.2487519,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 40,
+      "tokensOut": 2890,
+      "cacheRead": 2487831,
+      "cacheCreate": 0,
+      "cost": 0.40940185000000007,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 4523,
+      "tokensOut": 10684,
+      "cacheRead": 3073136,
+      "cacheCreate": 0,
+      "cost": 2.3968375999999996,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-d1913f27c47e40768653527644931639",
+      "cwd": null,
+      "tokensIn": 21,
+      "tokensOut": 16649,
+      "cacheRead": 130282,
+      "cacheCreate": 0,
+      "cost": 0.41826135,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-046b74de3205496fad32fc9a3326c0ed",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 15828,
+      "cacheRead": 109917,
+      "cacheCreate": 0,
+      "cost": 0.39932385,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-f537ddb5f58f43acab3c87f9a5c54b25",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 10008,
+      "cacheRead": 63691,
+      "cacheCreate": 0,
+      "cost": 0.2339223,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-64d7e2ddd4784a04a4bf7ac9f73d6883",
+      "cwd": null,
+      "tokensIn": 10,
+      "tokensOut": 8564,
+      "cacheRead": 41032,
+      "cacheCreate": 0,
+      "cost": 0.2374821,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-a8c5a500f0fe4c759b74b23eea85f28a",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 11792,
+      "cacheRead": 52623,
+      "cacheCreate": 0,
+      "cost": 0.30099315,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-e3859e11b82f4fff9de29a40152cee1d",
+      "cwd": null,
+      "tokensIn": 10,
+      "tokensOut": 8932,
+      "cacheRead": 40891,
+      "cacheCreate": 0,
+      "cost": 0.24367979999999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-31e67929e21a4e318df85e769ce2e089",
+      "cwd": null,
+      "tokensIn": 10,
+      "tokensOut": 9935,
+      "cacheRead": 41364,
+      "cacheCreate": 0,
+      "cost": 0.26311545000000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-c47058113ecb424095bc01c4fd576f44",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 11887,
+      "cacheRead": 54157,
+      "cacheCreate": 0,
+      "cost": 0.30405585,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-83aedccc51bb45d796b504d289332636",
+      "cwd": null,
+      "tokensIn": 12,
+      "tokensOut": 7790,
+      "cacheRead": 40835,
+      "cacheCreate": 0,
+      "cost": 0.22270275,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-a964b18cb4ae4e6fb82856f79712d874",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 9586,
+      "cacheRead": 54169,
+      "cacheCreate": 0,
+      "cost": 0.2602857,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-326ad3481690462ab756f73117954575",
+      "cwd": null,
+      "tokensIn": 11,
+      "tokensOut": 15238,
+      "cacheRead": 70412,
+      "cacheCreate": 0,
+      "cost": 0.33646035,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-bf71e26b98a5435a8c233b721aff3a09",
+      "cwd": null,
+      "tokensIn": 13,
+      "tokensOut": 14715,
+      "cacheRead": 68829,
+      "cacheCreate": 0,
+      "cost": 0.3609252,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp",
+      "cwd": null,
+      "tokensIn": 8403,
+      "tokensOut": 2986623,
+      "cacheRead": 27592078,
+      "cacheCreate": 0,
+      "cost": 82.07657319999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-secretary",
+      "cwd": null,
+      "tokensIn": 2324,
+      "tokensOut": 194435,
+      "cacheRead": 27508932,
+      "cacheCreate": 0,
+      "cost": 31.877598499999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 99,
+      "tokensOut": 4259,
+      "cacheRead": 1640903,
+      "cacheCreate": 0,
+      "cost": 0.7106973999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8,
+      "tokensOut": 16,
+      "cacheRead": 63543,
+      "cacheCreate": 0,
+      "cost": 0.36003025,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1,
+      "tokensOut": 3971,
+      "cacheRead": 52451,
+      "cacheCreate": 0,
+      "cost": 0.13551175,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 129,
+      "tokensOut": 12764,
+      "cacheRead": 2699757,
+      "cacheCreate": 0,
+      "cost": 1.86844035,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14,
+      "tokensOut": 1100,
+      "cacheRead": 117294,
+      "cacheCreate": 0,
+      "cost": 0.11107020000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 304,
+      "tokensOut": 18762,
+      "cacheRead": 11722315,
+      "cacheCreate": 0,
+      "cost": 6.494492000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 487,
+      "tokensOut": 47519,
+      "cacheRead": 25690322,
+      "cacheCreate": 0,
+      "cost": 12.208444749999991,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99--config-superpowers-worktrees-company-os-work-demo-studio-v3-agent-sdk-skills",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 7244,
+      "cacheRead": 50404,
+      "cacheCreate": 0,
+      "cost": 0.3269187,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99",
+      "cwd": null,
+      "tokensIn": 27,
+      "tokensOut": 7709,
+      "cacheRead": 50552,
+      "cacheCreate": 0,
+      "cost": 0.6608843500000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-tmpsgy8qy-q",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 201,
+      "cacheRead": 12638,
+      "cacheCreate": 0,
+      "cost": 0.03152415,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 23,
+      "tokensOut": 127,
+      "cacheRead": 153727,
+      "cacheCreate": 0,
+      "cost": 0.0816082,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 17272,
+      "tokensOut": 1230,
+      "cacheRead": 306645,
+      "cacheCreate": 0,
+      "cost": 0.13491775,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 2448,
+      "cacheRead": 285544,
+      "cacheCreate": 0,
+      "cost": 0.4503782500000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-8de60962713143648399e8e15363f83f-j1qtz-90",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 931,
+      "cacheRead": 19558,
+      "cacheCreate": 0,
+      "cost": 0.10160040000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-8de60962713143648399e8e15363f83f-884ywdik",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 4,
+      "cacheRead": 12601,
+      "cacheCreate": 0,
+      "cost": 0.0298068,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-8de60962713143648399e8e15363f83f-iz-adatl",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 4,
+      "cacheRead": 12606,
+      "cacheCreate": 0,
+      "cost": 0.029789549999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-8de60962713143648399e8e15363f83f-jgrsj7fr",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 458,
+      "cacheRead": 32306,
+      "cacheCreate": 0,
+      "cost": 0.050067299999999995,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-77aa162f1fdb4c8fb5d836ffbae2a11a-rtmfd9dx",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 690,
+      "cacheRead": 33912,
+      "cacheCreate": 0,
+      "cost": 0.053234100000000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 5928,
+      "tokensOut": 29477,
+      "cacheRead": 7954707,
+      "cacheCreate": 0,
+      "cost": 8.383618499999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1858,
+      "tokensOut": 2513,
+      "cacheRead": 4294731,
+      "cacheCreate": 0,
+      "cost": 0.9645447999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-77aa162f1fdb4c8fb5d836ffbae2a11a-cc907mh7",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 428,
+      "cacheRead": 19705,
+      "cacheCreate": 0,
+      "cost": 0.09307950000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-77aa162f1fdb4c8fb5d836ffbae2a11a-m-mbvwyj",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 495,
+      "cacheRead": 12972,
+      "cacheCreate": 0,
+      "cost": 0.037808100000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-77aa162f1fdb4c8fb5d836ffbae2a11a-9qufxnb2",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 10010,
+      "cacheRead": 97538,
+      "cacheCreate": 0,
+      "cost": 0.32635515000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1809,
+      "tokensOut": 21350,
+      "cacheRead": 9697238,
+      "cacheCreate": 0,
+      "cost": 5.195232150000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-spike-618w2qwy",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 11,
+      "cacheRead": 19466,
+      "cacheCreate": 0,
+      "cost": 0.08362155,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-warm-njdd8abh",
+      "cwd": null,
+      "tokensIn": 9,
+      "tokensOut": 16,
+      "cacheRead": 40618,
+      "cacheCreate": 0,
+      "cost": 0.09518864999999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-warm-8ycbtrml",
+      "cwd": null,
+      "tokensIn": 9,
+      "tokensOut": 4143,
+      "cacheRead": 89102,
+      "cacheCreate": 0,
+      "cost": 0.1889001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T-sdk-warm-uhq3biq7",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 9451,
+      "cacheRead": 120128,
+      "cacheCreate": 0,
+      "cost": 0.26956965000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-65dfaa8ad0d14fd5b24ee038545eca17",
+      "cwd": null,
+      "tokensIn": 21,
+      "tokensOut": 13118,
+      "cacheRead": 156675,
+      "cacheCreate": 0,
+      "cost": 0.39856050000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-ae52ba9675aa4b84aae951fd87a0578a",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 507,
+      "cacheRead": 19892,
+      "cacheCreate": 0,
+      "cost": 0.09551685000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-sdk-warm-cwds-fe5f264ce8204370a10380ccc098815a",
+      "cwd": null,
+      "tokensIn": 15,
+      "tokensOut": 9524,
+      "cacheRead": 51852,
+      "cacheCreate": 0,
+      "cost": 0.25851435,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-agents",
+      "cwd": null,
+      "tokensIn": 164743,
+      "tokensOut": 10898247,
+      "cacheRead": 2051570532,
+      "cacheCreate": 0,
+      "cost": 1862.7513964000048,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-var-folders-04-kp3fmqxn1ld0gr5t5zl32-pc0000gn-T",
+      "cwd": null,
+      "tokensIn": 18,
+      "tokensOut": 8585,
+      "cacheRead": 0,
+      "cacheCreate": 0,
+      "cost": 0.2432455,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 27570,
+      "tokensOut": 465429,
+      "cacheRead": 178625822,
+      "cacheCreate": 0,
+      "cost": 108.78481939999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6061,
+      "tokensOut": 95013,
+      "cacheRead": 56469033,
+      "cacheCreate": 0,
+      "cost": 27.61048435000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 40,
+      "tokensOut": 1083,
+      "cacheRead": 218292,
+      "cacheCreate": 0,
+      "cost": 0.33500009999999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 7242,
+      "tokensOut": 15893,
+      "cacheRead": 3543285,
+      "cacheCreate": 0,
+      "cost": 2.3629440000000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 59,
+      "tokensOut": 5268,
+      "cacheRead": 2027880,
+      "cacheCreate": 0,
+      "cost": 1.9072037500000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 32,
+      "tokensOut": 198,
+      "cacheRead": 225823,
+      "cacheCreate": 0,
+      "cost": 0.27520085000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8,
+      "tokensOut": 579,
+      "cacheRead": 67332,
+      "cacheCreate": 0,
+      "cost": 0.08600985,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 162803,
+      "tokensOut": 410813,
+      "cacheRead": 211029801,
+      "cacheCreate": 0,
+      "cost": 126.83937349999994,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 24613,
+      "tokensOut": 542332,
+      "cacheRead": 129027113,
+      "cacheCreate": 0,
+      "cost": 112.35382119999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-agents-agents-evelynn-inbox",
+      "cwd": null,
+      "tokensIn": 24,
+      "tokensOut": 1816,
+      "cacheRead": 198229,
+      "cacheCreate": 0,
+      "cost": 0.473397,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 4550,
+      "tokensOut": 1946,
+      "cacheRead": 309602,
+      "cacheCreate": 0,
+      "cost": 0.25470059999999994,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25247,
+      "tokensOut": 310945,
+      "cacheRead": 88111062,
+      "cacheCreate": 0,
+      "cost": 57.825405399999966,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 13276,
+      "tokensOut": 455550,
+      "cacheRead": 116438962,
+      "cacheCreate": 0,
+      "cost": 82.20301239999989,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 26298,
+      "tokensOut": 105185,
+      "cacheRead": 33031092,
+      "cacheCreate": 0,
+      "cost": 22.36108444999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6087,
+      "tokensOut": 42779,
+      "cacheRead": 19823171,
+      "cacheCreate": 0,
+      "cost": 12.570505450000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 310209,
+      "tokensOut": 658425,
+      "cacheRead": 278874104,
+      "cacheCreate": 0,
+      "cost": 173.86666259999953,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 7,
+      "tokensOut": 990,
+      "cacheRead": 70128,
+      "cacheCreate": 0,
+      "cost": 0.18731775,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 11,
+      "tokensOut": 776,
+      "cacheRead": 170693,
+      "cacheCreate": 0,
+      "cost": 0.29890775,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 26,
+      "tokensOut": 2267,
+      "cacheRead": 444702,
+      "cacheCreate": 0,
+      "cost": 0.5601309999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 10,
+      "tokensOut": 1322,
+      "cacheRead": 145721,
+      "cacheCreate": 0,
+      "cost": 0.403273,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-agents-dashboard-T-P2-4",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 304,
+      "cacheRead": 0,
+      "cacheCreate": 0,
+      "cost": 0.08315775,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 44449,
+      "tokensOut": 132918,
+      "cacheRead": 68196905,
+      "cacheCreate": 0,
+      "cost": 39.92179515000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 85061,
+      "tokensOut": 283274,
+      "cacheRead": 112471177,
+      "cacheCreate": 0,
+      "cost": 71.28973239999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 163032,
+      "tokensOut": 275951,
+      "cacheRead": 140440363,
+      "cacheCreate": 0,
+      "cost": 76.26892369999987,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 39166,
+      "tokensOut": 342035,
+      "cacheRead": 148496285,
+      "cacheCreate": 0,
+      "cost": 89.57804585000017,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 52105,
+      "tokensOut": 330038,
+      "cacheRead": 177009136,
+      "cacheCreate": 0,
+      "cost": 98.36997909999981,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 140665,
+      "tokensOut": 910248,
+      "cacheRead": 597152862,
+      "cacheCreate": 0,
+      "cost": 274.14549120000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 27037,
+      "tokensOut": 347674,
+      "cacheRead": 204574979,
+      "cacheCreate": 0,
+      "cost": 94.76259080000013,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-private-tmp-strawberry-orianna-substance-rescope",
+      "cwd": null,
+      "tokensIn": 87,
+      "tokensOut": 12406,
+      "cacheRead": 1203825,
+      "cacheCreate": 0,
+      "cost": 1.77757875,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 28878,
+      "tokensOut": 324286,
+      "cacheRead": 171940569,
+      "cacheCreate": 0,
+      "cost": 85.0028167499999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 33475,
+      "tokensOut": 266074,
+      "cacheRead": 114890577,
+      "cacheCreate": 0,
+      "cost": 55.470489399999956,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2436,
+      "tokensOut": 74139,
+      "cacheRead": 15962401,
+      "cacheCreate": 0,
+      "cost": 11.016702950000013,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 85413,
+      "tokensOut": 362053,
+      "cacheRead": 185444284,
+      "cacheCreate": 0,
+      "cost": 107.59274255000012,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Work-mmp-workspace",
+      "cwd": null,
+      "tokensIn": 58922,
+      "tokensOut": 1878795,
+      "cacheRead": 1634001531,
+      "cacheCreate": 0,
+      "cost": 1092.0525395,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 9989,
+      "tokensOut": 23025,
+      "cacheRead": 8901916,
+      "cacheCreate": 0,
+      "cost": 6.016071749999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6312,
+      "tokensOut": 33662,
+      "cacheRead": 7437269,
+      "cacheCreate": 0,
+      "cost": 7.231737899999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3159,
+      "tokensOut": 41777,
+      "cacheRead": 16824765,
+      "cacheCreate": 0,
+      "cost": 12.8322744,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 26,
+      "tokensOut": 336,
+      "cacheRead": 159096,
+      "cacheCreate": 0,
+      "cost": 0.41438430000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 13763,
+      "tokensOut": 10590,
+      "cacheRead": 2552473,
+      "cacheCreate": 0,
+      "cost": 1.8708901,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25,
+      "tokensOut": 3182,
+      "cacheRead": 648248,
+      "cacheCreate": 0,
+      "cost": 0.35050814999999996,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 13774,
+      "tokensOut": 42927,
+      "cacheRead": 14777880,
+      "cacheCreate": 0,
+      "cost": 12.076608450000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3015,
+      "tokensOut": 555,
+      "cacheRead": 1772987,
+      "cacheCreate": 0,
+      "cost": 0.2903362,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry",
+      "cwd": null,
+      "tokensIn": 52814,
+      "tokensOut": 2284618,
+      "cacheRead": 1286769960,
+      "cacheCreate": 0,
+      "cost": 859.9171039499971,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6572,
+      "tokensOut": 50039,
+      "cacheRead": 14574080,
+      "cacheCreate": 0,
+      "cost": 7.623143299999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 30,
+      "tokensOut": 1864,
+      "cacheRead": 369747,
+      "cacheCreate": 0,
+      "cost": 0.2976816,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12723,
+      "tokensOut": 205032,
+      "cacheRead": 64533314,
+      "cacheCreate": 0,
+      "cost": 35.589313249999975,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 760,
+      "tokensOut": 128799,
+      "cacheRead": 34052990,
+      "cacheCreate": 0,
+      "cost": 16.896938250000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 4435,
+      "tokensOut": 55476,
+      "cacheRead": 26007207,
+      "cacheCreate": 0,
+      "cost": 10.990543350000014,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 4320,
+      "tokensOut": 36623,
+      "cacheRead": 9650560,
+      "cacheCreate": 0,
+      "cost": 5.297625249999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2578,
+      "tokensOut": 69905,
+      "cacheRead": 27655046,
+      "cacheCreate": 0,
+      "cost": 14.828256650000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 130,
+      "tokensOut": 4389,
+      "cacheRead": 1721404,
+      "cacheCreate": 0,
+      "cost": 1.2544948000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2800,
+      "tokensOut": 75086,
+      "cacheRead": 32674449,
+      "cacheCreate": 0,
+      "cost": 18.671650550000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 589,
+      "tokensOut": 50086,
+      "cacheRead": 11215149,
+      "cacheCreate": 0,
+      "cost": 8.642109399999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3563,
+      "tokensOut": 105422,
+      "cacheRead": 34784748,
+      "cacheCreate": 0,
+      "cost": 22.501961000000023,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 123,
+      "tokensOut": 1832,
+      "cacheRead": 432374,
+      "cacheCreate": 0,
+      "cost": 0.2704212,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 635,
+      "tokensOut": 45249,
+      "cacheRead": 18501562,
+      "cacheCreate": 0,
+      "cost": 10.759618650000018,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2104,
+      "tokensOut": 68739,
+      "cacheRead": 22241151,
+      "cacheCreate": 0,
+      "cost": 13.119448449999988,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2007,
+      "tokensOut": 87480,
+      "cacheRead": 32474237,
+      "cacheCreate": 0,
+      "cost": 19.13802839999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 10362,
+      "tokensOut": 85913,
+      "cacheRead": 19182381,
+      "cacheCreate": 0,
+      "cost": 14.047278500000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 56284,
+      "tokensOut": 981429,
+      "cacheRead": 352943554,
+      "cacheCreate": 0,
+      "cost": 206.63151045000023,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1681,
+      "tokensOut": 255414,
+      "cacheRead": 106765196,
+      "cacheCreate": 0,
+      "cost": 81.80268479999991,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 27278,
+      "tokensOut": 93449,
+      "cacheRead": 37589100,
+      "cacheCreate": 0,
+      "cost": 21.809754650000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14302,
+      "tokensOut": 50814,
+      "cacheRead": 20541747,
+      "cacheCreate": 0,
+      "cost": 11.186263299999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Work-mmp",
+      "cwd": null,
+      "tokensIn": 4502,
+      "tokensOut": 17396,
+      "cacheRead": 4868400,
+      "cacheCreate": 0,
+      "cost": 6.546910000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2176,
+      "tokensOut": 206313,
+      "cacheRead": 51546765,
+      "cacheCreate": 0,
+      "cost": 29.96557520000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 132,
+      "tokensOut": 25371,
+      "cacheRead": 5277595,
+      "cacheCreate": 0,
+      "cost": 4.4100782,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12808,
+      "tokensOut": 141773,
+      "cacheRead": 28451922,
+      "cacheCreate": 0,
+      "cost": 23.06799509999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6146,
+      "tokensOut": 578046,
+      "cacheRead": 182937319,
+      "cacheCreate": 0,
+      "cost": 115.20248669999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8,
+      "tokensOut": 105,
+      "cacheRead": 45294,
+      "cacheCreate": 0,
+      "cost": 0.229137,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3048,
+      "tokensOut": 264307,
+      "cacheRead": 72559765,
+      "cacheCreate": 0,
+      "cost": 45.69574085000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 9163,
+      "tokensOut": 78008,
+      "cacheRead": 19728654,
+      "cacheCreate": 0,
+      "cost": 15.452056649999994,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 9348,
+      "tokensOut": 188112,
+      "cacheRead": 42228170,
+      "cacheCreate": 0,
+      "cost": 32.74288364999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2571,
+      "tokensOut": 218121,
+      "cacheRead": 63931540,
+      "cacheCreate": 0,
+      "cost": 30.248484499999993,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 17463,
+      "tokensOut": 54220,
+      "cacheRead": 45793348,
+      "cacheCreate": 0,
+      "cost": 32.92321984999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 13899,
+      "tokensOut": 140098,
+      "cacheRead": 76615596,
+      "cacheCreate": 0,
+      "cost": 58.18547120000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 22136,
+      "tokensOut": 155173,
+      "cacheRead": 116124272,
+      "cacheCreate": 0,
+      "cost": 70.05941719999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6387,
+      "tokensOut": 90282,
+      "cacheRead": 48488283,
+      "cacheCreate": 0,
+      "cost": 34.357039400000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6698,
+      "tokensOut": 88432,
+      "cacheRead": 66063902,
+      "cacheCreate": 0,
+      "cost": 42.770712350000046,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8130,
+      "tokensOut": 71841,
+      "cacheRead": 57318409,
+      "cacheCreate": 0,
+      "cost": 39.35514654999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 17,
+      "tokensOut": 730,
+      "cacheRead": 140692,
+      "cacheCreate": 0,
+      "cost": 0.1482336,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 24204,
+      "tokensOut": 292147,
+      "cacheRead": 159436021,
+      "cacheCreate": 0,
+      "cost": 95.30852615000015,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8603,
+      "tokensOut": 30561,
+      "cacheRead": 12287249,
+      "cacheCreate": 0,
+      "cost": 6.882093799999996,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25818,
+      "tokensOut": 193250,
+      "cacheRead": 58639035,
+      "cacheCreate": 0,
+      "cost": 30.41620035,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal",
+      "cwd": null,
+      "tokensIn": 14,
+      "tokensOut": 2003,
+      "cacheRead": 236558,
+      "cacheCreate": 0,
+      "cost": 0.47132399999999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 5485,
+      "tokensOut": 6162,
+      "cacheRead": 155310,
+      "cacheCreate": 0,
+      "cost": 0.59421125,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 21767,
+      "tokensOut": 138067,
+      "cacheRead": 43968127,
+      "cacheCreate": 0,
+      "cost": 30.54231399999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Work-mmp-workspace-mcps-slack",
+      "cwd": null,
+      "tokensIn": 50,
+      "tokensOut": 9275,
+      "cacheRead": 428509,
+      "cacheCreate": 0,
+      "cost": 1.4963170000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Work-mmp-workspace-mcps-wallet-studio",
+      "cwd": null,
+      "tokensIn": 9,
+      "tokensOut": 404,
+      "cacheRead": 111028,
+      "cacheCreate": 0,
+      "cost": 0.24264025,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 4683,
+      "tokensOut": 67848,
+      "cacheRead": 33502293,
+      "cacheCreate": 0,
+      "cost": 19.926402250000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 140,
+      "tokensOut": 6557,
+      "cacheRead": 3764073,
+      "cacheCreate": 0,
+      "cost": 1.8336331499999994,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 34663,
+      "tokensOut": 223483,
+      "cacheRead": 172627346,
+      "cacheCreate": 0,
+      "cost": 108.46956354999976,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2019,
+      "tokensOut": 10968,
+      "cacheRead": 3220242,
+      "cacheCreate": 0,
+      "cost": 3.905926549999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2226,
+      "tokensOut": 3041,
+      "cacheRead": 1365091,
+      "cacheCreate": 0,
+      "cost": 0.84332555,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 7309,
+      "tokensOut": 36264,
+      "cacheRead": 7630348,
+      "cacheCreate": 0,
+      "cost": 4.2362269999999995,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 86,
+      "tokensOut": 8817,
+      "cacheRead": 3714382,
+      "cacheCreate": 0,
+      "cost": 1.8471538500000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 293,
+      "tokensOut": 57285,
+      "cacheRead": 8844369,
+      "cacheCreate": 0,
+      "cost": 5.930799799999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3012,
+      "tokensOut": 36360,
+      "cacheRead": 13438941,
+      "cacheCreate": 0,
+      "cost": 9.124047650000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 489,
+      "tokensOut": 12844,
+      "cacheRead": 5059662,
+      "cacheCreate": 0,
+      "cost": 4.5130925500000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12033,
+      "tokensOut": 53884,
+      "cacheRead": 10225965,
+      "cacheCreate": 0,
+      "cost": 9.7711454,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6955,
+      "tokensOut": 64060,
+      "cacheRead": 36454228,
+      "cacheCreate": 0,
+      "cost": 30.347551849999974,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2031,
+      "tokensOut": 15321,
+      "cacheRead": 5310157,
+      "cacheCreate": 0,
+      "cost": 5.3298045000000025,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25580,
+      "tokensOut": 183231,
+      "cacheRead": 99424955,
+      "cacheCreate": 0,
+      "cost": 79.5569346499999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2323,
+      "tokensOut": 160521,
+      "cacheRead": 59297470,
+      "cacheCreate": 0,
+      "cost": 32.87192600000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 813,
+      "tokensOut": 13667,
+      "cacheRead": 2636630,
+      "cacheCreate": 0,
+      "cost": 3.18304935,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 15510,
+      "tokensOut": 119354,
+      "cacheRead": 33151789,
+      "cacheCreate": 0,
+      "cost": 31.63469165,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 823,
+      "tokensOut": 5407,
+      "cacheRead": 1671439,
+      "cacheCreate": 0,
+      "cost": 0.5157449999999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2322,
+      "tokensOut": 112739,
+      "cacheRead": 26650542,
+      "cacheCreate": 0,
+      "cost": 31.508704799999993,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 41,
+      "tokensOut": 4432,
+      "cacheRead": 1335126,
+      "cacheCreate": 0,
+      "cost": 1.19516175,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3098,
+      "tokensOut": 66981,
+      "cacheRead": 17231902,
+      "cacheCreate": 0,
+      "cost": 17.879694199999992,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 1036,
+      "cacheRead": 32949,
+      "cacheCreate": 0,
+      "cost": 0.05495715,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 226,
+      "tokensOut": 3291,
+      "cacheRead": 873442,
+      "cacheCreate": 0,
+      "cost": 0.25174145000000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 20,
+      "tokensOut": 141,
+      "cacheRead": 97815,
+      "cacheCreate": 0,
+      "cost": 0.052992750000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14,
+      "tokensOut": 647,
+      "cacheRead": 42358,
+      "cacheCreate": 0,
+      "cost": 0.05869480000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 19,
+      "tokensOut": 695,
+      "cacheRead": 318564,
+      "cacheCreate": 0,
+      "cost": 0.1400054,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 268,
+      "tokensOut": 3265,
+      "cacheRead": 611207,
+      "cacheCreate": 0,
+      "cost": 0.20547995000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 30,
+      "tokensOut": 85,
+      "cacheRead": 374059,
+      "cacheCreate": 0,
+      "cost": 0.13712965,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 66,
+      "tokensOut": 1203,
+      "cacheRead": 1232977,
+      "cacheCreate": 0,
+      "cost": 0.2424512,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 71,
+      "tokensOut": 3500,
+      "cacheRead": 2479332,
+      "cacheCreate": 0,
+      "cost": 0.50620545,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 27,
+      "tokensOut": 1015,
+      "cacheRead": 1381762,
+      "cacheCreate": 0,
+      "cost": 0.2754857,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 20,
+      "tokensOut": 341,
+      "cacheRead": 303419,
+      "cacheCreate": 0,
+      "cost": 0.12960815,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 22,
+      "tokensOut": 737,
+      "cacheRead": 2168238,
+      "cacheCreate": 0,
+      "cost": 0.37375205000000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 299,
+      "tokensOut": 8153,
+      "cacheRead": 2479512,
+      "cacheCreate": 0,
+      "cost": 0.8750977000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 9,
+      "tokensOut": 440,
+      "cacheRead": 25830,
+      "cacheCreate": 0,
+      "cost": 0.12396,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 9,
+      "tokensOut": 286,
+      "cacheRead": 33167,
+      "cacheCreate": 0,
+      "cost": 0.073391,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 7,
+      "tokensOut": 181,
+      "cacheRead": 25328,
+      "cacheCreate": 0,
+      "cost": 0.06751065,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 5,
+      "tokensOut": 147,
+      "cacheRead": 17898,
+      "cacheCreate": 0,
+      "cost": 0.036745650000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1646,
+      "tokensOut": 3814,
+      "cacheRead": 2509882,
+      "cacheCreate": 0,
+      "cost": 0.5939492,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8450,
+      "tokensOut": 9176,
+      "cacheRead": 1349416,
+      "cacheCreate": 0,
+      "cost": 0.64868775,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8449,
+      "tokensOut": 12573,
+      "cacheRead": 9807147,
+      "cacheCreate": 0,
+      "cost": 1.5327249499999993,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 973,
+      "tokensOut": 4838,
+      "cacheRead": 314321,
+      "cacheCreate": 0,
+      "cost": 0.43827404999999997,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 271,
+      "tokensOut": 2323,
+      "cacheRead": 2281042,
+      "cacheCreate": 0,
+      "cost": 0.4933077,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 113,
+      "tokensOut": 1458,
+      "cacheRead": 779182,
+      "cacheCreate": 0,
+      "cost": 0.22260995000000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 38,
+      "tokensOut": 200,
+      "cacheRead": 589658,
+      "cacheCreate": 0,
+      "cost": 0.1766838,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 63,
+      "tokensOut": 490,
+      "cacheRead": 488867,
+      "cacheCreate": 0,
+      "cost": 0.15821095000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 580,
+      "tokensOut": 2128,
+      "cacheRead": 1252769,
+      "cacheCreate": 0,
+      "cost": 0.27587690000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 8,
+      "tokensOut": 2,
+      "cacheRead": 13660,
+      "cacheCreate": 0,
+      "cost": 0.036137749999999996,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 49,
+      "tokensOut": 1072,
+      "cacheRead": 265500,
+      "cacheCreate": 0,
+      "cost": 0.11073900000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 28,
+      "tokensOut": 5260,
+      "cacheRead": 1717730,
+      "cacheCreate": 0,
+      "cost": 0.34926225000000005,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 179,
+      "tokensOut": 1284,
+      "cacheRead": 3462670,
+      "cacheCreate": 0,
+      "cost": 0.5870079499999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1953,
+      "tokensOut": 2347,
+      "cacheRead": 1962349,
+      "cacheCreate": 0,
+      "cost": 0.4042204,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25,
+      "tokensOut": 1510,
+      "cacheRead": 204824,
+      "cacheCreate": 0,
+      "cost": 0.10911240000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1289,
+      "tokensOut": 2957,
+      "cacheRead": 1895881,
+      "cacheCreate": 0,
+      "cost": 0.36026210000000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 61,
+      "tokensOut": 616,
+      "cacheRead": 1331684,
+      "cacheCreate": 0,
+      "cost": 0.2376194,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2142,
+      "tokensOut": 6177,
+      "cacheRead": 2831818,
+      "cacheCreate": 0,
+      "cost": 0.5027487999999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 18,
+      "tokensOut": 1276,
+      "cacheRead": 476046,
+      "cacheCreate": 0,
+      "cost": 0.1838601,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 468,
+      "tokensOut": 4147,
+      "cacheRead": 1383920,
+      "cacheCreate": 0,
+      "cost": 0.31617875000000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3,
+      "tokensOut": 3,
+      "cacheRead": 0,
+      "cacheCreate": 0,
+      "cost": 0.10879425000000001,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 6,
+      "tokensOut": 267,
+      "cacheRead": 42051,
+      "cacheCreate": 0,
+      "cost": 0.21056580000000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14695,
+      "tokensOut": 8827,
+      "cacheRead": 358786,
+      "cacheCreate": 0,
+      "cost": 0.49317685,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 1781,
+      "tokensOut": 2119,
+      "cacheRead": 48579,
+      "cacheCreate": 0,
+      "cost": 0.1349967,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 58,
+      "tokensOut": 2992,
+      "cacheRead": 366083,
+      "cacheCreate": 0,
+      "cost": 0.48103774999999993,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 111,
+      "tokensOut": 8463,
+      "cacheRead": 4994732,
+      "cacheCreate": 0,
+      "cost": 5.456608500000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 868,
+      "tokensOut": 2259,
+      "cacheRead": 1497971,
+      "cacheCreate": 0,
+      "cost": 0.32402885,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14,
+      "tokensOut": 3005,
+      "cacheRead": 42347,
+      "cacheCreate": 0,
+      "cost": 0.07213745,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "-Users-duongntd99-Documents-Personal-agents",
+      "cwd": null,
+      "tokensIn": 17,
+      "tokensOut": 605,
+      "cacheRead": 244972,
+      "cacheCreate": 0,
+      "cost": 0.277771,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 85,
+      "tokensOut": 1424,
+      "cacheRead": 351667,
+      "cacheCreate": 0,
+      "cost": 0.17088045000000002,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 24,
+      "tokensOut": 601,
+      "cacheRead": 1314956,
+      "cacheCreate": 0,
+      "cost": 0.24507959999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 16901,
+      "tokensOut": 12917,
+      "cacheRead": 9116350,
+      "cacheCreate": 0,
+      "cost": 1.3726622500000003,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 2240,
+      "tokensOut": 3570,
+      "cacheRead": 3444051,
+      "cacheCreate": 0,
+      "cost": 0.5666675999999999,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 25,
+      "tokensOut": 1171,
+      "cacheRead": 2504658,
+      "cacheCreate": 0,
+      "cost": 0.3879833,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12207,
+      "tokensOut": 6435,
+      "cacheRead": 5517951,
+      "cacheCreate": 0,
+      "cost": 0.8621045999999998,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 41,
+      "tokensOut": 6236,
+      "cacheRead": 468411,
+      "cacheCreate": 0,
+      "cost": 0.43967595000000004,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 47,
+      "tokensOut": 64,
+      "cacheRead": 1775626,
+      "cacheCreate": 0,
+      "cost": 0.3274746,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12685,
+      "tokensOut": 8149,
+      "cacheRead": 1353311,
+      "cacheCreate": 0,
+      "cost": 0.5178986,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 16,
+      "tokensOut": 894,
+      "cacheRead": 26461,
+      "cacheCreate": 0,
+      "cost": 0.050083350000000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 3946,
+      "tokensOut": 1617,
+      "cacheRead": 136519,
+      "cacheCreate": 0,
+      "cost": 0.13879165,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 14758,
+      "tokensOut": 669,
+      "cacheRead": 10202517,
+      "cacheCreate": 0,
+      "cost": 1.8042433500000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 39,
+      "tokensOut": 377,
+      "cacheRead": 7250779,
+      "cacheCreate": 0,
+      "cost": 0.9333319,
+      "model": null,
+      "startedAt": null
+    }
+  ],
+  "plans": [
+    {
+      "slug": "portfolio-tracker-v0-xlsx-bootstrap-import",
+      "state": "draft",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/draft/portfolio-tracker/2026-05-02-portfolio-tracker-v0-xlsx-bootstrap-import.md"
+    },
+    {
+      "slug": "portfolio-tracker-v1-xlsx-snapshot-export",
+      "state": "draft",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/draft/portfolio-tracker/2026-05-02-portfolio-tracker-v1-xlsx-snapshot-export.md"
+    },
+    {
+      "slug": "parallel-subagent-isolation-followups",
+      "state": "draft",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/draft/raspberry/2026-04-28-parallel-subagent-isolation-followups.md"
+    },
+    {
+      "slug": "portfolio-tracker-v0-tasks",
+      "state": "active",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/active/portfolio-tracker/2026-04-19-portfolio-tracker-v0-tasks.md"
+    },
+    {
+      "slug": "portfolio-tracker-v0-test-plan",
+      "state": "active",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/active/portfolio-tracker/2026-04-19-portfolio-tracker-v0-test-plan.md"
+    },
+    {
+      "slug": "raspberry-usage-dashboard",
+      "state": "active",
+      "concern": "personal",
+      "project": "raspberry-usage-dashboard",
+      "path": "plans/personal/active/raspberry-usage-dashboard/2026-05-02-raspberry-usage-dashboard.md"
+    },
+    {
+      "slug": "parallel-subagent-isolation",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-28-parallel-subagent-isolation.md"
+    },
+    {
+      "slug": "raspberry-bootstrap",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-28-raspberry-bootstrap.md"
+    },
+    {
+      "slug": "product-repo-hygiene",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-29-product-repo-hygiene.md"
+    },
+    {
+      "slug": "projects-hub",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-29-projects-hub.md"
+    },
+    {
+      "slug": "plans-and-specs-by-project-grouping",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-05-02-plans-and-specs-by-project-grouping.md"
+    },
+    {
+      "slug": "demo-studio-v3-post-pr134-suite-stabilization",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/draft/demo-studio-go-live/2026-04-28-demo-studio-v3-post-pr134-suite-stabilization.md"
+    },
+    {
+      "slug": "demo-studio-v3-main-py-decomposition",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-04-29-demo-studio-v3-main-py-decomposition.md"
+    },
+    {
+      "slug": "demo-studio-v3-monitoring-dashboard",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-monitoring-dashboard.md"
+    },
+    {
+      "slug": "demo-studio-v3-release-and-feedback-workflow",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-release-and-feedback-workflow.md"
+    },
+    {
+      "slug": "demo-studio-v3-s2-config-preverification",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-s2-config-preverification.md"
+    },
+    {
+      "slug": "demo-studio-v3-s4-verification-pass-rate",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-s4-verification-pass-rate.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-sdk-default-vanilla-removal",
+      "state": "active",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/active/demo-studio-go-live/2026-04-30-demo-studio-v3-sdk-default-vanilla-removal.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-sse-state-event-delivery",
+      "state": "active",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/active/demo-studio-go-live/2026-04-30-demo-studio-v3-sse-state-event-delivery.md"
+    },
+    {
+      "slug": "demo-studio-v3-local-dev-auth",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-28-demo-studio-v3-local-dev-auth.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-agent-sdk-skills",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-agent-sdk-skills.md"
+    },
+    {
+      "slug": "demo-studio-v3-agent-sdk-warm-runtime",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-agent-sdk-warm-runtime.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-build-progress-and-verify",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-build-progress-and-verify.md"
+    },
+    {
+      "slug": "demo-studio-v3-chat-persistence",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-chat-persistence.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-s4-response-shape",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-s4-response-shape.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-studio-ui-tweaks",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-studio-ui-tweaks.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-output-urls-on-failed-verify",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-30-demo-studio-v3-output-urls-on-failed-verify.md"
+    },
+    {
+      "slug": "secretary-v1",
+      "state": "done",
+      "concern": "work",
+      "project": "secretary",
+      "path": "plans/work/done/secretary/2026-04-28-secretary-v1.md"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "portfolio-tracker",
+      "name": "Portfolio Tracker",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": [
+        "portfolio",
+        "portfolio-tracker",
+        "portfolio tracker",
+        "portfolio-v0",
+        "portfolio v0"
+      ]
+    },
+    {
+      "slug": "raspberry",
+      "name": "Raspberry — Agentic Workflow",
+      "concern": "personal",
+      "product": "raspberry",
+      "aliases": [
+        "raspberry-self",
+        "meta",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "raspberry-usage-dashboard",
+      "name": "Raspberry Usage Dashboard",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": [
+        "raspberry-usage",
+        "raspberry usage",
+        "usage-dashboard",
+        "claude usage dashboard",
+        "phase dashboard",
+        "sbu",
+        "raspberry dashboard"
+      ]
+    },
+    {
+      "slug": "demo-studio-go-live",
+      "name": "Demo Studio v3 — go-live end-to-end",
+      "concern": "work",
+      "product": "company-os",
+      "aliases": [
+        "demo-studio",
+        "demo-studio-v3",
+        "ds-v3",
+        "demo studio go-live",
+        "go-live",
+        "demo go-live"
+      ]
+    },
+    {
+      "slug": "demo-studio-v1-1-reliability",
+      "name": "Demo Studio v1.1 — optimization & reliability",
+      "concern": "work",
+      "product": "company-os",
+      "aliases": [
+        "demo-studio-v1.1",
+        "demo-studio-reliability",
+        "ds-v1-1",
+        "ds-reliability"
+      ]
+    }
+  ],
+  "unphasedCount": 2326
+}
