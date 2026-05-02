@@ -17,20 +17,18 @@ export async function generatePlans({ raspberryDir, outPath }) {
     for (const state of STATES) {
       const stateDir = join(concernDir, state);
       if (!isDir(stateDir)) continue;
-      for (const fname of safeReaddir(stateDir)) {
-        if (!fname.endsWith('.md')) continue;
-        const filePath = join(stateDir, fname);
-        const text = readFileSync(filePath, 'utf8');
-        const fm = parseFrontmatter(text);
-        if (!fm) continue;
-        const slug = fm.slug ?? basename(fname, '.md');
-        plans.push({
-          slug,
-          state,
-          concern: fm.concern ?? concern,
-          project: fm.project ?? null,
-          path: filePath.replace(raspberryDir + '/', ''),
-        });
+      for (const entry of safeReaddir(stateDir)) {
+        const entryPath = join(stateDir, entry);
+        if (entry.endsWith('.md') && isFile(entryPath)) {
+          collectPlan(plans, entryPath, { raspberryDir, concern, state });
+        } else if (isDir(entryPath)) {
+          for (const sub of safeReaddir(entryPath)) {
+            if (!sub.endsWith('.md')) continue;
+            const subPath = join(entryPath, sub);
+            if (!isFile(subPath)) continue;
+            collectPlan(plans, subPath, { raspberryDir, concern, state });
+          }
+        }
       }
     }
   }
@@ -39,8 +37,23 @@ export async function generatePlans({ raspberryDir, outPath }) {
   return plans;
 }
 
+function collectPlan(plans, filePath, { raspberryDir, concern, state }) {
+  const text = readFileSync(filePath, 'utf8');
+  const fm = parseFrontmatter(text);
+  if (!fm) return;
+  const slug = fm.slug ?? basename(filePath, '.md');
+  plans.push({
+    slug,
+    state,
+    concern: fm.concern ?? concern,
+    project: fm.project ?? null,
+    path: filePath.replace(raspberryDir + '/', ''),
+  });
+}
+
 function safeReaddir(p) { try { return readdirSync(p); } catch { return []; } }
 function isDir(p)       { try { return statSync(p).isDirectory(); } catch { return false; } }
+function isFile(p)      { try { return statSync(p).isFile();      } catch { return false; } }
 
 const isCli = import.meta.url === `file://${process.argv[1]}`;
 if (isCli) {

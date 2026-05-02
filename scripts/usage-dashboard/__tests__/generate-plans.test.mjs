@@ -15,12 +15,19 @@ test('generate-plans: walks all four state dirs and records state', async () => 
   try {
     await generatePlans({ raspberryDir: fixtureRoot, outPath: out });
     const data = JSON.parse(readFileSync(out, 'utf8'));
-    assert.equal(data.plans.length, 2);
+    assert.equal(data.plans.length, 3);
     const draft = data.plans.find(p => p.state === 'draft');
-    const active = data.plans.find(p => p.state === 'active');
+    const flatActive = data.plans.find(p => p.slug === '2026-05-01-already-active');
+    const projected = data.plans.find(p => p.slug === '2026-04-30-projected');
     assert.equal(draft.slug, '2026-05-02-example');
     assert.equal(draft.project, 'example');
-    assert.equal(active.slug, '2026-05-01-already-active');
+    assert.equal(flatActive.state, 'active');
+    assert.equal(projected.state, 'active');
+    assert.equal(projected.project, 'example');
+    assert.ok(
+      data.plans.some(p => p.path.includes('example/')),
+      'expected at least one plan path to include the example/ project subdir',
+    );
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

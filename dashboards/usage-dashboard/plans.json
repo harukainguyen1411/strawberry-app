@@ -1,4 +1,201 @@
 {
-  "plans": [],
-  "generatedAt": "2026-05-02T09:10:24.030Z"
+  "plans": [
+    {
+      "slug": "portfolio-tracker-v0-xlsx-bootstrap-import",
+      "state": "draft",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/draft/portfolio-tracker/2026-05-02-portfolio-tracker-v0-xlsx-bootstrap-import.md"
+    },
+    {
+      "slug": "portfolio-tracker-v1-xlsx-snapshot-export",
+      "state": "draft",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/draft/portfolio-tracker/2026-05-02-portfolio-tracker-v1-xlsx-snapshot-export.md"
+    },
+    {
+      "slug": "parallel-subagent-isolation-followups",
+      "state": "draft",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/draft/raspberry/2026-04-28-parallel-subagent-isolation-followups.md"
+    },
+    {
+      "slug": "portfolio-tracker-v0-tasks",
+      "state": "active",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/active/portfolio-tracker/2026-04-19-portfolio-tracker-v0-tasks.md"
+    },
+    {
+      "slug": "portfolio-tracker-v0-test-plan",
+      "state": "active",
+      "concern": "personal",
+      "project": "portfolio-tracker",
+      "path": "plans/personal/active/portfolio-tracker/2026-04-19-portfolio-tracker-v0-test-plan.md"
+    },
+    {
+      "slug": "raspberry-usage-dashboard",
+      "state": "active",
+      "concern": "personal",
+      "project": "raspberry-usage-dashboard",
+      "path": "plans/personal/active/raspberry-usage-dashboard/2026-05-02-raspberry-usage-dashboard.md"
+    },
+    {
+      "slug": "parallel-subagent-isolation",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-28-parallel-subagent-isolation.md"
+    },
+    {
+      "slug": "raspberry-bootstrap",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-28-raspberry-bootstrap.md"
+    },
+    {
+      "slug": "product-repo-hygiene",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-29-product-repo-hygiene.md"
+    },
+    {
+      "slug": "projects-hub",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-04-29-projects-hub.md"
+    },
+    {
+      "slug": "plans-and-specs-by-project-grouping",
+      "state": "done",
+      "concern": "personal",
+      "project": "raspberry",
+      "path": "plans/personal/done/raspberry/2026-05-02-plans-and-specs-by-project-grouping.md"
+    },
+    {
+      "slug": "demo-studio-v3-post-pr134-suite-stabilization",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/draft/demo-studio-go-live/2026-04-28-demo-studio-v3-post-pr134-suite-stabilization.md"
+    },
+    {
+      "slug": "demo-studio-v3-main-py-decomposition",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-04-29-demo-studio-v3-main-py-decomposition.md"
+    },
+    {
+      "slug": "demo-studio-v3-monitoring-dashboard",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-monitoring-dashboard.md"
+    },
+    {
+      "slug": "demo-studio-v3-release-and-feedback-workflow",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-release-and-feedback-workflow.md"
+    },
+    {
+      "slug": "demo-studio-v3-s2-config-preverification",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-s2-config-preverification.md"
+    },
+    {
+      "slug": "demo-studio-v3-s4-verification-pass-rate",
+      "state": "draft",
+      "concern": "work",
+      "project": "demo-studio-v1-1-reliability",
+      "path": "plans/work/draft/demo-studio-v1-1-reliability/2026-05-01-demo-studio-v3-s4-verification-pass-rate.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-sdk-default-vanilla-removal",
+      "state": "active",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/active/demo-studio-go-live/2026-04-30-demo-studio-v3-sdk-default-vanilla-removal.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-sse-state-event-delivery",
+      "state": "active",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/active/demo-studio-go-live/2026-04-30-demo-studio-v3-sse-state-event-delivery.md"
+    },
+    {
+      "slug": "demo-studio-v3-local-dev-auth",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-28-demo-studio-v3-local-dev-auth.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-agent-sdk-skills",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-agent-sdk-skills.md"
+    },
+    {
+      "slug": "demo-studio-v3-agent-sdk-warm-runtime",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-agent-sdk-warm-runtime.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-build-progress-and-verify",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-build-progress-and-verify.md"
+    },
+    {
+      "slug": "demo-studio-v3-chat-persistence",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-chat-persistence.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-s4-response-shape",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-s4-response-shape.md"
+    },
+    {
+      "slug": "2026-04-29-demo-studio-v3-studio-ui-tweaks",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-29-demo-studio-v3-studio-ui-tweaks.md"
+    },
+    {
+      "slug": "2026-04-30-demo-studio-v3-output-urls-on-failed-verify",
+      "state": "done",
+      "concern": "work",
+      "project": "demo-studio-go-live",
+      "path": "plans/work/done/demo-studio-go-live/2026-04-30-demo-studio-v3-output-urls-on-failed-verify.md"
+    },
+    {
+      "slug": "secretary-v1",
+      "state": "done",
+      "concern": "work",
+      "project": "secretary",
+      "path": "plans/work/done/secretary/2026-04-28-secretary-v1.md"
+    }
+  ],
+  "generatedAt": "2026-05-02T09:13:04.791Z"
 }
