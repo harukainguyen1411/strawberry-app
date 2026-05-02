@@ -1,10 +1,9 @@
-<template>
-  <!-- DashboardView — placeholder for V0.17 wire-up -->
-  <div class="p-4">
-    <slot />
-  </div>
-</template>
-
 <script setup lang="ts">
-// Full implementation in V0.17
+// V0.17 stub. Throws at use-time so Vite static import-analysis succeeds
+// at transform time (V0.13 lesson).
+throw new Error('V0.17 DashboardView not yet implemented')
 </script>
+
+<template>
+  <div />
+</template>
