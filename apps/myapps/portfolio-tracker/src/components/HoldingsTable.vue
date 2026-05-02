@@ -87,6 +87,7 @@ function onHeaderClick(key: SortKey): void {
           v-for="i in SKELETON_ROW_COUNT"
           :key="i"
           data-testid="holdings-skeleton-row"
+          :aria-label="i === 1 ? 'Loading' : undefined"
           class="h-12 mx-3 my-2 rounded animate-pulse"
           style="background: var(--border);"
         />
