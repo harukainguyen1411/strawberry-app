@@ -37,14 +37,14 @@ describe('V0.8 — importCsv callable wrapper', () => {
     }))
   })
 
-  it.fails('exports importCsv as an HTTPS callable (has __endpoint metadata)', async () => {
+  it('exports importCsv as an HTTPS callable (has __endpoint metadata)', async () => {
     const mod = await import('../index.js')
     const importCsv = (mod as { importCsv?: { __endpoint?: unknown } }).importCsv
     expect(typeof importCsv).toBe('function')
     expect(importCsv?.__endpoint).toBeDefined()
   })
 
-  it.fails('callable rejects unauthenticated request with HttpsError unauthenticated', async () => {
+  it('callable rejects unauthenticated request with HttpsError unauthenticated', async () => {
     const mod = await import('../index.js')
     const callable = (mod as { importCsv: { run: (req: unknown) => Promise<unknown> } }).importCsv
     await expect(
