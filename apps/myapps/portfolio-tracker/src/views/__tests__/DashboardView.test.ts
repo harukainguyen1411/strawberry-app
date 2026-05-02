@@ -30,10 +30,13 @@ const mockSummary: Ref<PortfolioSummary | null> = ref<PortfolioSummary | null>(n
 const mockBaseCurrency: Ref<CurrencyCode | null> = ref<CurrencyCode | null>('USD')
 const mockError: Ref<Error | null> = ref<Error | null>(null)
 
+// Mirror the real composable's `loading` expression: idle counts as
+// loading too (no uid yet → skeleton). Drift here would let regressions
+// in the real composable's status state machine pass silently.
 vi.mock('@/composables/usePortfolio', () => ({
   usePortfolio: (): UsePortfolioReturn => ({
     status: computed(() => mockStatus.value) as ComputedRef<PortfolioStatus>,
-    loading: computed(() => mockStatus.value === 'loading'),
+    loading: computed(() => mockStatus.value === 'loading' || mockStatus.value === 'idle'),
     holdings: computed(() => mockHoldings.value) as ComputedRef<Holding[]>,
     summary: computed(() => mockSummary.value) as ComputedRef<PortfolioSummary | null>,
     baseCurrency: computed(() => mockBaseCurrency.value) as ComputedRef<CurrencyCode | null>,
@@ -84,6 +87,14 @@ const TWELVE_SUMMARY: PortfolioSummary = {
 describe('V0.17 — DashboardView', () => {
   it('renders skeletons (aria-busy) when status="loading"', async () => {
     mockStatus.value = 'loading'
+    const router = makeRouter()
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } })
+    expect(wrapper.find('section[aria-busy="true"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="holdings-root"][aria-busy="true"]').exists()).toBe(true)
+  })
+
+  it('renders skeletons (aria-busy) when status="idle" — no uid yet', async () => {
+    mockStatus.value = 'idle'
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
     expect(wrapper.find('section[aria-busy="true"]').exists()).toBe(true)

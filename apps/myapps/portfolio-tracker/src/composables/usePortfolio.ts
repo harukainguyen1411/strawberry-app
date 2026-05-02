@@ -26,11 +26,23 @@ import { db } from '@/firebase/config'
 import { useAuth } from '@/composables/useAuth'
 import type { CurrencyCode, Cash, FxMeta, Holding, Money, Position } from '@/types/firestore'
 
+export class FxRateMissingError extends Error {
+  constructor(public readonly pair: string) {
+    super(`FX rate missing for ${pair}`)
+    this.name = 'FxRateMissingError'
+  }
+}
+
+// Throws on missing rate to match the server's portfolio-tools/money.ts
+// semantics — silent identity-fallback would let mixed-currency totals
+// render confidently wrong (e.g. EUR-base summary that's actually
+// EUR + USD numerically). The v0 FX seed (V0.5) covers USD↔EUR, so this
+// branch is reachable only via a corrupted users/{uid}/meta/fx doc.
 function convertMoney(m: Money, to: CurrencyCode, fx: FxMeta | null): Money {
   if (m.currency === to) return m
   const key = `${m.currency}->${to}`
   const rate = fx?.overrides?.[key] ?? fx?.rates?.[key]
-  if (rate == null) return m
+  if (rate == null) throw new FxRateMissingError(key)
   return { amount: m.amount * rate, currency: to }
 }
 
@@ -161,51 +173,77 @@ export function usePortfolio(): UsePortfolioReturn {
   watch(uid, (next) => subscribe(next), { immediate: true })
   onScopeDispose(teardown)
 
-  const holdings = computed<Holding[]>(() => {
+  // Wrapping the whole derivation in a single try/catch keeps `holdings` and
+  // `summary` consistent: either both convert cleanly or both fall back to
+  // the empty/null shape and the error surfaces via `error.value`. Surfacing
+  // happens via a side-effect watcher below — computeds must stay pure.
+  const derived = computed<{ holdings: Holding[]; summary: PortfolioSummary | null; fxError: FxRateMissingError | null }>(() => {
     const base = baseCurrency.value
-    if (!base) return []
-    return positions.value.map((p): Holding => {
-      const marketValueBase = convertMoney(p.marketValue, base, fx.value)
-      const costBasisBase = convertMoney(
-        { amount: p.avgCost.amount * p.quantity, currency: p.avgCost.currency },
-        base,
-        fx.value,
-      )
-      const pl: Money = {
-        amount: marketValueBase.amount - costBasisBase.amount,
-        currency: base,
-      }
-      const plPct = costBasisBase.amount > 0
-        ? (pl.amount / costBasisBase.amount) * 100
-        : 0
+    if (!base || status.value !== 'ready') {
+      return { holdings: [], summary: null, fxError: null }
+    }
+    try {
+      const list: Holding[] = positions.value.map((p): Holding => {
+        const marketValueBase = convertMoney(p.marketValue, base, fx.value)
+        const costBasisBase = convertMoney(
+          { amount: p.avgCost.amount * p.quantity, currency: p.avgCost.currency },
+          base,
+          fx.value,
+        )
+        const pl: Money = {
+          amount: marketValueBase.amount - costBasisBase.amount,
+          currency: base,
+        }
+        const plPct = costBasisBase.amount > 0
+          ? (pl.amount / costBasisBase.amount) * 100
+          : 0
+        return {
+          ticker: p.ticker,
+          broker: p.broker,
+          quantity: p.quantity,
+          avgCost: p.avgCost,
+          marketValue: marketValueBase,
+          pl,
+          plPct,
+          sector: p.sector,
+          assetClass: p.assetClass,
+        }
+      })
+      const totalValueAmount = list.reduce((acc, h) => acc + h.marketValue.amount, 0)
+      const cashTotalAmount = cash.value.reduce((acc, c) => {
+        const converted = convertMoney({ amount: c.amount, currency: c.currency }, base, fx.value)
+        return acc + converted.amount
+      }, 0)
       return {
-        ticker: p.ticker,
-        broker: p.broker,
-        quantity: p.quantity,
-        avgCost: p.avgCost,
-        marketValue: marketValueBase,
-        pl,
-        plPct,
-        sector: p.sector,
-        assetClass: p.assetClass,
+        holdings: list,
+        summary: {
+          totalValue: { amount: totalValueAmount + cashTotalAmount, currency: base },
+          dayChange: null,
+          dayChangePct: null,
+          positionsCount: list.length,
+          cashTotal: { amount: cashTotalAmount, currency: base },
+        },
+        fxError: null,
       }
-    })
+    } catch (e) {
+      if (e instanceof FxRateMissingError) {
+        return { holdings: [], summary: null, fxError: e }
+      }
+      throw e
+    }
   })
 
-  const summary = computed<PortfolioSummary | null>(() => {
-    const base = baseCurrency.value
-    if (status.value !== 'ready' || !base) return null
-    const totalValueAmount = holdings.value.reduce((acc, h) => acc + h.marketValue.amount, 0)
-    const cashTotalAmount = cash.value.reduce((acc, c) => {
-      const converted = convertMoney({ amount: c.amount, currency: c.currency }, base, fx.value)
-      return acc + converted.amount
-    }, 0)
-    return {
-      totalValue: { amount: totalValueAmount + cashTotalAmount, currency: base },
-      dayChange: null,
-      dayChangePct: null,
-      positionsCount: holdings.value.length,
-      cashTotal: { amount: cashTotalAmount, currency: base },
+  const holdings = computed(() => derived.value.holdings)
+  const summary = computed(() => derived.value.summary)
+
+  watch(() => derived.value.fxError, (fxError) => {
+    if (fxError) {
+      error.value = fxError
+      status.value = 'error'
+    } else if (status.value === 'error' && error.value instanceof FxRateMissingError) {
+      // FX rates recovered (e.g. fx doc updated with the missing pair).
+      error.value = null
+      status.value = 'ready'
     }
   })
 
