@@ -43,22 +43,15 @@ for arg in "$@"; do
   esac
 done
 
+# --- Run build ---
+printf 'sbu: running build...\n'
+bash "$BUILD_SH"
+
 # --- Resolve data.json source (with legacy fallback) ---
 if test -f "$NEW_DATA"; then
   DATA_JSON="$NEW_DATA"
 elif test -f "$OLD_DATA"; then
   printf 'WARNING: running on legacy cache; run scripts/usage-dashboard/build.sh to migrate\n' >&2
-  DATA_JSON="$OLD_DATA"
-fi
-
-# --- Run build ---
-printf 'sbu: running build...\n'
-bash "$BUILD_SH"
-
-# Re-evaluate after build
-if test -f "$NEW_DATA"; then
-  DATA_JSON="$NEW_DATA"
-elif test -f "$OLD_DATA"; then
   DATA_JSON="$OLD_DATA"
 else
   printf 'sbu: no data.json found after build; run scripts/usage-dashboard/build.sh first\n' >&2

@@ -5,26 +5,28 @@
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 BUILD_SH="$SCRIPT_DIR/build.sh"
 CACHE_DIR="$HOME/.claude/raspberry-usage-cache"
+DATA_JSON="${DASHBOARD_DIR:-$REPO_ROOT/dashboards/usage-dashboard}/data.json"
 CRON_ENTRY="*/10 * * * * USAGE_CACHE_DIR=$HOME/.claude/raspberry-usage-cache sh $BUILD_SH >>$HOME/.claude/raspberry-usage-cache/cron.log 2>&1"
 
 verify_cutover() {
   printf 'Running one build to verify pipeline...\n'
   USAGE_CACHE_DIR="$HOME/.claude/raspberry-usage-cache" sh "$BUILD_SH"
-  if ! test -f "$CACHE_DIR/data.json"; then
-    printf 'ERROR: build did not produce data.json\n' >&2; exit 1
+  if ! test -f "$DATA_JSON"; then
+    printf 'ERROR: build did not produce %s\n' "$DATA_JSON" >&2; exit 1
   fi
-  if ! grep -q '"schemaVersion": 2' "$CACHE_DIR/data.json"; then
-    printf 'ERROR: data.json schemaVersion is not 2\n' >&2; exit 1
+  if ! grep -q '"schemaVersion": 2' "$DATA_JSON"; then
+    printf 'ERROR: %s schemaVersion is not 2\n' "$DATA_JSON" >&2; exit 1
   fi
-  printf 'cutover verified — schemaVersion 2 in %s/data.json\n' "$CACHE_DIR"
+  printf 'cutover verified — schemaVersion 2 in %s\n' "$DATA_JSON"
 }
 
 verify_cutover
 
 # Capture existing crontab, stripping any prior entry for this build.sh
-EXISTING="$(crontab -l 2>/dev/null | grep -v "$BUILD_SH" || true)"
+EXISTING="$(crontab -l 2>/dev/null | grep -vF "$BUILD_SH" || true)"
 
 printf '%s\n%s\n' "$EXISTING" "$CRON_ENTRY" | crontab -
 
