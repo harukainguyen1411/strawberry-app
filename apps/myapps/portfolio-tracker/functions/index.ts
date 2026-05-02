@@ -18,14 +18,17 @@ interface ImportCsvData {
 // The orchestrator throws plain Error objects with `code` properties so it stays
 // transport-agnostic; this wrapper translates them to HttpsError so the client
 // receives proper Firebase callable error codes.
-export const importCsv = onCall<ImportCsvData, Promise<ImportResult>>(
-  async (request: CallableRequest<ImportCsvData>) => {
+export const importCsv = onCall<ImportCsvData>(
+  async (request: CallableRequest<ImportCsvData>): Promise<ImportResult> => {
     const uid = request.auth?.uid
     if (!uid) {
       throw new HttpsError('unauthenticated', 'Request must be authenticated')
     }
 
-    const { source, csv } = request.data ?? ({} as ImportCsvData)
+    if (!request.data || typeof request.data !== 'object') {
+      throw new HttpsError('invalid-argument', 'Request data is required')
+    }
+    const { source, csv } = request.data
     if (typeof csv !== 'string' || csv.length === 0) {
       throw new HttpsError('invalid-argument', '`csv` must be a non-empty string')
     }
@@ -38,6 +41,9 @@ export const importCsv = onCall<ImportCsvData, Promise<ImportResult>>(
       return await importCsvHandler({ uid, db, source, csv })
     } catch (err: unknown) {
       if (err instanceof HttpsError) throw err
+      // Defense-in-depth: forward known orchestrator codes verbatim. The
+      // 'unauthenticated' branch is unreachable today (caller is gated above)
+      // but kept so future orchestrator-side auth checks surface correctly.
       const code = (err as { code?: string }).code
       const message = err instanceof Error ? err.message : 'Unknown error'
       if (code === 'unauthenticated' || code === 'invalid-argument') {
