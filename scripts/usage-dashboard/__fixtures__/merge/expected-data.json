@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "cutoverDate": "2026-04-28",
-  "window": { "remaining": 12345, "tokensUsed": 350, "model": "claude-opus-4-7" },
+  "window": { "startTime": "2026-05-01T09:00:00.000Z", "endTime": "2026-05-01T14:00:00.000Z", "inputTokens": 100, "outputTokens": 50, "totalCost": 0.05 },
   "grid": {
     "byProject": {
       "example": {

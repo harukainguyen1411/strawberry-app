@@ -30,7 +30,7 @@ const projects  = load(args.projects);
 const plans     = load(args.plans);
 
 assertKey(sessions, 'sessions');
-assertKey(blocks,   'window');
+assertKey(blocks,   'blocks');
 assertKey(daily,    'daily');
 assertKey(phaseScan,'records');
 assertKey(projects, 'projects');
@@ -116,11 +116,20 @@ const sessionsOut = sessions.sessions.map(s => ({
 
 const unphasedCount = (gridSerialized.byProject['(unscoped)']?.byPhase?.['(unphased)']?.sessions) ?? 0;
 
+const activeBlock = blocks.blocks.find(b => b.isActive) ?? blocks.blocks[blocks.blocks.length - 1] ?? null;
+const windowOut = activeBlock ? {
+  startTime:   activeBlock.startTime,
+  endTime:     activeBlock.endTime,
+  inputTokens: activeBlock.tokenCounts?.inputTokens ?? 0,
+  outputTokens: activeBlock.tokenCounts?.outputTokens ?? 0,
+  totalCost:   activeBlock.costUSD ?? 0,
+} : null;
+
 const out = {
   schemaVersion: 2,
   generatedAt:   new Date().toISOString(),
   cutoverDate:   CUTOVER,
-  window:        blocks.window,
+  window:        windowOut,
   grid:          gridSerialized,
   perRepo:       Object.entries(perRepo).map(([repo, v]) => ({ repo, ...v })),
   sparkline,
