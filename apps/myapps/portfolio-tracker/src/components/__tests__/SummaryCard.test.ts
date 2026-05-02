@@ -62,3 +62,40 @@ describe('V0.14 — SummaryCard', () => {
     expect(dayChange.text()).toContain('+0.97%')
   })
 })
+
+describe('V0.16 — SummaryCard loading state', () => {
+  it('renders shimmer skeleton with aria-busy="true" when loading=true; no amount text', () => {
+    const wrapper = mount(SummaryCard, {
+      props: {
+        totalValue: { amount: 124567.89, currency: 'USD' },
+        dayChange: null,
+        dayChangePct: null,
+        positionsCount: 12,
+        cashTotal: { amount: 4200, currency: 'USD' },
+        loading: true,
+      },
+    })
+    const root = wrapper.find('section')
+    expect(root.attributes('aria-busy')).toBe('true')
+    const skeleton = wrapper.find('[data-testid="summary-skeleton"]')
+    expect(skeleton.exists()).toBe(true)
+    expect(skeleton.classes()).toContain('animate-pulse')
+    expect(wrapper.text()).not.toContain('$124,567.89')
+    expect(wrapper.text()).not.toContain('$4,200.00')
+  })
+
+  it('omits aria-busy and renders amounts when loading=false (default)', () => {
+    const wrapper = mount(SummaryCard, {
+      props: {
+        totalValue: { amount: 124567.89, currency: 'USD' },
+        dayChange: null,
+        dayChangePct: null,
+        positionsCount: 12,
+        cashTotal: { amount: 4200, currency: 'USD' },
+      },
+    })
+    const root = wrapper.find('section')
+    expect(root.attributes('aria-busy')).toBeUndefined()
+    expect(wrapper.text()).toContain('$124,567.89')
+  })
+})

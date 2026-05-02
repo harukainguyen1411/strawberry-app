@@ -159,3 +159,29 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
     expect(rows).toHaveLength(5)
   })
 })
+
+describe('V0.16 — HoldingsTable loading state', () => {
+  it('renders 5 skeleton rows with aria-busy="true" when loading=true', () => {
+    const wrapper = mount(HoldingsTable, {
+      props: { holdings: [], baseCurrency: 'EUR', loading: true },
+    })
+    const root = wrapper.find('[data-testid="holdings-root"]')
+    expect(root.exists()).toBe(true)
+    expect(root.attributes('aria-busy')).toBe('true')
+    const skeletons = wrapper.findAll('[data-testid="holdings-skeleton-row"]')
+    expect(skeletons).toHaveLength(5)
+    expect(skeletons[0].classes()).toContain('animate-pulse')
+  })
+
+  it('omits aria-busy and renders real rows when loading=false (default)', () => {
+    const wrapper = mount(HoldingsTable, {
+      props: { holdings: HOLDINGS, baseCurrency: 'EUR' },
+    })
+    const root = wrapper.find('[data-testid="holdings-root"]')
+    expect(root.attributes('aria-busy')).toBeUndefined()
+    const skeletons = wrapper.findAll('[data-testid="holdings-skeleton-row"]')
+    expect(skeletons).toHaveLength(0)
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows).toHaveLength(5)
+  })
+})
