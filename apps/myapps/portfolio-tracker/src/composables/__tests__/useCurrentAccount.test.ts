@@ -20,17 +20,17 @@ vi.mock('@/composables/useAuth', () => ({
   }),
 }))
 
+import { useCurrentAccount } from '@/composables/useCurrentAccount'
+
 describe('V0.13 — useCurrentAccount', () => {
-  it('exposes currentUid mirroring useAuth().uid for the signed-in user', async () => {
+  it('exposes currentUid mirroring useAuth().uid for the signed-in user', () => {
     mockUid.value = 'user-123'
-    const { useCurrentAccount } = await import('@/composables/useCurrentAccount')
     const { currentUid } = useCurrentAccount()
     expect(currentUid.value).toBe('user-123')
   })
 
-  it('reactively flips to null when useAuth().uid becomes null (sign-out)', async () => {
+  it('reactively flips to null when useAuth().uid becomes null (sign-out)', () => {
     mockUid.value = 'user-456'
-    const { useCurrentAccount } = await import('@/composables/useCurrentAccount')
     const { currentUid } = useCurrentAccount()
     expect(currentUid.value).toBe('user-456')
 
@@ -38,10 +38,8 @@ describe('V0.13 — useCurrentAccount', () => {
     expect(currentUid.value).toBeNull()
   })
 
-  it('does not expose multi-account affordances (no accounts, no switchTo)', async () => {
-    const { useCurrentAccount } = await import('@/composables/useCurrentAccount')
+  it('exposes only currentUid — no accounts, no switchTo, no multi-account surface', () => {
     const exposed = useCurrentAccount()
-    expect((exposed as unknown as Record<string, unknown>).accounts).toBeUndefined()
-    expect((exposed as unknown as Record<string, unknown>).switchTo).toBeUndefined()
+    expect(Object.keys(exposed)).toEqual(['currentUid'])
   })
 })
