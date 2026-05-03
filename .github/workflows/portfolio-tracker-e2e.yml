@@ -1,0 +1,73 @@
+name: Portfolio Tracker E2E
+
+on:
+  pull_request:
+    paths:
+      - 'apps/myapps/portfolio-tracker/**'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Portfolio Tracker E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/myapps/portfolio-tracker
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/myapps/portfolio-tracker/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools@^15.14.0
+
+      - name: Install Cloud Functions dependencies
+        run: npm ci
+        working-directory: apps/myapps/portfolio-tracker/functions
+
+      - name: Build Cloud Functions (emit JS despite type errors)
+        run: npx tsc --noEmitOnError false
+        working-directory: apps/myapps/portfolio-tracker/functions
+
+      - name: Run Portfolio Tracker E2E
+        run: npm run test:e2e
+        env:
+          CI: true
+          VITE_USE_FIREBASE_EMULATOR: 'true'
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || 'e2e-placeholder-api-key' }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || 'portfolio-tracker-e2e.firebaseapp.com' }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || 'portfolio-tracker-e2e' }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || 'portfolio-tracker-e2e.appspot.com' }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || '000000000000' }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID || '1:000000000000:web:e2e-placeholder' }}
+          VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID || 'G-E2EPLCHLDR' }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.6.1
+        with:
+          name: portfolio-tracker-playwright-report
+          path: apps/myapps/portfolio-tracker/playwright-report/
+          retention-days: 30
+
+      - name: Upload E2E screenshots and artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.6.1
+        with:
+          name: portfolio-tracker-e2e-artifacts
+          path: apps/myapps/portfolio-tracker/e2e/artifacts/
+          retention-days: 30

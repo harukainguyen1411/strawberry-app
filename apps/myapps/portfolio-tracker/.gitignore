@@ -1,0 +1,15 @@
+# Build outputs
+dist/
+functions/lib/
+
+# Playwright
+playwright-report/
+test-results/
+e2e/artifacts/
+e2e/.emulator.pid
+
+# Firebase
+.firebase/
+firebase-debug.log
+ui-debug.log
+firestore-debug.log

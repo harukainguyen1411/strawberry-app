@@ -20,10 +20,14 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-        }
+        manualChunks(id: string) {
+          if (id.includes('node_modules/vue') || id.includes('node_modules/pinia') || id.includes('node_modules/@vue')) {
+            return 'vue-vendor'
+          }
+          if (id.includes('node_modules/firebase')) {
+            return 'firebase-vendor'
+          }
+        },
       }
     }
   },
