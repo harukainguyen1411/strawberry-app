@@ -32,6 +32,8 @@
     {
       "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-app",
       "cwd": null,
+      "projectSlug": null,
+      "planSlug": null,
       "tokensIn": 100,
       "tokensOut": 50,
       "cacheRead": 200,

@@ -122,17 +122,34 @@ const sparkline = last14.map(d => ({
 
 // ── Sessions output ───────────────────────────────────────────────────────────
 
-const sessionsOut = sessions.sessions.map(s => ({
-  sessionId:   s.sessionId,
-  cwd:         s.cwd         ?? null,
-  tokensIn:    s.inputTokens         ?? 0,
-  tokensOut:   s.outputTokens        ?? 0,
-  cacheRead:   s.cacheReadTokens     ?? 0,
-  cacheCreate: s.cacheCreationTokens ?? 0,   // real field name from ccusage
-  cost:        s.totalCost           ?? 0,
-  model:       s.model               ?? null,
-  startedAt:   s.startTime           ?? null,
-}));
+// Build a sessionId → { projectSlug, planSlug } lookup from the first matching
+// phase-scan record for each session. Provides accurate attribution for drill-down.
+const sessionAttribution = {};
+for (const r of phaseScan.records) {
+  if (!sessionAttribution[r.sessionId]) {
+    sessionAttribution[r.sessionId] = {
+      projectSlug: r.projectSlug ?? null,
+      planSlug:    r.planSlug    ?? null,
+    };
+  }
+}
+
+const sessionsOut = sessions.sessions.map(s => {
+  const attr = sessionAttribution[s.sessionId] ?? { projectSlug: null, planSlug: null };
+  return {
+    sessionId:   s.sessionId,
+    cwd:         s.cwd         ?? null,
+    projectSlug: attr.projectSlug,
+    planSlug:    attr.planSlug,
+    tokensIn:    s.inputTokens         ?? 0,
+    tokensOut:   s.outputTokens        ?? 0,
+    cacheRead:   s.cacheReadTokens     ?? 0,
+    cacheCreate: s.cacheCreationTokens ?? 0,   // real field name from ccusage
+    cost:        s.totalCost           ?? 0,
+    model:       s.model               ?? null,
+    startedAt:   s.startTime           ?? null,
+  };
+});
 
 const unphasedCount = (gridSerialized.byProject['(unscoped)']?.byPhase?.['(unphased)']?.sessions) ?? 0;
 

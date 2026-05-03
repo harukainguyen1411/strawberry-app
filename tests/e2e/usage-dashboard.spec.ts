@@ -114,4 +114,62 @@ test.describe('usage-dashboard phase-grid smoke', () => {
     await expect(unphasedAfter).toHaveCount(0)
   })
 
+  test('UI-1: thead and tbody column counts stay in sync when hide-unphased toggles', async ({ page }) => {
+    await page.goto('/')
+    await waitForGrid(page)
+
+    // Helper: count columns from thead and first grid-row tbody tr
+    const getColCounts = () => page.evaluate(() => {
+      const theadCols = document.querySelectorAll('#grid-head th').length
+      const firstRow  = document.querySelector('#grid-body .grid-row')
+      const tbodyCols = firstRow ? firstRow.querySelectorAll('td').length : 0
+      return { theadCols, tbodyCols }
+    })
+
+    // Unchecked: all phases visible (8 phases + Project + Total = 10)
+    const before = await getColCounts()
+    expect(before.theadCols).toBe(before.tbodyCols)
+    expect(before.theadCols).toBe(10)
+
+    // Check hide-unphased
+    await page.locator('#hide-unphased').check()
+    await page.waitForTimeout(150)
+    await waitForGrid(page)
+
+    // Checked: (unphased) hidden (7 phases + Project + Total = 9)
+    const after = await getColCounts()
+    expect(after.theadCols).toBe(after.tbodyCols)
+    expect(after.theadCols).toBe(9)
+  })
+
+  test('I5: plan-row drill is scoped to the plan and yields fewer sessions than project-row drill', async ({ page }) => {
+    await page.goto('/')
+    await waitForGrid(page)
+
+    // Expand the first project row to reveal plan rows
+    const firstRow = page.locator('#grid-body .grid-row').first()
+    await firstRow.locator('td').first().click()
+    const planRows = page.locator('#grid-body .plan-row:not(.hidden)')
+    await expect(planRows).not.toHaveCount(0)
+
+    // Click a phase cell on the first project row (project-level drill)
+    const projectPhaseCell = firstRow.locator('td.heatmap-cell').first()
+    await projectPhaseCell.click()
+    const projectDrillCount = await page.locator('#drill-panel tbody tr').count()
+
+    // Close the drill panel
+    await page.locator('#drill-close').click()
+    await expect(page.locator('#drill-panel')).toHaveCount(0)
+
+    // Click a phase cell on a plan row (plan-level drill)
+    const firstPlanRow = planRows.first()
+    const planPhaseCell = firstPlanRow.locator('td[data-phase]').first()
+    await planPhaseCell.click()
+    const planDrillCount = await page.locator('#drill-panel tbody tr').count()
+
+    // Plan drill should be scoped: result count <= project drill count
+    // (fixture has multiple plans per project, so plan drill < project drill)
+    expect(planDrillCount).toBeLessThan(projectDrillCount)
+  })
+
 })

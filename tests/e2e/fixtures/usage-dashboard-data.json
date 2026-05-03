@@ -106,6 +106,8 @@
     {
       "sessionId": "s-001",
       "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-30-raspberry-usage-dashboard",
       "tokensIn": 42000,
       "tokensOut": 12000,
       "cacheRead": 1200,
@@ -117,6 +119,8 @@
     {
       "sessionId": "s-002",
       "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-10-portfolio-tracker",
       "tokensIn": 28000,
       "tokensOut": 8000,
       "cacheRead": 800,
@@ -128,6 +132,8 @@
     {
       "sessionId": "s-003",
       "cwd": "/Users/duongntd99/Documents/Personal/strawberry",
+      "projectSlug": "strawberry",
+      "planSlug": "2026-04-20-csv-export",
       "tokensIn": 21000,
       "tokensOut": 6000,
       "cacheRead": 500,
@@ -139,6 +145,8 @@
     {
       "sessionId": "s-004",
       "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-30-raspberry-usage-dashboard",
       "tokensIn": 15000,
       "tokensOut": 4500,
       "cacheRead": 300,
@@ -150,6 +158,8 @@
     {
       "sessionId": "s-005",
       "cwd": "/Users/duongntd99/Documents/Personal/strawberry",
+      "projectSlug": "strawberry",
+      "planSlug": "2026-03-28-dark-mode",
       "tokensIn": 9500,
       "tokensOut": 2800,
       "cacheRead": 200,

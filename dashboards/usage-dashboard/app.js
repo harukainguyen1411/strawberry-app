@@ -105,11 +105,13 @@ function renderBlockStrip(data) {
 // --- phase x project grid ---
 function renderProjectGrid(data, { metric, hideUnphased, projectFilter }) {
   const tbody = document.getElementById('grid-body');
+  const thead = document.getElementById('grid-head');
   if (!tbody) return;
   tbody.innerHTML = '';
 
   if (!data || !data.grid || !data.grid.byProject) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;opacity:.5">No grid data</td></tr>';
+    if (thead) thead.innerHTML = '';
     return;
   }
 
@@ -125,14 +127,28 @@ function renderProjectGrid(data, { metric, hideUnphased, projectFilter }) {
     projects.push(unscoped);
   }
 
-  // Compute per-column max for heatmap intensity
-  const colMax = {};
-  for (const ph of PHASES) {
-    colMax[ph] = Math.max(0, ...projects.map(p => metricOf(p.byPhase && p.byPhase[ph], metric)));
-  }
-
   // Determine which phase columns to render
   const visiblePhases = hideUnphased ? PHASES.filter(ph => ph !== '(unphased)') : PHASES;
+
+  // Render thead to match visiblePhases
+  if (thead) {
+    const thCells = [
+      '<th class="text-left px-3 py-2">Project</th>',
+      ...visiblePhases.map(ph => `<th class="text-right px-3 py-2">${ph}</th>`),
+      '<th class="text-right px-3 py-2 font-semibold">Total</th>',
+    ].join('');
+    thead.innerHTML = thCells;
+  }
+
+  // Compute per-column max for heatmap intensity (include plan rows for accurate normalisation)
+  const colMax = {};
+  for (const ph of visiblePhases) {
+    const projectVals = projects.map(p => metricOf(p.byPhase && p.byPhase[ph], metric));
+    const planVals = projects.flatMap(p =>
+      Object.values(p.byPlan || {}).map(planData => metricOf(planData.byPhase && planData.byPhase[ph], metric))
+    );
+    colMax[ph] = Math.max(0, ...projectVals, ...planVals);
+  }
 
   for (const p of projects) {
     const tr = document.createElement('tr');
@@ -166,6 +182,7 @@ function renderProjectGrid(data, { metric, hideUnphased, projectFilter }) {
       const planTr = document.createElement('tr');
       planTr.className = 'plan-row hidden border-b border-[#313244]/50';
       planTr.dataset.parent = p.slug;
+      planTr.dataset.plan = planSlug;
 
       const planPhaseCells = visiblePhases.map(ph => {
         const v = metricOf(planData.byPhase && planData.byPhase[ph], metric);
@@ -202,7 +219,7 @@ function renderProjectGrid(data, { metric, hideUnphased, projectFilter }) {
   // not here — re-attaching on every render leaks listeners on tbody.
 }
 
-function showSessionDrill(data, { project, phase }) {
+function showSessionDrill(data, { project, phase, plan }) {
   // Remove any existing drill panel
   const existing = document.getElementById('drill-panel');
   if (existing) existing.remove();
@@ -212,15 +229,20 @@ function showSessionDrill(data, { project, phase }) {
 
   const sessions = data.sessions || [];
 
-  // Best-effort: match sessions by cwd containing the project slug
-  // (proper attribution requires per-session phase tagging — deferred)
+  // Filter sessions by project and optionally by plan.
+  // When sessions carry projectSlug/planSlug (from merge.mjs enrichment), use
+  // exact match. Fall back to cwd heuristic for legacy/unenriched sessions.
   let matched = sessions;
   if (project && project !== '(unscoped)') {
-    matched = sessions.filter(s => s.cwd && s.cwd.toLowerCase().includes(project.toLowerCase()));
-  }
-
-  if (matched.length === 0) {
-    matched = [];
+    const enriched = sessions.some(s => s.projectSlug != null);
+    if (enriched) {
+      matched = sessions.filter(s => s.projectSlug === project);
+      if (plan) {
+        matched = matched.filter(s => s.planSlug === plan);
+      }
+    } else {
+      matched = sessions.filter(s => s.cwd && s.cwd.toLowerCase().includes(project.toLowerCase()));
+    }
   }
 
   // Sort by tokens desc and take top 20
@@ -233,9 +255,9 @@ function showSessionDrill(data, { project, phase }) {
   drillEl.id = 'drill-panel';
   drillEl.className = 'border-t border-[#45475a] p-3';
 
-  const note = project !== '(unscoped)' && matched.length > 0
-    ? ''
-    : '<p class="text-xs text-[#6c7086] italic mb-2">Note: drill-down uses cwd heuristic — per-session phase attribution deferred.</p>';
+  const title = plan
+    ? `Drill: ${project} / ${plan} / ${phase} (top 20 sessions by tokens)`
+    : `Drill: ${project} / ${phase} (top 20 sessions by tokens)`;
 
   const rows = top20.length === 0
     ? '<tr><td colspan="4" class="py-4 text-center text-[#6c7086]">No sessions matched</td></tr>'
@@ -251,10 +273,9 @@ function showSessionDrill(data, { project, phase }) {
 
   drillEl.innerHTML = `
     <div class="flex items-center justify-between mb-2">
-      <span class="text-xs font-semibold text-[#cba6f7]">Drill: ${project} / ${phase} (top 20 sessions by tokens)</span>
+      <span class="text-xs font-semibold text-[#cba6f7]">${title}</span>
       <button id="drill-close" class="text-xs text-[#6c7086] hover:text-[#cdd6f4] px-2 py-0.5 rounded border border-[#45475a]">Close</button>
     </div>
-    ${note}
     <div class="overflow-x-auto">
       <table class="w-full text-sm border-collapse">
         <thead>
@@ -449,9 +470,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!cell || !state.data) return;
       e.stopPropagation();
       const row     = cell.closest('tr');
-      const project = row.classList.contains('grid-row') ? row.dataset.project : row.dataset.parent;
+      const project = row.dataset.project ?? row.dataset.parent;
+      const plan    = row.dataset.plan ?? null;
       const phase   = cell.dataset.phase;
-      showSessionDrill(state.data, { project, phase });
+      showSessionDrill(state.data, { project, phase, plan });
     });
   }
 
