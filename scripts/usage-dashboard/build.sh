@@ -43,7 +43,9 @@ PLANS_JSON="$DASHBOARD_DIR/plans.json"
 
 printf 'Running phase-scan...\n'
 PHASE_SCAN_OUT="$PHASE_SCAN_JSON" \
-  node "$SCRIPT_DIR/phase-scan.mjs"
+  node "$SCRIPT_DIR/phase-scan.mjs" \
+  --projects "$PROJECTS_JSON" \
+  --plans    "$PLANS_JSON"
 
 printf 'Running generate-projects...\n'
 PROJECTS_OUT="$PROJECTS_JSON" \

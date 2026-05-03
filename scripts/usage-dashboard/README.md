@@ -42,8 +42,28 @@ ccusage session/blocks/daily
 | `CUTOVER_DATE` | _(none)_ | ISO date string; sessions before this date treated as pre-cutover |
 | `IDLE_CAP_SEC` | `300` | Session idle gap in seconds before a session is split |
 | `RASPBERRY_DIR` | auto-detected | Path to this (raspberry) repo root |
+| `PROJECTS_JSON` | `<RASPBERRY_DIR>/dashboards/usage-dashboard/projects.json` | Override path to projects registry (consumed by `phase-scan.mjs`) |
+| `PLANS_JSON` | `<RASPBERRY_DIR>/dashboards/usage-dashboard/plans.json` | Override path to plans registry (consumed by `phase-scan.mjs`) |
+| `PRODUCT_REPOS` | _(derived from projects.json)_ | JSON map of `{ productName: absolutePath }` for bare-product-repo cwd matching in `phase-scan.mjs` |
 | `PORT` | `4765` | Port for `refresh-server.mjs` |
 | `BUILD_SH` | _(same dir)_ | Path to `build.sh` used by `refresh-server.mjs` and `sbu.sh` |
+
+## `phase-scan.mjs` CLI flags
+
+`phase-scan.mjs` also accepts two CLI flags that override the env vars above:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--projects <path>` | `$PROJECTS_JSON` or dashboard dir default | Path to `projects.json` registry |
+| `--plans <path>` | `$PLANS_JSON` or dashboard dir default | Path to `plans.json` registry |
+
+These flags are passed automatically by `build.sh`. Override manually if testing with a different registry:
+
+```sh
+PHASE_SCAN_OUT=/tmp/test-scan.json node scripts/usage-dashboard/phase-scan.mjs \
+  --projects /tmp/my-projects.json \
+  --plans    /tmp/my-plans.json
+```
 
 ## Manual build
 

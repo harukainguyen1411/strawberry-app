@@ -1,112 +1,366 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-05-02T10:24:53.399Z",
+  "generatedAt": "2026-05-03T06:44:21.874Z",
   "cutoverDate": "2026-04-28",
   "window": {
-    "startTime": "2026-05-02T07:00:00.000Z",
-    "endTime": "2026-05-02T12:00:00.000Z",
-    "inputTokens": 8848,
-    "outputTokens": 827168,
-    "totalCost": 112.42688725000012
+    "startTime": "2026-05-03T06:00:00.000Z",
+    "endTime": "2026-05-03T11:00:00.000Z",
+    "inputTokens": 7624,
+    "outputTokens": 112142,
+    "totalCost": 17.99466544999999
   },
   "grid": {
     "byProject": {
       "(unscoped)": {
         "byPhase": {
           "(unphased)": {
-            "tokens": 16625167900,
-            "durationSec": 2819893,
-            "sessions": 2326
+            "tokens": 16500623038,
+            "durationSec": 2804454,
+            "sessions": 2316
           },
           "Plan": {
-            "tokens": 300359163,
-            "durationSec": 33630,
-            "sessions": 16
+            "tokens": 246341584,
+            "durationSec": 27989,
+            "sessions": 11
           },
           "Implement": {
-            "tokens": 648588538,
-            "durationSec": 57706,
-            "sessions": 16
+            "tokens": 228079886,
+            "durationSec": 22474,
+            "sessions": 10
           },
           "Debug": {
-            "tokens": 82169096,
-            "durationSec": 9172,
-            "sessions": 4
-          },
-          "Brainstorm": {
-            "tokens": 1084605730,
-            "durationSec": 134495,
-            "sessions": 23
-          },
-          "Verify": {
-            "tokens": 641401385,
-            "durationSec": 76660,
-            "sessions": 9
-          },
-          "Finish": {
-            "tokens": 99188462,
-            "durationSec": 8735,
+            "tokens": 76940100,
+            "durationSec": 8410,
             "sessions": 3
           },
+          "Brainstorm": {
+            "tokens": 860202199,
+            "durationSec": 112073,
+            "sessions": 18
+          },
+          "Verify": {
+            "tokens": 646258563,
+            "durationSec": 77192,
+            "sessions": 9
+          },
           "Review": {
-            "tokens": 37798525,
-            "durationSec": 5602,
+            "tokens": 34680291,
+            "durationSec": 4211,
             "sessions": 2
+          },
+          "Finish": {
+            "tokens": 9598173,
+            "durationSec": 530,
+            "sessions": 1
           }
         },
         "total": {
-          "tokens": 19519278799,
-          "durationSec": 3145893,
-          "sessions": 2326
+          "tokens": 18602723834,
+          "durationSec": 3057333,
+          "sessions": 2316
         },
         "byPlan": {
           "(unscoped)": {
             "byPhase": {
               "(unphased)": {
-                "tokens": 16625167900,
-                "durationSec": 2819893,
-                "sessions": 2326
+                "tokens": 16500623038,
+                "durationSec": 2804454,
+                "sessions": 2316
               },
               "Plan": {
-                "tokens": 300359163,
-                "durationSec": 33630,
-                "sessions": 16
+                "tokens": 246341584,
+                "durationSec": 27989,
+                "sessions": 11
               },
               "Implement": {
-                "tokens": 648588538,
-                "durationSec": 57706,
-                "sessions": 16
+                "tokens": 228079886,
+                "durationSec": 22474,
+                "sessions": 10
               },
               "Debug": {
-                "tokens": 82169096,
-                "durationSec": 9172,
-                "sessions": 4
-              },
-              "Brainstorm": {
-                "tokens": 1084605730,
-                "durationSec": 134495,
-                "sessions": 23
-              },
-              "Verify": {
-                "tokens": 641401385,
-                "durationSec": 76660,
-                "sessions": 9
-              },
-              "Finish": {
-                "tokens": 99188462,
-                "durationSec": 8735,
+                "tokens": 76940100,
+                "durationSec": 8410,
                 "sessions": 3
               },
+              "Brainstorm": {
+                "tokens": 860202199,
+                "durationSec": 112073,
+                "sessions": 18
+              },
+              "Verify": {
+                "tokens": 646258563,
+                "durationSec": 77192,
+                "sessions": 9
+              },
               "Review": {
-                "tokens": 37798525,
-                "durationSec": 5602,
+                "tokens": 34680291,
+                "durationSec": 4211,
                 "sessions": 2
+              },
+              "Finish": {
+                "tokens": 9598173,
+                "durationSec": 530,
+                "sessions": 1
               }
             },
             "total": {
-              "tokens": 19519278799,
-              "durationSec": 3145893,
-              "sessions": 2326
+              "tokens": 18602723834,
+              "durationSec": 3057333,
+              "sessions": 2316
+            }
+          }
+        }
+      },
+      "demo-studio-go-live": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 194339853,
+            "durationSec": 20786,
+            "sessions": 10
+          },
+          "Verify": {
+            "tokens": 3083197,
+            "durationSec": 397,
+            "sessions": 1
+          },
+          "Plan": {
+            "tokens": 54017579,
+            "durationSec": 5641,
+            "sessions": 5
+          },
+          "Implement": {
+            "tokens": 437405764,
+            "durationSec": 38047,
+            "sessions": 6
+          },
+          "Brainstorm": {
+            "tokens": 224403531,
+            "durationSec": 22422,
+            "sessions": 5
+          },
+          "Finish": {
+            "tokens": 89590289,
+            "durationSec": 8205,
+            "sessions": 2
+          },
+          "Review": {
+            "tokens": 22251203,
+            "durationSec": 3404,
+            "sessions": 1
+          },
+          "Debug": {
+            "tokens": 5228996,
+            "durationSec": 762,
+            "sessions": 1
+          }
+        },
+        "total": {
+          "tokens": 1030320412,
+          "durationSec": 99664,
+          "sessions": 10
+        },
+        "byPlan": {
+          "2026-04-29-demo-studio-v3-studio-ui-tweaks": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 20453617,
+                "durationSec": 2823,
+                "sessions": 1
+              },
+              "Verify": {
+                "tokens": 3083197,
+                "durationSec": 397,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 23536814,
+              "durationSec": 3220,
+              "sessions": 1
+            }
+          },
+          "2026-04-29-demo-studio-v3-build-progress-and-verify": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 70390065,
+                "durationSec": 9409,
+                "sessions": 3
+              },
+              "Plan": {
+                "tokens": 12951447,
+                "durationSec": 1408,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 26076740,
+                "durationSec": 1835,
+                "sessions": 1
+              },
+              "Debug": {
+                "tokens": 5228996,
+                "durationSec": 762,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 114647248,
+              "durationSec": 13414,
+              "sessions": 3
+            }
+          },
+          "2026-04-29-demo-studio-v3-s4-response-shape": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 280058,
+                "durationSec": 14,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 14969621,
+                "durationSec": 4526,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 10623185,
+                "durationSec": 1042,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 53504081,
+                "durationSec": 7419,
+                "sessions": 1
+              },
+              "Finish": {
+                "tokens": 30626883,
+                "durationSec": 2757,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 110003828,
+              "durationSec": 15758,
+              "sessions": 1
+            }
+          },
+          "2026-04-30-demo-studio-v3-sse-state-event-delivery": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 555525,
+                "durationSec": 23,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 9100403,
+                "durationSec": 1324,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 15095832,
+                "durationSec": 1124,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 124971680,
+                "durationSec": 8468,
+                "sessions": 1
+              },
+              "Review": {
+                "tokens": 22251203,
+                "durationSec": 3404,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 171974643,
+              "durationSec": 14343,
+              "sessions": 1
+            }
+          },
+          "2026-04-29-demo-studio-v3-agent-sdk-skills": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 93434299,
+                "durationSec": 7843,
+                "sessions": 2
+              },
+              "Brainstorm": {
+                "tokens": 4726393,
+                "durationSec": 1293,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 8283155,
+                "durationSec": 1410,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 210037375,
+                "durationSec": 17779,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 316481222,
+              "durationSec": 28325,
+              "sessions": 2
+            }
+          },
+          "2026-04-30-demo-studio-v3-output-urls-on-failed-verify": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 244633,
+                "durationSec": 9,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 17319602,
+                "durationSec": 1886,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 7063960,
+                "durationSec": 657,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 19333832,
+                "durationSec": 1704,
+                "sessions": 1
+              },
+              "Finish": {
+                "tokens": 58963406,
+                "durationSec": 5448,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 102925433,
+              "durationSec": 9704,
+              "sessions": 1
+            }
+          },
+          "2026-04-30-demo-studio-v3-sdk-default-vanilla-removal": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 8981656,
+                "durationSec": 665,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 178287512,
+                "durationSec": 13393,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 3482056,
+                "durationSec": 842,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 190751224,
+              "durationSec": 14900,
+              "sessions": 1
             }
           }
         }
@@ -116,16 +370,12 @@
   "perRepo": [
     {
       "repo": "(unknown)",
-      "tokens": 11730383494,
+      "tokens": 11777567075,
       "durationSec": 0,
       "sessions": 228
     }
   ],
   "sparkline": [
-    {
-      "date": "2026-04-19",
-      "byProject": {}
-    },
     {
       "date": "2026-04-20",
       "byProject": {}
@@ -177,17 +427,43 @@
     {
       "date": "2026-05-02",
       "byProject": {}
+    },
+    {
+      "date": "2026-05-03",
+      "byProject": {}
     }
   ],
   "sessions": [
     {
       "sessionId": "-Users-duongntd99-Documents-Personal-raspberry",
       "cwd": null,
-      "tokensIn": 30276,
-      "tokensOut": 4274016,
-      "cacheRead": 701352928,
+      "tokensIn": 35983,
+      "tokensOut": 4493701,
+      "cacheRead": 728134257,
       "cacheCreate": 0,
-      "cost": 569.7279189999986,
+      "cost": 593.0310497499987,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 977,
+      "tokensOut": 79290,
+      "cacheRead": 32317535,
+      "cacheCreate": 0,
+      "cost": 20.679522950000006,
+      "model": null,
+      "startedAt": null
+    },
+    {
+      "sessionId": "subagents",
+      "cwd": null,
+      "tokensIn": 12828,
+      "tokensOut": 13071,
+      "cacheRead": 2518017,
+      "cacheCreate": 0,
+      "cost": 3.9347985,
       "model": null,
       "startedAt": null
     },
@@ -221,28 +497,6 @@
       "cacheRead": 19796127,
       "cacheCreate": 0,
       "cost": 7.9333381499999955,
-      "model": null,
-      "startedAt": null
-    },
-    {
-      "sessionId": "subagents",
-      "cwd": null,
-      "tokensIn": 600,
-      "tokensOut": 46921,
-      "cacheRead": 14194940,
-      "cacheCreate": 0,
-      "cost": 9.361042500000002,
-      "model": null,
-      "startedAt": null
-    },
-    {
-      "sessionId": "subagents",
-      "cwd": null,
-      "tokensIn": 2270,
-      "tokensOut": 4675,
-      "cacheRead": 515452,
-      "cacheCreate": 0,
-      "cost": 1.22731975,
       "model": null,
       "startedAt": null
     },
@@ -2954,5 +3208,5 @@
       ]
     }
   ],
-  "unphasedCount": 2326
+  "unphasedCount": 2316
 }
