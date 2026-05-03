@@ -137,6 +137,25 @@ describe('A.4 — T212 CSV parser', () => {
   // Refs V0.6 bug-fix: non-trade rows must not become phantom BUYs
   // A dividend row with a fully populated price/shares triggered the phantom BUY bug:
   // action.toLowerCase().includes('sell') is false → side defaults to 'BUY'.
+  it('A.4.13 positions populate marketValue/lastPrice/lastPriceAt (V0.18 regression — v0 proxy)', async () => {
+    const { parseT212Csv } = await import('../t212.js')
+    const result = parseT212Csv(fixture('t212-sample.csv'))
+    // V0 has no live-price feed; the parser uses avgCost × qty as a marketValue
+    // proxy (and lastPrice = lastTradePrice, lastPriceAt = lastTradeTime). Without
+    // these fields, usePortfolio derives empty holdings and the dashboard shows
+    // EmptyState even after a successful import — the bug V0.18 surfaced.
+    // TODO V0.21: replace proxy with quote-feed; lastPriceAt becomes a price ts
+    // (currently a trade ts).
+    expect(result.positions.length).toBeGreaterThan(0)
+    for (const p of result.positions) {
+      expect(p.marketValue).toBeDefined()
+      expect(p.marketValue!.amount).toBeGreaterThan(0)
+      expect(p.marketValue!.currency).toBe(p.avgCost.currency)
+      expect(p.lastPrice).toBeGreaterThan(0)
+      expect(p.lastPriceAt).toBeInstanceOf(Date)
+    }
+  })
+
   it('A.4.12 non-trade rows (dividend, deposit, interest, fee) are skipped, not phantom BUYs', async () => {
     const { parseT212Csv } = await import('../t212.js')
     const HEADER = 'Action,Time,ISIN,Ticker,Name,No. of shares,Price / share,Currency (Price / share),Exchange rate,Result,Currency (Result),Total,Currency (Total),Withholding tax,Currency (Withholding tax),Notes,ID,Currency conversion fee,Currency (Currency conversion fee)'

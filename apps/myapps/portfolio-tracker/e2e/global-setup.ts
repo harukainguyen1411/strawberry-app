@@ -100,32 +100,47 @@ export default async function globalSetup() {
   console.log('[global-setup] Emulators ready, allowlist seeded.')
 }
 
-async function probeEmulators(timeoutMs: number): Promise<boolean> {
+async function probeProjectScopedEmulator(host: string, path: string, timeoutMs: number): Promise<boolean> {
+  // Project-scoped probe — only 200s when the emulator is running for *this* project.
+  // Plain `fetch('http://127.0.0.1:9099/')` returns 200 for any process bound to the port,
+  // including a stranger's emulator on a different project — would make us silently wipe their data.
   try {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
-    await fetch('http://127.0.0.1:9099/', { signal: controller.signal })
+    const res = await fetch(`http://${host}${path}`, { signal: controller.signal })
     clearTimeout(timer)
-    return true
+    return res.ok
   } catch {
     return false
   }
 }
 
+async function probeEmulators(timeoutMs: number): Promise<boolean> {
+  return probeProjectScopedEmulator(
+    '127.0.0.1:9099',
+    `/emulator/v1/projects/${PROJECT_ID}/config`,
+    timeoutMs,
+  )
+}
+
 async function waitForEmulators(maxWaitMs: number, intervalMs = 1_000): Promise<boolean> {
   const deadline = Date.now() + maxWaitMs
   while (Date.now() < deadline) {
-    try {
-      const [authOk, fsOk] = await Promise.all([
-        fetch('http://127.0.0.1:9099/').then(() => true).catch(() => false),
-        fetch('http://127.0.0.1:8080/').then(() => true).catch(() => false),
-      ])
-      if (authOk && fsOk) {
-        console.log('[global-setup] Auth + Firestore emulators are up.')
-        return true
-      }
-    } catch {
-      // Not ready yet
+    const [authOk, fsOk] = await Promise.all([
+      probeProjectScopedEmulator(
+        '127.0.0.1:9099',
+        `/emulator/v1/projects/${PROJECT_ID}/config`,
+        2_000,
+      ),
+      probeProjectScopedEmulator(
+        '127.0.0.1:8080',
+        `/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
+        2_000,
+      ),
+    ])
+    if (authOk && fsOk) {
+      console.log('[global-setup] Auth + Firestore emulators are up.')
+      return true
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs))
   }
