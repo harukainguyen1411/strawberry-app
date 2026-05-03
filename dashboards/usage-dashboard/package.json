@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bash ../../scripts/usage-dashboard/build.sh"
+    "build": "echo 'usage-dashboard: build is local-only (run scripts/usage-dashboard/build.sh; CI has no ~/.claude data)'"
   },
   "devDependencies": {
     "ccusage": "0.8.0",
