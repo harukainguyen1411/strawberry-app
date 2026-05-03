@@ -1,0 +1,24 @@
+{
+  "blocks": [
+    {
+      "id": "2026-05-01T09:00:00.000Z",
+      "startTime": "2026-05-01T09:00:00.000Z",
+      "endTime": "2026-05-01T14:00:00.000Z",
+      "actualEndTime": "2026-05-01T10:30:00.000Z",
+      "isActive": true,
+      "isGap": false,
+      "entries": 3,
+      "tokenCounts": {
+        "inputTokens": 100,
+        "outputTokens": 50,
+        "cacheCreationInputTokens": 0,
+        "cacheReadInputTokens": 200
+      },
+      "totalTokens": 350,
+      "costUSD": 0.05,
+      "models": ["claude-opus-4-7"],
+      "burnRate": null,
+      "projection": null
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/bin/sh
-# sbu — Strawberry Build & Update CLI alias for the usage dashboard.
+# sbu — Build & Update CLI alias for the usage dashboard.
 #
 # Usage:
 #   sbu                 Build data.json then open the dashboard in the browser.
@@ -10,7 +10,7 @@
 # Environment overrides (mostly for testing):
 #   BUILD_SH              Path to build.sh (default: same dir as this script)
 #   REFRESH_SERVER_MJS    Path to refresh-server.mjs (default: same dir)
-#   PID_FILE              Path to PID file (default: ~/.claude/strawberry-usage-cache/refresh-server.pid)
+#   PID_FILE              Path to PID file (default: ~/.claude/raspberry-usage-cache/refresh-server.pid)
 #   REPO_ROOT             Repo root (default: two levels up from this script's dir)
 #
 # POSIX-portable: runs on macOS sh and Git Bash on Windows.
@@ -23,7 +23,9 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 BUILD_SH="${BUILD_SH:-$SCRIPT_DIR/build.sh}"
 REFRESH_SERVER_MJS="${REFRESH_SERVER_MJS:-$SCRIPT_DIR/refresh-server.mjs}"
 DASHBOARD_INDEX="$REPO_ROOT/dashboards/usage-dashboard/index.html"
-PID_FILE="${PID_FILE:-$HOME/.claude/strawberry-usage-cache/refresh-server.pid}"
+PID_FILE="${PID_FILE:-$HOME/.claude/raspberry-usage-cache/refresh-server.pid}"
+NEW_DATA="$HOME/.claude/raspberry-usage-cache/data.json"
+OLD_DATA="$HOME/.claude/strawberry-usage-cache/data.json"
 
 # --- Parse flags ---
 DO_SERVE=0
@@ -44,6 +46,17 @@ done
 # --- Run build ---
 printf 'sbu: running build...\n'
 bash "$BUILD_SH"
+
+# --- Resolve data.json source (with legacy fallback) ---
+if test -f "$NEW_DATA"; then
+  DATA_JSON="$NEW_DATA"
+elif test -f "$OLD_DATA"; then
+  printf 'WARNING: running on legacy cache; run scripts/usage-dashboard/build.sh to migrate\n' >&2
+  DATA_JSON="$OLD_DATA"
+else
+  printf 'sbu: no data.json found after build; run scripts/usage-dashboard/build.sh first\n' >&2
+  exit 1
+fi
 
 # --- Optionally start refresh server ---
 if [ "$DO_SERVE" = "1" ]; then

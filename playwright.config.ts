@@ -28,8 +28,9 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    // Install the fixture data.json then start a static server.
-    command: "node -e \"const fs=require('fs'),p=require('path');fs.copyFileSync(p.resolve('tests/e2e/fixtures/usage-dashboard-data.json'),p.resolve('dashboards/usage-dashboard/data.json'));console.log('fixture installed');\" && npx --yes serve dashboards/usage-dashboard -l 7891 --no-clipboard",
+    // Static server only — fixture data.json is installed deterministically
+    // in test.beforeAll() so it runs regardless of reuseExistingServer state.
+    command: 'npx --yes serve dashboards/usage-dashboard -l 7891 --no-clipboard',
     url: 'http://127.0.0.1:7891',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

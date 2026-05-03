@@ -1,157 +1,226 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-04-19T12:00:00Z",
+  "schemaVersion": 2,
+  "cutoverDate": "2026-04-28",
+  "generatedAt": "2026-05-02T00:00:00.000Z",
   "window": {
-    "startTime": "2026-04-19T09:00:00Z",
-    "endTime": "2026-04-19T14:00:00Z",
-    "inputTokens": 48000,
-    "outputTokens": 12000,
-    "totalCost": 0.18
+    "startTime": "2026-05-01T09:00:00.000Z",
+    "endTime": "2026-05-01T14:00:00.000Z",
+    "inputTokens": 120000,
+    "outputTokens": 35000,
+    "totalCost": 0.72
   },
+  "grid": {
+    "byProject": {
+      "strawberry-app": {
+        "byPhase": {
+          "Brainstorm": { "tokens": 8500,  "durationSec": 420,  "sessions": 2 },
+          "Plan":       { "tokens": 22000, "durationSec": 1080, "sessions": 3 },
+          "Implement":  { "tokens": 61000, "durationSec": 4200, "sessions": 8 },
+          "Review":     { "tokens": 9000,  "durationSec": 540,  "sessions": 2 },
+          "Verify":     { "tokens": 4500,  "durationSec": 270,  "sessions": 1 },
+          "Finish":     { "tokens": 3000,  "durationSec": 180,  "sessions": 1 },
+          "(unphased)": { "tokens": 5200,  "durationSec": 310,  "sessions": 2 }
+        },
+        "total": { "tokens": 113200, "durationSec": 7000, "sessions": 19 },
+        "byPlan": {
+          "2026-04-30-raspberry-usage-dashboard": {
+            "byPhase": {
+              "Brainstorm": { "tokens": 5000, "durationSec": 300, "sessions": 1 },
+              "Plan":       { "tokens": 14000,"durationSec": 720, "sessions": 2 },
+              "Implement":  { "tokens": 42000,"durationSec": 2800,"sessions": 5 },
+              "Review":     { "tokens": 6000, "durationSec": 360, "sessions": 1 },
+              "Finish":     { "tokens": 2000, "durationSec": 120, "sessions": 1 }
+            },
+            "total": { "tokens": 69000, "durationSec": 4300, "sessions": 10 }
+          },
+          "2026-04-10-portfolio-tracker": {
+            "byPhase": {
+              "Brainstorm": { "tokens": 3500, "durationSec": 120, "sessions": 1 },
+              "Plan":       { "tokens": 8000, "durationSec": 360, "sessions": 1 },
+              "Implement":  { "tokens": 19000,"durationSec": 1400,"sessions": 3 },
+              "Verify":     { "tokens": 4500, "durationSec": 270, "sessions": 1 }
+            },
+            "total": { "tokens": 35000, "durationSec": 2150, "sessions": 6 }
+          },
+          "2026-03-15-auth-refactor": {
+            "byPhase": {
+              "Implement":  { "tokens": 9200, "durationSec": 600, "sessions": 2 },
+              "(unphased)": { "tokens": 5200, "durationSec": 310, "sessions": 2 }
+            },
+            "total": { "tokens": 14400, "durationSec": 910, "sessions": 4 }
+          }
+        }
+      },
+      "strawberry": {
+        "byPhase": {
+          "Plan":       { "tokens": 11000, "durationSec": 660,  "sessions": 2 },
+          "Implement":  { "tokens": 34000, "durationSec": 2100, "sessions": 5 },
+          "Debug":      { "tokens": 7800,  "durationSec": 510,  "sessions": 2 },
+          "Finish":     { "tokens": 2200,  "durationSec": 130,  "sessions": 1 },
+          "(unphased)": { "tokens": 3100,  "durationSec": 190,  "sessions": 1 }
+        },
+        "total": { "tokens": 58100, "durationSec": 3590, "sessions": 11 },
+        "byPlan": {
+          "2026-04-20-csv-export": {
+            "byPhase": {
+              "Plan":      { "tokens": 7000,  "durationSec": 420, "sessions": 1 },
+              "Implement": { "tokens": 22000, "durationSec": 1400,"sessions": 3 },
+              "Finish":    { "tokens": 2200,  "durationSec": 130, "sessions": 1 }
+            },
+            "total": { "tokens": 31200, "durationSec": 1950, "sessions": 5 }
+          },
+          "2026-03-28-dark-mode": {
+            "byPhase": {
+              "Plan":      { "tokens": 4000,  "durationSec": 240, "sessions": 1 },
+              "Implement": { "tokens": 12000, "durationSec": 700, "sessions": 2 },
+              "Debug":     { "tokens": 7800,  "durationSec": 510, "sessions": 2 },
+              "(unphased)":{ "tokens": 3100,  "durationSec": 190, "sessions": 1 }
+            },
+            "total": { "tokens": 26900, "durationSec": 1640, "sessions": 6 }
+          }
+        }
+      }
+    }
+  },
+  "perRepo": [
+    { "repo": "strawberry-app", "tokens": 113200, "durationSec": 7000, "sessions": 19, "cost": 0.54 },
+    { "repo": "strawberry",     "tokens": 58100,  "durationSec": 3590, "sessions": 11, "cost": 0.28 }
+  ],
+  "sparkline": [
+    { "date": "2026-04-19", "byProject": { "strawberry-app": 6200,  "strawberry": 2100 } },
+    { "date": "2026-04-20", "byProject": { "strawberry-app": 8100,  "strawberry": 5500 } },
+    { "date": "2026-04-21", "byProject": { "strawberry-app": 3400,  "strawberry": 1200 } },
+    { "date": "2026-04-22", "byProject": { "strawberry-app": 11200, "strawberry": 4400 } },
+    { "date": "2026-04-23", "byProject": { "strawberry-app": 7800,  "strawberry": 0    } },
+    { "date": "2026-04-24", "byProject": { "strawberry-app": 9300,  "strawberry": 3300 } },
+    { "date": "2026-04-25", "byProject": { "strawberry-app": 4100,  "strawberry": 1800 } },
+    { "date": "2026-04-26", "byProject": { "strawberry-app": 12500, "strawberry": 6700 } },
+    { "date": "2026-04-27", "byProject": { "strawberry-app": 5600,  "strawberry": 2900 } },
+    { "date": "2026-04-28", "byProject": { "strawberry-app": 8900,  "strawberry": 4100 } },
+    { "date": "2026-04-29", "byProject": { "strawberry-app": 14200, "strawberry": 7200 } },
+    { "date": "2026-04-30", "byProject": { "strawberry-app": 11800, "strawberry": 5500 } },
+    { "date": "2026-05-01", "byProject": { "strawberry-app": 9400,  "strawberry": 8200 } },
+    { "date": "2026-05-02", "byProject": { "strawberry-app": 6700,  "strawberry": 5100 } }
+  ],
   "sessions": [
     {
-      "sessionId": "sess-001",
-      "agent": "Jayce",
-      "project": "strawberry",
-      "cwd": "/home/user/strawberry",
-      "tokensIn": 12000,
-      "tokensOut": 3000,
-      "cacheRead": 400,
-      "cacheCreate": 200,
-      "cost": 0.045,
+      "sessionId": "s-001",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-30-raspberry-usage-dashboard",
+      "tokensIn": 42000,
+      "tokensOut": 12000,
+      "cacheRead": 1200,
+      "cacheCreate": 600,
+      "cost": 0.18,
       "model": "claude-opus-4-7",
-      "startedAt": "2026-02-20T10:00:00Z"
+      "startedAt": "2026-05-01T10:00:00.000Z"
     },
     {
-      "sessionId": "sess-002",
-      "agent": "Evelynn",
-      "project": "strawberry",
-      "cwd": "/home/user/strawberry",
-      "tokensIn": 9000,
-      "tokensOut": 2500,
+      "sessionId": "s-002",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-10-portfolio-tracker",
+      "tokensIn": 28000,
+      "tokensOut": 8000,
+      "cacheRead": 800,
+      "cacheCreate": 400,
+      "cost": 0.12,
+      "model": "claude-sonnet-4-6",
+      "startedAt": "2026-04-30T14:00:00.000Z"
+    },
+    {
+      "sessionId": "s-003",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry",
+      "projectSlug": "strawberry",
+      "planSlug": "2026-04-20-csv-export",
+      "tokensIn": 21000,
+      "tokensOut": 6000,
+      "cacheRead": 500,
+      "cacheCreate": 200,
+      "cost": 0.09,
+      "model": "claude-opus-4-7",
+      "startedAt": "2026-04-29T11:00:00.000Z"
+    },
+    {
+      "sessionId": "s-004",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "projectSlug": "strawberry-app",
+      "planSlug": "2026-04-30-raspberry-usage-dashboard",
+      "tokensIn": 15000,
+      "tokensOut": 4500,
       "cacheRead": 300,
       "cacheCreate": 100,
-      "cost": 0.032,
-      "model": "claude-opus-4-7",
-      "startedAt": "2026-02-28T11:00:00Z"
-    },
-    {
-      "sessionId": "sess-003",
-      "agent": "unknown",
-      "project": "work/mmp",
-      "cwd": "/home/user/work/mmp",
-      "tokensIn": 5000,
-      "tokensOut": 1500,
-      "cacheRead": 0,
-      "cacheCreate": 0,
-      "cost": 0.018,
+      "cost": 0.07,
       "model": "claude-sonnet-4-6",
-      "startedAt": "2026-03-05T09:00:00Z"
+      "startedAt": "2026-04-28T09:00:00.000Z"
     },
     {
-      "sessionId": "sess-004",
-      "agent": "Viktor",
-      "project": "strawberry-app",
-      "cwd": "/home/user/strawberry-app",
-      "tokensIn": 8000,
-      "tokensOut": 2000,
+      "sessionId": "s-005",
+      "cwd": "/Users/duongntd99/Documents/Personal/strawberry",
+      "projectSlug": "strawberry",
+      "planSlug": "2026-03-28-dark-mode",
+      "tokensIn": 9500,
+      "tokensOut": 2800,
       "cacheRead": 200,
-      "cacheCreate": 100,
-      "cost": 0.028,
-      "model": "claude-sonnet-4-6",
-      "startedAt": "2026-03-12T14:00:00Z"
-    },
-    {
-      "sessionId": "sess-005",
-      "agent": "Jayce",
-      "project": "strawberry-app",
-      "cwd": "/home/user/strawberry-app",
-      "tokensIn": 15000,
-      "tokensOut": 4000,
-      "cacheRead": 500,
-      "cacheCreate": 300,
-      "cost": 0.055,
-      "model": "claude-opus-4-7",
-      "startedAt": "2026-03-25T10:00:00Z"
-    },
-    {
-      "sessionId": "sess-006",
-      "agent": "Evelynn",
-      "project": "strawberry",
-      "cwd": "/home/user/strawberry",
-      "tokensIn": 11000,
-      "tokensOut": 3500,
-      "cacheRead": 350,
-      "cacheCreate": 150,
-      "cost": 0.042,
-      "model": "claude-opus-4-7",
-      "startedAt": "2026-03-30T11:00:00Z"
-    },
-    {
-      "sessionId": "sess-007",
-      "agent": "Viktor",
-      "project": "strawberry-app",
-      "cwd": "/home/user/strawberry-app",
-      "tokensIn": 7000,
-      "tokensOut": 1800,
-      "cacheRead": 150,
-      "cacheCreate": 80,
-      "cost": 0.024,
-      "model": "claude-sonnet-4-6",
-      "startedAt": "2026-04-05T13:00:00Z"
-    },
-    {
-      "sessionId": "sess-008",
-      "agent": "unknown",
-      "project": "work/mmp",
-      "cwd": "/home/user/work/mmp",
-      "tokensIn": 4000,
-      "tokensOut": 1000,
-      "cacheRead": 0,
-      "cacheCreate": 0,
-      "cost": 0.014,
+      "cacheCreate": 50,
+      "cost": 0.04,
       "model": "claude-haiku-4-5",
-      "startedAt": "2026-04-08T09:00:00Z"
-    },
-    {
-      "sessionId": "sess-009",
-      "agent": "Jayce",
-      "project": "strawberry",
-      "cwd": "/home/user/strawberry",
-      "tokensIn": 18000,
-      "tokensOut": 5000,
-      "cacheRead": 600,
-      "cacheCreate": 400,
-      "cost": 0.068,
-      "model": "claude-opus-4-7",
-      "startedAt": "2026-04-15T10:00:00Z"
-    },
-    {
-      "sessionId": "sess-010",
-      "agent": "Evelynn",
-      "project": "strawberry",
-      "cwd": "/home/user/strawberry",
-      "tokensIn": 10000,
-      "tokensOut": 3000,
-      "cacheRead": 280,
-      "cacheCreate": 120,
-      "cost": 0.038,
-      "model": "claude-opus-4-7",
-      "startedAt": "2026-04-17T11:00:00Z"
+      "startedAt": "2026-04-27T16:00:00.000Z"
     }
   ],
-  "daily": [
-    { "date": "2026-02-20", "tokens": 15000, "cost": 0.045, "byAgent": { "Jayce": 15000 } },
-    { "date": "2026-02-28", "tokens": 11500, "cost": 0.032, "byAgent": { "Evelynn": 11500 } },
-    { "date": "2026-03-05", "tokens": 6500,  "cost": 0.018, "byAgent": { "unknown": 6500 } },
-    { "date": "2026-03-12", "tokens": 10000, "cost": 0.028, "byAgent": { "Viktor": 10000 } },
-    { "date": "2026-03-25", "tokens": 19000, "cost": 0.055, "byAgent": { "Jayce": 19000 } },
-    { "date": "2026-03-30", "tokens": 14500, "cost": 0.042, "byAgent": { "Evelynn": 14500 } },
-    { "date": "2026-04-05", "tokens": 8800,  "cost": 0.024, "byAgent": { "Viktor": 8800 } },
-    { "date": "2026-04-08", "tokens": 5000,  "cost": 0.014, "byAgent": { "unknown": 5000 } },
-    { "date": "2026-04-15", "tokens": 23000, "cost": 0.068, "byAgent": { "Jayce": 23000 } },
-    { "date": "2026-04-17", "tokens": 13000, "cost": 0.038, "byAgent": { "Evelynn": 13000 } }
+  "plans": [
+    {
+      "slug": "2026-04-30-raspberry-usage-dashboard",
+      "state": "active",
+      "concern": "personal",
+      "project": "strawberry-app",
+      "path": "plans/personal/active/strawberry-app/2026-04-30-raspberry-usage-dashboard.md"
+    },
+    {
+      "slug": "2026-04-10-portfolio-tracker",
+      "state": "done",
+      "concern": "personal",
+      "project": "strawberry-app",
+      "path": "plans/personal/done/strawberry-app/2026-04-10-portfolio-tracker.md"
+    },
+    {
+      "slug": "2026-03-15-auth-refactor",
+      "state": "done",
+      "concern": "personal",
+      "project": "strawberry-app",
+      "path": "plans/personal/done/strawberry-app/2026-03-15-auth-refactor.md"
+    },
+    {
+      "slug": "2026-04-20-csv-export",
+      "state": "done",
+      "concern": "personal",
+      "project": "strawberry",
+      "path": "plans/personal/done/strawberry/2026-04-20-csv-export.md"
+    },
+    {
+      "slug": "2026-03-28-dark-mode",
+      "state": "done",
+      "concern": "personal",
+      "project": "strawberry",
+      "path": "plans/personal/done/strawberry/2026-03-28-dark-mode.md"
+    }
   ],
-  "roster": ["Evelynn", "Jayce", "Viktor", "Seraphine", "Orianna"],
-  "unknownCount": 2
+  "projects": [
+    {
+      "slug": "strawberry-app",
+      "name": "Strawberry App",
+      "concern": "personal",
+      "product": "strawberry-app",
+      "aliases": ["strawberry-app", "app"]
+    },
+    {
+      "slug": "strawberry",
+      "name": "Strawberry",
+      "concern": "personal",
+      "product": "strawberry",
+      "aliases": ["strawberry"]
+    }
+  ],
+  "unphasedCount": 5
 }

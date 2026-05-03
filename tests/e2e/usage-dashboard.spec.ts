@@ -1,166 +1,218 @@
 /**
- * Playwright smoke tests for the usage-dashboard static page.
+ * Playwright smoke tests for the usage-dashboard phase × project grid.
  *
- * plan: plans/approved/2026-04-19-claude-usage-dashboard-tasks.md T10
+ * Replaces the pre-cutover agent-leaderboard spec (schemaVersion 1).
+ * plan: plans/personal/active/raspberry-usage-dashboard/2026-05-02-raspberry-usage-dashboard.md T8
  *
- * These tests run against a local static server serving
- * dashboards/usage-dashboard/ with a pre-installed fixture data.json
- * (tests/e2e/fixtures/usage-dashboard-data.json).  No real ccusage or
- * refresh-server dependency is needed.
+ * Tests run against a local static server (configured in playwright.config.ts)
+ * serving dashboards/usage-dashboard/ with a pre-installed schemaVersion 2
+ * fixture at tests/e2e/fixtures/usage-dashboard-data.json.
+ * No real ccusage or refresh-server dependency needed.
+ *
+ * Fixture install is handled deterministically in beforeAll/afterAll so tests
+ * pass regardless of whether a pre-existing data.json is present (i.e. whether
+ * reuseExistingServer is true or false).
  */
 
 import { test, expect } from '@playwright/test'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
+
+// ---------------------------------------------------------------------------
+// paths
+// ---------------------------------------------------------------------------
+
+const ROOT = path.resolve(__dirname, '../..')
+const LIVE_DATA   = path.join(ROOT, 'dashboards/usage-dashboard/data.json')
+const FIXTURE     = path.join(ROOT, 'tests/e2e/fixtures/usage-dashboard-data.json')
+const BACKUP      = path.join(ROOT, 'dashboards/usage-dashboard/data.json.bak')
+
+// ---------------------------------------------------------------------------
+// fixture setup / teardown
+// ---------------------------------------------------------------------------
+
+test.beforeAll(async () => {
+  // Back up existing data.json (may or may not exist)
+  try {
+    await fs.copyFile(LIVE_DATA, BACKUP)
+  } catch {
+    // No pre-existing data.json — nothing to back up
+  }
+  // Install fixture unconditionally
+  await fs.copyFile(FIXTURE, LIVE_DATA)
+})
+
+test.afterAll(async () => {
+  try {
+    // Check if a backup exists
+    await fs.access(BACKUP)
+    // Restore the original
+    await fs.rename(BACKUP, LIVE_DATA)
+  } catch {
+    // No backup means there was no original; remove the fixture we installed
+    try { await fs.unlink(LIVE_DATA) } catch { /* ignore */ }
+  }
+})
 
 // ---------------------------------------------------------------------------
 // helpers
 // ---------------------------------------------------------------------------
 
-/** Wait for the debounce + fetch chain to settle. */
-async function waitForRender(page: import('@playwright/test').Page) {
-  // The app debounces renders at 50 ms and fetches data.json on load.
-  // We wait until the leaderboard no longer shows the "Loading…" placeholder.
+/** Wait for the phase grid to finish rendering (at least one .grid-row present). */
+async function waitForGrid(page: import('@playwright/test').Page) {
   await page.waitForFunction(() => {
-    const tbody = document.querySelector('#leaderboard-body')
-    if (!tbody) return false
-    return !tbody.textContent?.includes('Loading')
+    const rows = document.querySelectorAll('#grid-body .grid-row')
+    return rows.length > 0
   }, { timeout: 5000 })
 }
-
-// ---------------------------------------------------------------------------
-// fixture data facts (derived from tests/e2e/fixtures/usage-dashboard-data.json)
-// ---------------------------------------------------------------------------
-// Within the default 30-day window (cutoff ~2026-03-20):
-//   agents: Jayce, Evelynn, Viktor, unknown  => 4 agent rows + 1 totals row = 5
-//   projects: strawberry, strawberry-app, work/mmp  => 3 rows
-//
-// Within the 7-day window (cutoff ~2026-04-12):
-//   agents: Jayce, Evelynn  => 2 agent rows + 1 totals row = 3  (< 5, confirming reduction)
 
 // ---------------------------------------------------------------------------
 // smoke tests
 // ---------------------------------------------------------------------------
 
-test.describe('usage-dashboard smoke', () => {
+test.describe('usage-dashboard phase-grid smoke', () => {
 
-  test('page title is "Strawberry Usage"', async ({ page }) => {
+  test('page title is "Raspberry Usage"', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle('Strawberry Usage')
+    await expect(page).toHaveTitle('Raspberry Usage')
   })
 
-  test('window strip is visible and shows a token count', async ({ page }) => {
+  test('grid tbody has at least one .grid-row after data load', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
-    const windowStrip = page.locator('#window-strip')
-    await expect(windowStrip).toBeVisible()
-    // window-tokens should be populated (not the placeholder dash)
-    const tokenText = await page.locator('#window-tokens').textContent()
-    expect(tokenText).not.toBe('—')
-    expect(tokenText?.trim().length).toBeGreaterThan(0)
+    await waitForGrid(page)
+    const rows = page.locator('#grid-body .grid-row')
+    // Assert at least one row; fixture has 2 projects but we avoid hardcoding to stay resilient
+    await expect(rows).not.toHaveCount(0)
   })
 
-  test('leaderboard has >=4 rows (3 agents + totals) on default 30-day range', async ({ page }) => {
+  test('clicking first row sets aria-expanded="true" and reveals plan rows', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
-    const rows = page.locator('#leaderboard-body tr')
-    await expect(rows).toHaveCount(5) // Jayce, Evelynn, Viktor, unknown, Totals
+    await waitForGrid(page)
+
+    const firstRow = page.locator('#grid-body .grid-row').first()
+    // Before click: collapsed
+    await expect(firstRow).toHaveAttribute('aria-expanded', 'false')
+
+    // Click the project name cell (not a phase cell) to expand
+    await firstRow.locator('td').first().click()
+    await expect(firstRow).toHaveAttribute('aria-expanded', 'true')
+
+    // At least one .plan-row should now be visible
+    const planRows = page.locator('#grid-body .plan-row:not(.hidden)')
+    await expect(planRows).not.toHaveCount(0)
   })
 
-  test('project breakdown has exactly 3 rows on default 30-day range', async ({ page }) => {
+  test('clicking a heatmap cell shows the drill panel', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
-    const rows = page.locator('#project-body tr')
-    await expect(rows).toHaveCount(3)
+    await waitForGrid(page)
+
+    // Click the first non-empty heatmap cell in the first grid row
+    const firstRow = page.locator('#grid-body .grid-row').first()
+    const heatmapCell = firstRow.locator('td.heatmap-cell').first()
+    await heatmapCell.click()
+
+    // Drill panel should become visible inside #panel-grid
+    const drillPanel = page.locator('#drill-panel')
+    await expect(drillPanel).toBeVisible()
   })
 
-  test('sparkline canvas is present and within a visible section', async ({ page }) => {
+  test('switching metric to Time changes cell text to duration format', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
-    const sparklineSection = page.locator('#sparkline')
-    await expect(sparklineSection).toBeVisible()
-    const canvas = page.locator('#sparkline-canvas')
-    await expect(canvas).toBeVisible()
-    // Canvas should have non-zero dimensions (Chart.js rendered into it)
-    const box = await canvas.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.width).toBeGreaterThan(0)
-    expect(box!.height).toBeGreaterThan(0)
+    await waitForGrid(page)
+
+    await page.locator('#metric').selectOption('time')
+    // Allow debounce (50ms) + render to complete
+    await page.waitForTimeout(150)
+    await waitForGrid(page)
+
+    // At least one non-empty heatmap cell should show a duration like 7h, 1m, 30s, etc.
+    const cells = page.locator('#grid-body .grid-row td.heatmap-cell')
+    const count = await cells.count()
+    let foundDuration = false
+    for (let i = 0; i < count; i++) {
+      const text = (await cells.nth(i).textContent()) ?? ''
+      if (/^\d+(s|m|h)/.test(text.trim())) {
+        foundDuration = true
+        break
+      }
+    }
+    expect(foundDuration).toBe(true)
   })
 
-  test('date-range select default value is 30 (Last 30 days)', async ({ page }) => {
+  test('toggling "Hide unphased" removes all (unphased) cells from the DOM', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
-    const select = page.locator('#date-range')
-    await expect(select).toHaveValue('30')
+    await waitForGrid(page)
+
+    // Confirm (unphased) cells are present before toggle
+    const unphasedBefore = page.locator('#grid-body td[data-phase="(unphased)"]')
+    await expect(unphasedBefore).not.toHaveCount(0)
+
+    // Enable the toggle
+    await page.locator('#hide-unphased').check()
+    await page.waitForTimeout(150)
+    await waitForGrid(page)
+
+    // No (unphased) cells should remain in the rendered grid
+    const unphasedAfter = page.locator('#grid-body td[data-phase="(unphased)"]')
+    await expect(unphasedAfter).toHaveCount(0)
   })
 
-  test('switching to 7-day range reduces leaderboard rows', async ({ page }) => {
+  test('UI-1: thead and tbody column counts stay in sync when hide-unphased toggles', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
+    await waitForGrid(page)
 
-    // Capture row count at 30 days
-    const rowsBefore = await page.locator('#leaderboard-body tr').count()
-    expect(rowsBefore).toBeGreaterThanOrEqual(4)
+    // Helper: count columns from thead and first grid-row tbody tr
+    const getColCounts = () => page.evaluate(() => {
+      const theadCols = document.querySelectorAll('#grid-head th').length
+      const firstRow  = document.querySelector('#grid-body .grid-row')
+      const tbodyCols = firstRow ? firstRow.querySelectorAll('td').length : 0
+      return { theadCols, tbodyCols }
+    })
 
-    // Switch to 7 days
-    await page.locator('#date-range').selectOption('7')
-    // Wait for debounce
-    await page.waitForTimeout(200)
-    await waitForRender(page)
+    // Unchecked: all phases visible (8 phases + Project + Total = 10)
+    const before = await getColCounts()
+    expect(before.theadCols).toBe(before.tbodyCols)
+    expect(before.theadCols).toBe(10)
 
-    const rowsAfter = await page.locator('#leaderboard-body tr').count()
-    // 7-day window includes only Jayce + Evelynn => 2 agents + Totals = 3 rows
-    expect(rowsAfter).toBeLessThan(rowsBefore)
-    expect(rowsAfter).toBe(3)
+    // Check hide-unphased
+    await page.locator('#hide-unphased').check()
+    await page.waitForTimeout(150)
+    await waitForGrid(page)
+
+    // Checked: (unphased) hidden (7 phases + Project + Total = 9)
+    const after = await getColCounts()
+    expect(after.theadCols).toBe(after.tbodyCols)
+    expect(after.theadCols).toBe(9)
   })
 
-  test('"Hide unknown" toggle hides the unknown row', async ({ page }) => {
+  test('I5: plan-row drill is scoped to the plan and yields fewer sessions than project-row drill', async ({ page }) => {
     await page.goto('/')
-    await waitForRender(page)
+    await waitForGrid(page)
 
-    // Confirm unknown row is visible before toggle
-    const unknownRowBefore = page.locator('#leaderboard-body tr').filter({ hasText: 'unknown' })
-    await expect(unknownRowBefore).toBeVisible()
+    // Expand the first project row to reveal plan rows
+    const firstRow = page.locator('#grid-body .grid-row').first()
+    await firstRow.locator('td').first().click()
+    const planRows = page.locator('#grid-body .plan-row:not(.hidden)')
+    await expect(planRows).not.toHaveCount(0)
 
-    // Toggle hide-unknown
-    await page.locator('#hide-unknown').check()
-    await page.waitForTimeout(200)
-    await waitForRender(page)
+    // Click a phase cell on the first project row (project-level drill)
+    const projectPhaseCell = firstRow.locator('td.heatmap-cell').first()
+    await projectPhaseCell.click()
+    const projectDrillCount = await page.locator('#drill-panel tbody tr').count()
 
-    // Unknown row should no longer be in the leaderboard
-    const unknownRowAfter = page.locator('#leaderboard-body tr').filter({ hasText: 'unknown' })
-    await expect(unknownRowAfter).toHaveCount(0)
-  })
+    // Close the drill panel
+    await page.locator('#drill-close').click()
+    await expect(page.locator('#drill-panel')).toHaveCount(0)
 
-  test('error banner is hidden on successful load', async ({ page }) => {
-    await page.goto('/')
-    await waitForRender(page)
-    const banner = page.locator('#error-banner')
-    await expect(banner).toBeHidden()
-  })
+    // Click a phase cell on a plan row (plan-level drill)
+    const firstPlanRow = planRows.first()
+    const planPhaseCell = firstPlanRow.locator('td[data-phase]').first()
+    await planPhaseCell.click()
+    const planDrillCount = await page.locator('#drill-panel tbody tr').count()
 
-  test('refresh button has hidden attribute by default (no refresh-server running)', async ({ page }) => {
-    await page.goto('/')
-    // Wait for the health probe timeout (300 ms) to settle before asserting.
-    // Note: Tailwind's `flex` utility class overrides the `hidden` attribute's
-    // display:none via higher specificity — the button may render as
-    // visually present while the `hidden` attr is still set.  This is a known
-    // CSS ordering issue in the dashboard (Tailwind CDN load order); we assert
-    // the programmatic `hidden` attribute here.  A QA note is included in the
-    // assessments report.
-    await page.waitForTimeout(600) // > HEALTH_TIMEOUT_MS (300 ms) + debounce (50 ms)
-    const refreshBtn = page.locator('#refresh-btn')
-    // The refresh-server is not running so the health probe must have rejected.
-    // Assert the hidden attribute is present — the application's intended state.
-    await expect(refreshBtn).toHaveAttribute('hidden', '')
-  })
-
-  test('all four main sections are present in the DOM', async ({ page }) => {
-    await page.goto('/')
-    await waitForRender(page)
-    await expect(page.locator('#window-strip')).toBeVisible()
-    await expect(page.locator('#agent-leaderboard')).toBeVisible()
-    await expect(page.locator('#project-breakdown')).toBeVisible()
-    await expect(page.locator('#sparkline')).toBeVisible()
+    // Plan drill should be scoped: result count <= project drill count
+    // (fixture has multiple plans per project, so plan drill < project drill)
+    expect(planDrillCount).toBeLessThan(projectDrillCount)
   })
 
 })
