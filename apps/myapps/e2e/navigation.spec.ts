@@ -15,17 +15,6 @@ test.describe('Navigation between views', () => {
     await expect(page.getByRole('link', { name: /goals/i })).toBeVisible()
   })
 
-  test('home navigates to Portfolio Tracker', async ({ page }) => {
-    await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Welcome to MyApps' })).toBeVisible()
-
-    await page.getByRole('button', { name: /open app/i }).nth(1).click()
-    await expect(page).toHaveURL(/\/portfolio-tracker/)
-    await expect(page.getByText(/Manage your stock portfolio/)).toBeVisible()
-    await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /transactions/i })).toBeVisible()
-  })
-
   test('Read Tracker inner navigation: Dashboard, Sessions, Books, Goals', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('heading', { name: 'Welcome to MyApps' })).toBeVisible()
@@ -45,19 +34,6 @@ test.describe('Navigation between views', () => {
     await page.getByRole('link', { name: /goals/i }).click()
     await expect(page).toHaveURL(/\/read-tracker\/goals/)
     await expect(page.getByText(/Reading Goals/)).toBeVisible()
-  })
-
-  test('Portfolio Tracker inner navigation: Dashboard, Transactions', async ({ page }) => {
-    await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Welcome to MyApps' })).toBeVisible()
-    await page.goto('/portfolio-tracker/dashboard')
-
-    await expect(page).toHaveURL(/\/portfolio-tracker\/dashboard/)
-    await expect(page.getByText(/Manage your stock portfolio/)).toBeVisible()
-
-    await page.getByRole('link', { name: /transactions/i }).click()
-    await expect(page).toHaveURL(/\/portfolio-tracker\/transactions/)
-    await expect(page.getByRole('heading', { name: 'Transactions' })).toBeVisible()
   })
 
   test('can go back to home from Read Tracker via header', async ({ page }) => {

@@ -1,12 +1,9 @@
 import { db } from './config'
 import {
-  doc,
-  getDoc,
   getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
-  setDoc,
   query,
   orderBy,
   Timestamp,
@@ -47,52 +44,8 @@ export interface Goal {
   week?: number
 }
 
-export interface StockHolding {
-  id?: string
-  symbol: string
-  quantity: number
-  averagePrice: number // Average purchase price per share (weighted average of buys)
-  currentPrice?: number // Manual/last-known price per share; default is last buy price
-  /** Broker/source where the holding was bought (e.g. Trading 212, Interactive Broker). Empty = legacy/unset. */
-  source?: string
-  /** Currency of averagePrice and currentPrice. Defaults to USD for backward compatibility. */
-  currency?: Currency
-  createdAt?: Timestamp
-  updatedAt?: Timestamp
-}
-
-export type Currency = 'EUR' | 'USD'
-
-export interface Transaction {
-  id?: string
-  type: 'buy' | 'sell'
-  symbol: string
-  quantity: number
-  price: number // Price per share at transaction time
-  date: Timestamp
-  /** Broker/source where the transaction was made (e.g. Trading 212, Interactive Broker). Empty = legacy/unset. */
-  source?: string
-  /** Currency of the price (EUR or USD). Defaults to USD for backward compatibility. */
-  currency?: Currency
-  createdAt?: Timestamp
-}
-
-export interface PortfolioAccount {
-  id?: string
-  totalInvested: number // Total money deposited/invested (in baseCurrency)
-  cash: number // Available cash (in baseCurrency)
-  /** Base currency for displaying totals. Defaults to USD. */
-  baseCurrency?: Currency
-  /** 1 EUR = X USD. Used to convert EUR to USD. */
-  eurToUsd?: number
-  /** 1 USD = X EUR. Used to convert USD to EUR. */
-  usdToEur?: number
-  updatedAt?: Timestamp
-}
-
 // App IDs for path namespacing
 const READ_TRACKER_APP_ID = 'read-tracker'
-const PORTFOLIO_TRACKER_APP_ID = 'portfolio-tracker'
 
 // Reading Sessions
 export const getReadingSessions = async (userId: string): Promise<ReadingSession[]> => {
@@ -168,78 +121,3 @@ export const deleteGoal = async (userId: string, goalId: string): Promise<void> 
   return await deleteDoc(goalRef)
 }
 
-// Stock Holdings
-export const getStockHoldings = async (userId: string): Promise<StockHolding[]> => {
-  const holdingsRef = appCollection(db, PORTFOLIO_TRACKER_APP_ID, userId, 'stockHoldings')
-  const snapshot = await getDocs(holdingsRef)
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StockHolding))
-}
-
-export const addStockHolding = async (userId: string, holdingData: Omit<StockHolding, 'id' | 'createdAt' | 'updatedAt'>): Promise<DocumentReference<DocumentData>> => {
-  const holdingsRef = appCollection(db, PORTFOLIO_TRACKER_APP_ID, userId, 'stockHoldings')
-  return await addDoc(holdingsRef, {
-    ...holdingData,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
-  })
-}
-
-export const updateStockHolding = async (userId: string, holdingId: string, updates: UpdateData<StockHolding>): Promise<void> => {
-  const holdingRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'stockHoldings', holdingId)
-  return await updateDoc(holdingRef, {
-    ...updates,
-    updatedAt: Timestamp.now()
-  })
-}
-
-export const deleteStockHolding = async (userId: string, holdingId: string): Promise<void> => {
-  const holdingRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'stockHoldings', holdingId)
-  return await deleteDoc(holdingRef)
-}
-
-// Transactions
-export const getTransactions = async (userId: string): Promise<Transaction[]> => {
-  const transactionsRef = appCollection(db, PORTFOLIO_TRACKER_APP_ID, userId, 'transactions')
-  const q = query(transactionsRef, orderBy('date', 'desc'))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction))
-}
-
-export const addTransaction = async (userId: string, transactionData: Omit<Transaction, 'id' | 'createdAt'>): Promise<DocumentReference<DocumentData>> => {
-  const transactionsRef = appCollection(db, PORTFOLIO_TRACKER_APP_ID, userId, 'transactions')
-  return await addDoc(transactionsRef, {
-    ...transactionData,
-    createdAt: Timestamp.now()
-  })
-}
-
-export const deleteTransaction = async (userId: string, transactionId: string): Promise<void> => {
-  const transactionRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'transactions', transactionId)
-  return await deleteDoc(transactionRef)
-}
-
-// Portfolio Account
-export const getPortfolioAccount = async (userId: string): Promise<PortfolioAccount | null> => {
-  const accountRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'portfolioAccount', 'account')
-  const accountSnap = await getDoc(accountRef)
-  if (accountSnap.exists()) {
-    return { id: accountSnap.id, ...accountSnap.data() } as PortfolioAccount
-  }
-  return null
-}
-
-export const setPortfolioAccount = async (userId: string, accountData: Omit<PortfolioAccount, 'id' | 'updatedAt'>): Promise<void> => {
-  const accountRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'portfolioAccount', 'account')
-  await setDoc(accountRef, {
-    ...accountData,
-    updatedAt: Timestamp.now()
-  }, { merge: true })
-}
-
-export const updatePortfolioAccount = async (userId: string, updates: UpdateData<PortfolioAccount>): Promise<void> => {
-  const accountRef = appDoc(db, PORTFOLIO_TRACKER_APP_ID, userId, 'portfolioAccount', 'account')
-  return await updateDoc(accountRef, {
-    ...updates,
-    updatedAt: Timestamp.now()
-  })
-}

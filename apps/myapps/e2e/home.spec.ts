@@ -7,7 +7,7 @@ test.describe('Home page', () => {
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(page.getByText(/Read Tracker/)).toBeVisible()
-    await expect(page.getByText(/Portfolio Tracker/)).toBeVisible()
+    await expect(page.getByText(/Task List/)).toBeVisible()
   })
 
   test('has no failed (4xx/5xx) requests to app', async ({ page }) => {

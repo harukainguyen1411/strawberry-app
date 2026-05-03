@@ -9,14 +9,6 @@ test.describe('Authentication flows – local mode', () => {
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible()
   })
 
-  test('can access Portfolio Tracker without signing in (local mode)', async ({ page }) => {
-    await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await page.getByRole('button', { name: /open app/i }).nth(1).click()
-    await expect(page).toHaveURL(/\/portfolio-tracker/)
-    await expect(page.getByRole('heading', { name: 'My Holdings' })).toBeVisible()
-  })
-
   test('protected routes redirect to home when not ready then allow access after local mode', async ({ page }) => {
     await page.goto('/read-tracker/sessions')
     await page.waitForURL(/\/(read-tracker|$)/, { timeout: 10000 })
