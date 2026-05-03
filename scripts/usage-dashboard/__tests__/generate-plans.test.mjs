@@ -17,9 +17,9 @@ test('generate-plans: walks all four state dirs and records state', async () => 
     const data = JSON.parse(readFileSync(out, 'utf8'));
     assert.equal(data.plans.length, 3);
     const draft = data.plans.find(p => p.state === 'draft');
-    const flatActive = data.plans.find(p => p.slug === '2026-05-01-already-active');
-    const projected = data.plans.find(p => p.slug === '2026-04-30-projected');
-    assert.equal(draft.slug, '2026-05-02-example');
+    const flatActive = data.plans.find(p => p.slug === 'already-active');
+    const projected = data.plans.find(p => p.slug === 'projected');
+    assert.equal(draft.slug, 'example');
     assert.equal(draft.project, 'example');
     assert.equal(flatActive.state, 'active');
     assert.equal(projected.state, 'active');

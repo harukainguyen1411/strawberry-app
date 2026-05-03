@@ -41,12 +41,8 @@ PHASE_SCAN_JSON="$CACHE_DIR/phase-scan.json"
 PROJECTS_JSON="$DASHBOARD_DIR/projects.json"
 PLANS_JSON="$DASHBOARD_DIR/plans.json"
 
-printf 'Running phase-scan...\n'
-PHASE_SCAN_OUT="$PHASE_SCAN_JSON" \
-  node "$SCRIPT_DIR/phase-scan.mjs" \
-  --projects "$PROJECTS_JSON" \
-  --plans    "$PLANS_JSON"
-
+# Generate registries BEFORE phase-scan so a fresh checkout (no committed
+# projects.json/plans.json yet) still gets attribution on first run.
 printf 'Running generate-projects...\n'
 PROJECTS_OUT="$PROJECTS_JSON" \
   node "$SCRIPT_DIR/generate-projects.mjs"
@@ -54,6 +50,12 @@ PROJECTS_OUT="$PROJECTS_JSON" \
 printf 'Running generate-plans...\n'
 PLANS_OUT="$PLANS_JSON" \
   node "$SCRIPT_DIR/generate-plans.mjs"
+
+printf 'Running phase-scan...\n'
+PHASE_SCAN_OUT="$PHASE_SCAN_JSON" \
+  node "$SCRIPT_DIR/phase-scan.mjs" \
+  --projects "$PROJECTS_JSON" \
+  --plans    "$PLANS_JSON"
 
 printf 'Running merge...\n'
 node "$SCRIPT_DIR/merge.mjs" \

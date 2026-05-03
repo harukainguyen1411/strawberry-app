@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-05-03T07:14:34.376Z",
+  "generatedAt": "2026-05-03T07:40:40.770Z",
   "cutoverDate": "2026-04-28",
   "window": {
     "startTime": "2026-05-03T06:00:00.000Z",
     "endTime": "2026-05-03T11:00:00.000Z",
-    "inputTokens": 7898,
-    "outputTokens": 182523,
-    "totalCost": 34.111934799999986
+    "inputTokens": 8191,
+    "outputTokens": 225318,
+    "totalCost": 53.80687035
   },
   "grid": {
     "byProject": {
@@ -625,8 +625,8 @@
             "sessions": 1
           },
           "Review": {
-            "tokens": 48272740,
-            "durationSec": 4748,
+            "tokens": 87837355,
+            "durationSec": 7632,
             "sessions": 1
           },
           "Brainstorm": {
@@ -641,8 +641,8 @@
           }
         },
         "total": {
-          "tokens": 166915307,
-          "durationSec": 20255,
+          "tokens": 206479922,
+          "durationSec": 23139,
           "sessions": 2
         },
         "byPlan": {
@@ -664,8 +664,8 @@
                 "sessions": 1
               },
               "Review": {
-                "tokens": 48272740,
-                "durationSec": 4748,
+                "tokens": 87837355,
+                "durationSec": 7632,
                 "sessions": 1
               },
               "Brainstorm": {
@@ -680,8 +680,8 @@
               }
             },
             "total": {
-              "tokens": 166915307,
-              "durationSec": 20255,
+              "tokens": 206479922,
+              "durationSec": 23139,
               "sessions": 2
             }
           }
@@ -832,7 +832,7 @@
   "perRepo": [
     {
       "repo": "(unknown)",
-      "tokens": 11805838099,
+      "tokens": 11844439453,
       "durationSec": 0,
       "sessions": 228
     }
@@ -899,33 +899,33 @@
     {
       "sessionId": "-Users-duongntd99-Documents-Personal-raspberry",
       "cwd": null,
-      "tokensIn": 36053,
-      "tokensOut": 4543421,
-      "cacheRead": 739371930,
+      "tokensIn": 36063,
+      "tokensOut": 4550954,
+      "cacheRead": 740031647,
       "cacheCreate": 0,
-      "cost": 600.4246174999987,
+      "cost": 601.0892697499987,
       "model": null,
       "startedAt": null
     },
     {
       "sessionId": "subagents",
       "cwd": null,
-      "tokensIn": 1114,
-      "tokensOut": 98968,
-      "cacheRead": 46251469,
+      "tokensIn": 1262,
+      "tokensOut": 121748,
+      "cacheRead": 68153788,
       "cacheCreate": 0,
-      "cost": 28.545788900000012,
+      "cost": 42.32356239999998,
       "model": null,
       "startedAt": null
     },
     {
       "sessionId": "subagents",
       "cwd": null,
-      "tokensIn": 12893,
-      "tokensOut": 17059,
-      "cacheRead": 5543776,
+      "tokensIn": 13032,
+      "tokensOut": 29727,
+      "cacheRead": 21539816,
       "cacheCreate": 0,
-      "cost": 5.210258699999998,
+      "cost": 10.504311449999998,
       "model": null,
       "startedAt": null
     },

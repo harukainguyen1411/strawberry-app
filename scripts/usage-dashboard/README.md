@@ -40,7 +40,7 @@ ccusage session/blocks/daily
 |----------|---------|-------------|
 | `USAGE_CACHE_DIR` | `~/.claude/raspberry-usage-cache` | Directory for ccusage JSON output and phase-scan cache |
 | `CUTOVER_DATE` | _(none)_ | ISO date string; sessions before this date treated as pre-cutover |
-| `IDLE_CAP_SEC` | `300` | Session idle gap in seconds before a session is split |
+| `IDLE_CAP_SEC` | `600` | Idle-gap cap (seconds) for assistant-message duration. Gaps longer than this are clipped per spec §6 (default: 10 min). |
 | `RASPBERRY_DIR` | auto-detected | Path to this (raspberry) repo root |
 | `PROJECTS_JSON` | `<RASPBERRY_DIR>/dashboards/usage-dashboard/projects.json` | Override path to projects registry (consumed by `phase-scan.mjs`) |
 | `PLANS_JSON` | `<RASPBERRY_DIR>/dashboards/usage-dashboard/plans.json` | Override path to plans registry (consumed by `phase-scan.mjs`) |

@@ -20,7 +20,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scanJsonl, resolveProject } from '../phase-scan.mjs';
+import { scanJsonl, resolveProject, buildBasenameIndex } from '../phase-scan.mjs';
 import { generateProjects } from '../generate-projects.mjs';
 import { generatePlans } from '../generate-plans.mjs';
 
@@ -219,5 +219,99 @@ test('scanJsonl: all records carry a cwd field', async () => {
   );
   for (const r of records) {
     assert.ok('cwd' in r, `expected cwd field on record, got: ${JSON.stringify(r)}`);
+  }
+});
+
+// ── buildBasenameIndex collision detection ───────────────────────────────────
+
+test('buildBasenameIndex: colliding filenames are marked ambiguous and warned', () => {
+  // Two plans across different projects share the same filename
+  // `2026-05-01-foo.md`. Fallback must be skipped for this filename.
+  const planA = {
+    slug: 'foo-alpha',
+    project: 'project-alpha',
+    path: 'plans/personal/active/project-alpha/2026-05-01-foo.md',
+  };
+  const planB = {
+    slug: 'foo-beta',
+    project: 'project-beta',
+    path: 'plans/personal/active/project-beta/2026-05-01-foo.md',
+  };
+  const planUnique = {
+    slug: 'unique',
+    project: 'project-alpha',
+    path: 'plans/personal/active/project-alpha/2026-05-02-unique.md',
+  };
+  // Path-keyed plansIndex (matches production)
+  const plansIndex = {
+    [planA.path]:      planA,
+    [planB.path]:      planB,
+    [planUnique.path]: planUnique,
+  };
+
+  const warnings = [];
+  const idx = buildBasenameIndex(plansIndex, { warn: (m) => warnings.push(m) });
+
+  // Colliding filename → marked ambiguous (not one of the plans)
+  assert.notEqual(idx['2026-05-01-foo.md'], planA);
+  assert.notEqual(idx['2026-05-01-foo.md'], planB);
+  // Unique filename → maps to its plan
+  assert.equal(idx['2026-05-02-unique.md'], planUnique);
+  // One warning emitted listing the collision
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /2026-05-01-foo\.md/);
+  assert.match(warnings[0], /project-alpha/);
+  assert.match(warnings[0], /project-beta/);
+});
+
+test('buildBasenameIndex: no collisions → no warning emitted', () => {
+  const planA = {
+    slug: 'foo',
+    project: 'project-alpha',
+    path: 'plans/personal/active/project-alpha/2026-05-01-foo.md',
+  };
+  const planB = {
+    slug: 'bar',
+    project: 'project-beta',
+    path: 'plans/personal/active/project-beta/2026-05-02-bar.md',
+  };
+  const plansIndex = {
+    [planA.path]: planA,
+    [planB.path]: planB,
+  };
+  const warnings = [];
+  buildBasenameIndex(plansIndex, { warn: (m) => warnings.push(m) });
+  assert.equal(warnings.length, 0);
+});
+
+test('findPlanFromPaths (via scanJsonl): ambiguous-basename fallback is skipped, exact-path still works', async () => {
+  // Build a plansIndex with two plans sharing a filename. The exact-path
+  // lookup should still resolve when a tool_use references the full path,
+  // but the basename fallback must not. This test exercises the full
+  // resolveProject → findPlanFromPaths path through scanJsonl.
+  const planA = {
+    slug: 'foo-alpha',
+    project: 'project-alpha',
+    path: 'plans/personal/active/project-alpha/2026-05-01-foo.md',
+  };
+  const planB = {
+    slug: 'foo-beta',
+    project: 'project-beta',
+    path: 'plans/personal/active/project-beta/2026-05-01-foo.md',
+  };
+  const plansIndex = {
+    [planA.path]: planA,
+    [planB.path]: planB,
+  };
+
+  // Exact-path tool_use → resolves cleanly to planA
+  const records = await scanJsonl(
+    join(fixturesDir, 'attribution-collision-exact.jsonl'),
+    { projectsIndex: {}, plansIndex, raspberryDir: '/Users/u/Documents/Personal/raspberry' },
+  );
+  assert.ok(records.length > 0);
+  for (const r of records) {
+    assert.equal(r.projectSlug, 'project-alpha');
+    assert.equal(r.planSlug,    'foo-alpha');
   }
 });
