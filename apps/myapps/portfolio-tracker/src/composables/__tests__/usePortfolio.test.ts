@@ -87,7 +87,7 @@ beforeEach(() => {
 })
 
 describe('A.6 — usePortfolio FX-error reactive stability', () => {
-  it.fails('A.6.1 persistent FxRateMissingError flips status to error exactly once (no infinite loop)', async () => {
+  it('A.6.1 persistent FxRateMissingError flips status to error exactly once (no infinite loop)', async () => {
     const { value: pf, scope } = withScope(() => usePortfolio())
     try {
       // Track every status transition. On the bug this fires hundreds of
@@ -141,7 +141,7 @@ describe('A.6 — usePortfolio FX-error reactive stability', () => {
     }
   })
 
-  it.fails('A.6.2 fx doc update with the missing pair recovers from error to ready', async () => {
+  it('A.6.2 fx doc update with the missing pair recovers from error to ready', async () => {
     const { value: pf, scope } = withScope(() => usePortfolio())
     try {
       mockUid.value = 'user-B'
