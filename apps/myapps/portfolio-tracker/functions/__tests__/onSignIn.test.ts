@@ -55,9 +55,17 @@ describe('A.1 — onSignIn allowlist guard', () => {
 describe('A.1 — onSignIn handler trigger and per-invocation guard', () => {
   const allowlistedEmail = 'harukainguyen1411@gmail.com'
 
-  // Mock firebase-admin before importing onSignIn so admin.initializeApp() and
-  // admin.firestore() don't require a live Firebase project.
+  // Mock firebase-admin subpath modules before importing onSignIn so
+  // initializeApp() and getFirestore() don't require a live Firebase project.
+  // Subpath imports (firebase-admin/app + firebase-admin/firestore) are required
+  // at runtime under ESM — see onSignIn.ts for the reason — so the mock must
+  // intercept those subpaths, not the top-level 'firebase-admin' module.
   const mockGet = vi.fn()
+  const firestoreStub = {
+    collection: vi.fn().mockReturnValue({
+      doc: vi.fn().mockReturnValue({ get: mockGet }),
+    }),
+  }
 
   beforeEach(() => {
     mockGet.mockReset()
@@ -66,23 +74,12 @@ describe('A.1 — onSignIn handler trigger and per-invocation guard', () => {
       data: () => ({ emails: [allowlistedEmail] }),
     })
 
-    vi.doMock('firebase-admin', () => ({
-      default: {
-        apps: ['stub'], // non-empty so initializeApp() is skipped
-        initializeApp: vi.fn(),
-        firestore: vi.fn().mockReturnValue({
-          collection: vi.fn().mockReturnValue({
-            doc: vi.fn().mockReturnValue({ get: mockGet }),
-          }),
-        }),
-      },
-      apps: ['stub'],
+    vi.doMock('firebase-admin/app', () => ({
+      getApps: vi.fn().mockReturnValue(['stub']), // non-empty → skip initializeApp()
       initializeApp: vi.fn(),
-      firestore: vi.fn().mockReturnValue({
-        collection: vi.fn().mockReturnValue({
-          doc: vi.fn().mockReturnValue({ get: mockGet }),
-        }),
-      }),
+    }))
+    vi.doMock('firebase-admin/firestore', () => ({
+      getFirestore: vi.fn().mockReturnValue(firestoreStub),
     }))
   })
 

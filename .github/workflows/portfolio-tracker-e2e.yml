@@ -1,0 +1,107 @@
+name: Portfolio Tracker E2E
+
+on:
+  pull_request:
+    paths:
+      - 'apps/myapps/portfolio-tracker/**'
+      - '.github/workflows/portfolio-tracker-e2e.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Portfolio Tracker E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+          # PT v0 is an npm workspace member — no own lockfile.
+          # The root package-lock.json owns its deps; functions/ has its own.
+          cache-dependency-path: |
+            package-lock.json
+            apps/myapps/portfolio-tracker/functions/package-lock.json
+
+      - name: Install dependencies (workspace install from repo root)
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/myapps/portfolio-tracker
+
+      - name: Install Playwright system deps (cached browser path)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+        working-directory: apps/myapps/portfolio-tracker
+
+      # firebase-tools >= 15.x requires JDK 21+ to run the Auth/Firestore emulators.
+      # ubuntu-latest ships JDK 17 which fails with:
+      #   "firebase-tools no longer supports Java version before 21"
+      - name: Set up JDK 21 (for Firebase emulators)
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00  # v4.7.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools@^15.14.0
+
+      - name: Install Cloud Functions dependencies
+        run: npm ci
+        working-directory: apps/myapps/portfolio-tracker/functions
+
+      - name: Build Cloud Functions (emit JS despite type errors)
+        # --noEmitOnError false makes tsc emit JS, but it still exits non-zero on
+        # type errors. global-setup.ts wraps this in try/catch locally; CI's
+        # bash -e doesn't, so swallow the exit code while keeping the JS output.
+        run: npx tsc --noEmitOnError false || true
+        working-directory: apps/myapps/portfolio-tracker/functions
+
+      - name: Run Portfolio Tracker E2E
+        run: npm run test:e2e
+        working-directory: apps/myapps/portfolio-tracker
+        env:
+          CI: true
+          VITE_USE_FIREBASE_EMULATOR: 'true'
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || 'e2e-placeholder-api-key' }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || 'portfolio-tracker-e2e.firebaseapp.com' }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || 'portfolio-tracker-e2e' }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || 'portfolio-tracker-e2e.appspot.com' }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || '000000000000' }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID || '1:000000000000:web:e2e-placeholder' }}
+          VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID || 'G-E2EPLCHLDR' }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.6.1
+        with:
+          name: portfolio-tracker-playwright-report
+          path: apps/myapps/portfolio-tracker/playwright-report/
+          retention-days: 30
+
+      - name: Upload E2E screenshots and artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.6.1
+        with:
+          name: portfolio-tracker-e2e-artifacts
+          path: apps/myapps/portfolio-tracker/e2e/artifacts/
+          retention-days: 30

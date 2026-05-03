@@ -184,7 +184,13 @@ export function usePortfolio(): UsePortfolioReturn {
     }
     try {
       const list: Holding[] = positions.value.map((p): Holding => {
-        const marketValueBase = convertMoney(p.marketValue, base, fx.value)
+        // Fallback: if marketValue is missing (e.g. legacy data or parser gap),
+        // derive it from avgCost × quantity so the dashboard still renders.
+        const effectiveMarketValue: Money = p.marketValue ?? {
+          amount: p.avgCost.amount * p.quantity,
+          currency: p.avgCost.currency,
+        }
+        const marketValueBase = convertMoney(effectiveMarketValue, base, fx.value)
         const costBasisBase = convertMoney(
           { amount: p.avgCost.amount * p.quantity, currency: p.avgCost.currency },
           base,
@@ -211,6 +217,8 @@ export function usePortfolio(): UsePortfolioReturn {
       })
       const totalValueAmount = list.reduce((acc, h) => acc + h.marketValue.amount, 0)
       const cashTotalAmount = cash.value.reduce((acc, c) => {
+        // Skip cash entries with no currency (placeholder rows from v0 import)
+        if (!c.currency) return acc
         const converted = convertMoney({ amount: c.amount, currency: c.currency }, base, fx.value)
         return acc + converted.amount
       }, 0)

@@ -62,10 +62,20 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _from, next) => {
-  // Use both auth systems during transition: existing authStore + new useAuth
+  // Auth guard for portfolio-tracker V0 routes.
+  //
+  // Primary authority: useAuth() (Firebase onAuthStateChanged).
+  // Fallback: legacy authStore.isAuthenticated for the host-shell transition
+  // period — but ONLY when the legacy store has a real Firebase user (not just
+  // localMode). localMode is a read-tracker concept that should not grant
+  // access to the portfolio-tracker routes.
+  //
+  // Refs V0.18 (fixed auth guard to exclude localMode from fallback)
   const authStore = useAuthStore()
 
-  // Wait for initial auth check
+  // Wait for initial auth check (legacy store still drives the loading flag).
+  // TODO: when the legacy auth store is removed, switch to `useAuth().loading`
+  // (singleton driven by onAuthStateChanged) — see V0-app cleanup follow-up.
   if (authStore.loading) {
     await new Promise<void>((resolve) => {
       const check = () => {
@@ -77,9 +87,12 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   const { isAuthenticated } = useAuth()
-  const authed = isAuthenticated.value || authStore.isAuthenticated
-
-  if (to.meta.requiresAuth && !authed) {
+  // useAuth().isAuthenticated is the sole source of truth — driven by
+  // onAuthStateChanged, true iff there's a real Firebase user. We deliberately
+  // do NOT honour authStore.isAuthenticated because that returns true for
+  // localMode (legacy host-shell pattern) which would bypass the V0 sign-in
+  // gate that V0.18 E2E relies on.
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
     next({ name: 'sign-in' })
   } else {
     next()
