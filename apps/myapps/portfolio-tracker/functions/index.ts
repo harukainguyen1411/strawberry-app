@@ -1,10 +1,11 @@
-import * as admin from 'firebase-admin'
+import { initializeApp, getApps } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
 import { onCall, HttpsError, type CallableRequest } from 'firebase-functions/v2/https'
 import { importCsv as importCsvHandler } from './import.js'
 import type { ImportResult } from './portfolio-tools/types.js'
 
-if (!admin.apps.length) {
-  admin.initializeApp()
+if (!getApps().length) {
+  initializeApp()
 }
 
 export { onSignIn } from './onSignIn.js'
@@ -37,7 +38,7 @@ export const importCsv = onCall<ImportCsvData>(
     }
 
     try {
-      const db = admin.firestore()
+      const db = getFirestore()
       return await importCsvHandler({ uid, db, source, csv })
     } catch (err: unknown) {
       if (err instanceof HttpsError) throw err

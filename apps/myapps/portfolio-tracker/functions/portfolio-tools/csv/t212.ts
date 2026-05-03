@@ -232,12 +232,18 @@ function updatePositionMap(map: Map<string, Position>, trade: Trade): void {
   const existing = map.get(trade.ticker)
   if (!existing) {
     if (trade.side === 'BUY') {
+      const qty = trade.quantity
+      const price = trade.price.amount
       map.set(trade.ticker, {
         ticker: trade.ticker,
         broker: 'T212',
-        quantity: trade.quantity,
-        avgCost: { amount: trade.price.amount, currency: trade.currency },
+        quantity: qty,
+        avgCost: { amount: price, currency: trade.currency },
         currency: trade.currency,
+        // Use last trade price as a proxy for current price (no live data at v0)
+        lastPrice: price,
+        lastPriceAt: trade.executedAt,
+        marketValue: { amount: qty * price, currency: trade.currency },
       })
     }
     return
@@ -248,10 +254,17 @@ function updatePositionMap(map: Map<string, Position>, trade: Trade): void {
     const totalCost = existing.avgCost.amount * existing.quantity + trade.price.amount * trade.quantity
     existing.quantity = totalShares
     existing.avgCost = { amount: totalCost / totalShares, currency: existing.currency }
+    existing.lastPrice = trade.price.amount
+    existing.lastPriceAt = trade.executedAt
+    existing.marketValue = { amount: totalShares * trade.price.amount, currency: existing.currency }
   } else {
     existing.quantity = Math.max(0, existing.quantity - trade.quantity)
     if (existing.quantity === 0) {
       map.delete(trade.ticker)
+    } else {
+      existing.lastPrice = trade.price.amount
+      existing.lastPriceAt = trade.executedAt
+      existing.marketValue = { amount: existing.quantity * trade.price.amount, currency: existing.currency }
     }
   }
 }

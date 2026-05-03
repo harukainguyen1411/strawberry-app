@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator, type Firestore } from 'firebase/firestore'
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions'
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage'
 import { getAnalytics, type Analytics, isSupported } from 'firebase/analytics'
 
@@ -31,6 +32,7 @@ if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
   connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
   connectFirestoreEmulator(db, 'localhost', 8080)
   connectStorageEmulator(storage, 'localhost', 9199)
+  connectFunctionsEmulator(getFunctions(app), 'localhost', 5001)
 }
 
 let analytics: Analytics | null = null

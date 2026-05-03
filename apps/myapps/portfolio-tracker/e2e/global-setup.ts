@@ -41,6 +41,7 @@ export default async function globalSetup() {
   const alreadyUp = await probeEmulators(2_000)
   if (alreadyUp) {
     console.log('[global-setup] Emulators already running — skipping spawn.')
+    await clearEmulatorData()
     await seedAllowlist()
     return
   }
@@ -93,7 +94,8 @@ export default async function globalSetup() {
     throw new Error('[global-setup] Timed out waiting for Firebase emulators')
   }
 
-  // Seed allowlist
+  // Clear any stale data from previous runs, then seed
+  await clearEmulatorData()
   await seedAllowlist()
   console.log('[global-setup] Emulators ready, allowlist seeded.')
 }
@@ -130,8 +132,36 @@ async function waitForEmulators(maxWaitMs: number, intervalMs = 1_000): Promise<
   return false
 }
 
+async function clearEmulatorData(): Promise<void> {
+  // Clear Firestore emulator data so each run starts clean.
+  // Uses the emulator's admin HTTP endpoint (DELETE all documents).
+  const url =
+    `http://127.0.0.1:8080/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`
+  const res = await fetch(url, { method: 'DELETE' })
+  if (!res.ok && res.status !== 404) {
+    const text = await res.text()
+    console.warn(`[global-setup] clearEmulatorData warning: HTTP ${res.status}: ${text}`)
+  } else {
+    console.log('[global-setup] Firestore emulator data cleared.')
+  }
+
+  // Clear Auth emulator accounts
+  const authUrl =
+    `http://127.0.0.1:9099/emulator/v1/projects/${PROJECT_ID}/accounts`
+  const authRes = await fetch(authUrl, { method: 'DELETE' })
+  if (!authRes.ok && authRes.status !== 404 && authRes.status !== 405) {
+    const text = await authRes.text()
+    console.warn(`[global-setup] clearAuthData warning: HTTP ${authRes.status}: ${text}`)
+  } else {
+    console.log('[global-setup] Auth emulator accounts cleared.')
+  }
+}
+
 async function seedAllowlist(): Promise<void> {
-  // Use the Firestore emulator REST API to seed config/auth_allowlist
+  // Use the Firestore emulator REST API with the admin bypass token.
+  // The config/auth_allowlist doc has `allow read, write: if false` in
+  // production rules; the emulator honours `Authorization: Bearer owner` to
+  // bypass security rules for seed/teardown operations.
   const url =
     `http://127.0.0.1:8080/v1/projects/${PROJECT_ID}/databases/(default)/documents/config/auth_allowlist`
   const body = {
@@ -146,7 +176,11 @@ async function seedAllowlist(): Promise<void> {
 
   const res = await fetch(url, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      // Emulator admin bypass — bypasses Firestore security rules
+      Authorization: 'Bearer owner',
+    },
     body: JSON.stringify(body),
   })
 
