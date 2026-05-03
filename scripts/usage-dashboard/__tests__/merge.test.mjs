@@ -195,6 +195,124 @@ test('regression I1: cacheCreate field in sessions output uses cacheCreationToke
   }
 });
 
+// ── Regression: session attribution joins via ccusage project key ────────────
+// F3 originally keyed sessionAttribution by phase-scan sessionId (real JSONL
+// UUIDs) and looked up by ccusage sessionId (project-path slugs). The two
+// never matched in production, leaving every session with projectSlug: null.
+// This test pins the join to ccusageProjectKey(cwd) so the bug can't return.
+
+test('regression I5b: session.projectSlug + planSlug join via ccusage project key (real-shape IDs)', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'merge-'));
+  try {
+    // ccusage side: sessionId is a project-path slug (encoded cwd dir).
+    const sessPath = join(tmp, 'sessions.json');
+    writeFileSync(sessPath, JSON.stringify({
+      totals: { totalCost: 0.1 },
+      sessions: [{
+        sessionId: '-Users-me-Documents-Personal-foo',
+        inputTokens: 100,
+        outputTokens: 50,
+        cacheReadTokens: 0,
+        cacheCreationTokens: 0,
+        totalCost: 0.1,
+        model: 'claude-opus-4-7',
+        lastActivity: '2026-05-01',
+        projectPath: '-Users-me-Documents-Personal-foo',
+      }],
+    }));
+    // phase-scan side: sessionId is a JSONL UUID, cwd is the actual path.
+    const phaseScanPath = join(tmp, 'phase-scan.json');
+    writeFileSync(phaseScanPath, JSON.stringify({
+      records: [{
+        sessionId:   'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        messageIdx:  0,
+        phase:       'Plan',
+        projectSlug: 'foo',
+        planSlug:    '2026-05-01-foo-init',
+        cwd:         '/Users/me/Documents/Personal/foo',
+        tokens:      150,
+        durationSec: 90,
+        timestamp:   '2026-05-01T10:00:00Z',
+        subagent:    false,
+      }],
+    }));
+    const out = join(tmp, 'data.json');
+    const r = spawnSync('node', [
+      mergeMjs,
+      '--sessions',   sessPath,
+      '--blocks',     join(fix, 'blocks.json'),
+      '--daily',      join(fix, 'daily.json'),
+      '--phase-scan', phaseScanPath,
+      '--projects',   join(fix, 'projects.json'),
+      '--plans',      join(fix, 'plans.json'),
+      '--out',        out,
+    ], { encoding: 'utf8', env: { ...process.env, CUTOVER_DATE: '2026-04-28' } });
+    assert.equal(r.status, 0, r.stderr);
+    const got = JSON.parse(readFileSync(out, 'utf8'));
+    const sess = got.sessions[0];
+    assert.ok(sess, 'no session in output');
+    assert.equal(sess.projectSlug, 'foo',
+      `expected projectSlug='foo' (joined via ccusageProjectKey(cwd)), got ${sess.projectSlug}`);
+    assert.equal(sess.planSlug, '2026-05-01-foo-init',
+      `expected planSlug='2026-05-01-foo-init', got ${sess.planSlug}`);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('regression I5b: most-frequent attribution wins when one ccusage session spans multiple plans', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'merge-'));
+  try {
+    const sessPath = join(tmp, 'sessions.json');
+    writeFileSync(sessPath, JSON.stringify({
+      totals: { totalCost: 0.1 },
+      sessions: [{
+        sessionId: '-Users-me-Documents-Personal-bar',
+        inputTokens: 100, outputTokens: 50,
+        cacheReadTokens: 0, cacheCreationTokens: 0,
+        totalCost: 0.1, model: 'claude-opus-4-7',
+        lastActivity: '2026-05-01',
+        projectPath: '-Users-me-Documents-Personal-bar',
+      }],
+    }));
+    // 3 records on plan-A, 1 record on plan-B → plan-A wins.
+    const phaseScanPath = join(tmp, 'phase-scan.json');
+    writeFileSync(phaseScanPath, JSON.stringify({
+      records: [
+        { sessionId: 'u1', messageIdx: 0, phase: 'Plan', projectSlug: 'bar', planSlug: 'plan-a',
+          cwd: '/Users/me/Documents/Personal/bar', tokens: 50, durationSec: 30,
+          timestamp: '2026-05-01T10:00:00Z', subagent: false },
+        { sessionId: 'u2', messageIdx: 0, phase: 'Plan', projectSlug: 'bar', planSlug: 'plan-a',
+          cwd: '/Users/me/Documents/Personal/bar', tokens: 50, durationSec: 30,
+          timestamp: '2026-05-01T11:00:00Z', subagent: false },
+        { sessionId: 'u3', messageIdx: 0, phase: 'Plan', projectSlug: 'bar', planSlug: 'plan-a',
+          cwd: '/Users/me/Documents/Personal/bar', tokens: 50, durationSec: 30,
+          timestamp: '2026-05-01T12:00:00Z', subagent: false },
+        { sessionId: 'u4', messageIdx: 0, phase: 'Plan', projectSlug: 'bar', planSlug: 'plan-b',
+          cwd: '/Users/me/Documents/Personal/bar', tokens: 50, durationSec: 30,
+          timestamp: '2026-05-01T13:00:00Z', subagent: false },
+      ],
+    }));
+    const out = join(tmp, 'data.json');
+    const r = spawnSync('node', [
+      mergeMjs,
+      '--sessions',   sessPath,
+      '--blocks',     join(fix, 'blocks.json'),
+      '--daily',      join(fix, 'daily.json'),
+      '--phase-scan', phaseScanPath,
+      '--projects',   join(fix, 'projects.json'),
+      '--plans',      join(fix, 'plans.json'),
+      '--out',        out,
+    ], { encoding: 'utf8', env: { ...process.env, CUTOVER_DATE: '2026-04-28' } });
+    assert.equal(r.status, 0, r.stderr);
+    const got = JSON.parse(readFileSync(out, 'utf8'));
+    assert.equal(got.sessions[0].planSlug, 'plan-a',
+      `expected most-frequent plan-a, got ${got.sessions[0].planSlug}`);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 // ── Regression: cost not in grid cells ────────────────────────────────────────
 
 test('regression C4: grid cells have no cost field (cost dropped from grid)', () => {

@@ -122,20 +122,40 @@ const sparkline = last14.map(d => ({
 
 // ── Sessions output ───────────────────────────────────────────────────────────
 
-// Build a sessionId → { projectSlug, planSlug } lookup from the first matching
-// phase-scan record for each session. Provides accurate attribution for drill-down.
-const sessionAttribution = {};
+// ccusage's session.sessionId is a project-path slug (the encoded JSONL parent
+// directory): "/Users/foo/bar" → "-Users-foo-bar". Phase-scan records carry
+// real JSONL UUIDs as sessionId and the actual cwd. To attribute a ccusage
+// session to a (projectSlug, planSlug) we group phase-scan records by the
+// ccusage-shape key derived from each record's cwd, then take the
+// most-frequent (projectSlug, planSlug) tuple within that group. A single
+// ccusage session spans many JSONL transcripts on the same cwd, so picking
+// the modal attribution is the right call.
+function ccusageProjectKey(cwd) {
+  if (!cwd) return null;
+  return '-' + cwd.replace(/^\//, '').replace(/\//g, '-');
+}
+
+const ccusageAttribution = {};
 for (const r of phaseScan.records) {
-  if (!sessionAttribution[r.sessionId]) {
-    sessionAttribution[r.sessionId] = {
-      projectSlug: r.projectSlug ?? null,
-      planSlug:    r.planSlug    ?? null,
-    };
+  const key = ccusageProjectKey(r.cwd);
+  if (!key) continue;
+  if (!ccusageAttribution[key]) ccusageAttribution[key] = new Map();
+  const counts = ccusageAttribution[key];
+  const subKey = JSON.stringify([r.projectSlug ?? null, r.planSlug ?? null]);
+  counts.set(subKey, (counts.get(subKey) ?? 0) + 1);
+}
+
+function bestAttribution(group) {
+  if (!group) return { projectSlug: null, planSlug: null };
+  let best = null, bestCount = -1;
+  for (const [k, v] of group.entries()) {
+    if (v > bestCount) { bestCount = v; best = JSON.parse(k); }
   }
+  return { projectSlug: best?.[0] ?? null, planSlug: best?.[1] ?? null };
 }
 
 const sessionsOut = sessions.sessions.map(s => {
-  const attr = sessionAttribution[s.sessionId] ?? { projectSlug: null, planSlug: null };
+  const attr = bestAttribution(ccusageAttribution[s.sessionId]);
   return {
     sessionId:   s.sessionId,
     cwd:         s.cwd         ?? null,
