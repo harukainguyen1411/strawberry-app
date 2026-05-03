@@ -124,23 +124,29 @@ async function probeEmulators(timeoutMs: number): Promise<boolean> {
 }
 
 async function waitForEmulators(maxWaitMs: number, intervalMs = 1_000): Promise<boolean> {
+  // Use the Firebase Emulator Hub at port 4400 as the canonical readiness signal.
+  // The hub binds last (after all emulators register) and exposes /emulators with
+  // a JSON map of every emulator that's accepting traffic. Project-scoped probes
+  // on /emulator/v1/projects/{id}/config aren't reliable in CI: that endpoint
+  // doesn't bind until the project namespace has been touched at least once.
+  const requiredEmulators = ['auth', 'firestore', 'functions']
   const deadline = Date.now() + maxWaitMs
   while (Date.now() < deadline) {
-    const [authOk, fsOk] = await Promise.all([
-      probeProjectScopedEmulator(
-        '127.0.0.1:9099',
-        `/emulator/v1/projects/${PROJECT_ID}/config`,
-        2_000,
-      ),
-      probeProjectScopedEmulator(
-        '127.0.0.1:8080',
-        `/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
-        2_000,
-      ),
-    ])
-    if (authOk && fsOk) {
-      console.log('[global-setup] Auth + Firestore emulators are up.')
-      return true
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 2_000)
+      const res = await fetch('http://127.0.0.1:4400/emulators', { signal: controller.signal })
+      clearTimeout(timer)
+      if (res.ok) {
+        const map = (await res.json()) as Record<string, unknown>
+        const missing = requiredEmulators.filter((name) => !(name in map))
+        if (missing.length === 0) {
+          console.log(`[global-setup] Emulator hub reports all expected emulators up: ${requiredEmulators.join(', ')}`)
+          return true
+        }
+      }
+    } catch {
+      // Hub not bound yet — fall through to retry
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs))
   }

@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:e2e": "firebase emulators:exec --only auth,firestore,functions --project portfolio-tracker-e2e 'node e2e/seed-allowlist.mjs && VITE_USE_FIREBASE_EMULATOR=true vite'",
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
