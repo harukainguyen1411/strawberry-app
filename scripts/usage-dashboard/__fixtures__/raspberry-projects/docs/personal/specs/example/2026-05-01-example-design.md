@@ -1,7 +1,7 @@
 ---
 project: example
 concern: personal
-slug: already-active
+slug: example-design
 ---
 
-Active fixture.
+Example spec fixture.

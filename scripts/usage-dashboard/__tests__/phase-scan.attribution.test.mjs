@@ -3,15 +3,15 @@
 //
 // Fixture raspberry tree: scripts/usage-dashboard/__fixtures__/raspberry-projects/
 //   projects/personal/example/README.md  (slug: example, product: strawberry-app)
-//   plans/personal/draft/2026-05-02-example.md  (project: example)
-//   plans/personal/active/2026-05-01-already-active.md  (project: example)
-//   plans/personal/active/example/2026-04-30-projected.md  (project: example)
+//   plans/personal/draft/2026-05-02-example.md          (slug: example,        project: example)
+//   plans/personal/active/2026-05-01-already-active.md  (slug: already-active, project: example)
+//   plans/personal/active/example/2026-04-30-projected.md (slug: projected,    project: example)
+//   docs/personal/specs/example/2026-05-01-example-design.md (slug: example-design, project: example)
 //
-// Products.json (generated from fixture tree): strawberry-app → example project
-// Plans.json (generated from fixture tree): 3 plans all under example project
+// Slugs are date-stripped (matches real-world plan/spec frontmatter).
 //
 // JSONL fixtures:
-//   attribution-worktree-cwd.jsonl  — cwd = <product-repo>/.worktrees/2026-04-30-projected
+//   attribution-worktree-cwd.jsonl  — cwd = <product-repo>/.worktrees/projected
 //   attribution-raspberry-cwd.jsonl — cwd = RASPBERRY_DIR, Read tool_uses reference plan path
 //   attribution-product-repo-cwd.jsonl — cwd = product-repo bare path, Read references plan
 //   attribution-unscoped.jsonl      — cwd outside any known repo → (unscoped)
@@ -45,22 +45,19 @@ async function getIndexes() {
     outPath: join(raspberryDir, '__generated-plans.json'),
   });
 
-  // Build slug → plan map
   projectsIndex = {};
   for (const p of projects) projectsIndex[p.slug] = p;
 
+  // plansIndex is keyed by relative path (matches plans.json `path` field).
+  // Slug-keyed lookup would mask Bug 1 because real plans have date-stripped slugs
+  // while file basenames carry dates.
   plansIndex = {};
-  for (const p of plans) plansIndex[p.slug] = p;
+  for (const p of plans) plansIndex[p.path] = p;
 
   return { projectsIndex, plansIndex };
 }
 
-// ── fake product-repo base path ───────────────────────────────────────────────
-
-// The fixture JSONLs use "/Users/u/Documents/Personal/strawberry-app" as the
-// product-repo base, and "/Users/u/Documents/Personal/raspberry" as raspberry dir.
-// We pass a custom raspberryDir (fixture), product-repo paths are derived from
-// projectsIndex (product field = "strawberry-app") + a test-supplied productRepoBase.
+// ── test paths ────────────────────────────────────────────────────────────────
 
 const FIXTURE_RASPBERRY_DIR   = '/Users/u/Documents/Personal/raspberry';
 const FIXTURE_PRODUCT_REPO    = '/Users/u/Documents/Personal/strawberry-app';
@@ -69,16 +66,18 @@ const FIXTURE_PRODUCT_REPO    = '/Users/u/Documents/Personal/strawberry-app';
 
 test('resolveProject: worktree cwd → resolves fixture project + plan slug', async () => {
   const { projectsIndex: pi, plansIndex: pli } = await getIndexes();
-  // cwd ends with .worktrees/<plan-slug>
-  const cwd = `${FIXTURE_PRODUCT_REPO}/.worktrees/2026-04-30-projected`;
+  // cwd ends with .worktrees/<plan-slug> — the worktree dir name IS the plan slug
+  const cwd = `${FIXTURE_PRODUCT_REPO}/.worktrees/projected`;
   const result = resolveProject(cwd, [], pi, pli, FIXTURE_RASPBERRY_DIR);
   assert.equal(result.projectSlug, 'example');
-  assert.equal(result.planSlug,    '2026-04-30-projected');
+  assert.equal(result.planSlug,    'projected');
 });
 
-test('resolveProject: raspberry-dir cwd with Read tool_use → resolves via plan path', async () => {
+test('resolveProject: raspberry-dir cwd with Read tool_use → resolves via plan path (date-stripped slug)', async () => {
   const { projectsIndex: pi, plansIndex: pli } = await getIndexes();
-  // tool_use Read blocks referencing plan files under plans/personal/...
+  // tool_use Read blocks referencing a plan file by its real (date-prefixed)
+  // filename. The implementation must do a PATH-based lookup, not a stem-based
+  // lookup, because the plan's slug is date-stripped.
   const toolUseRecords = [
     {
       type: 'assistant',
@@ -100,20 +99,42 @@ test('resolveProject: raspberry-dir cwd with Read tool_use → resolves via plan
   ];
   const result = resolveProject(FIXTURE_RASPBERRY_DIR, toolUseRecords, pi, pli, FIXTURE_RASPBERRY_DIR);
   assert.equal(result.projectSlug, 'example');
-  assert.equal(result.planSlug,    '2026-04-30-projected');
+  assert.equal(result.planSlug,    'projected');
+});
+
+test('resolveProject: raspberry-dir cwd with Read tool_use on spec → resolves via spec frontmatter', async () => {
+  const { projectsIndex: pi, plansIndex: pli } = await getIndexes();
+  // Spec §4 step 3: brainstorming sessions touch only spec files.
+  // Spec lives at docs/<concern>/specs/<project>/<file>.md and carries
+  // `project:` + `slug:` frontmatter. The spec's slug becomes the planSlug.
+  // We use the actual fixture raspberryDir (filesystem path) so the on-the-fly
+  // frontmatter read can find the spec file.
+  const toolUseRecords = [
+    {
+      type: 'assistant',
+      message: {
+        content: [
+          {
+            type:  'tool_use',
+            name:  'Read',
+            input: { file_path: `${raspberryDir}/docs/personal/specs/example/2026-05-01-example-design.md` },
+          },
+          {
+            type:  'tool_use',
+            name:  'Edit',
+            input: { file_path: `${raspberryDir}/docs/personal/specs/example/2026-05-01-example-design.md` },
+          },
+        ],
+      },
+    },
+  ];
+  const result = resolveProject(raspberryDir, toolUseRecords, pi, pli, raspberryDir);
+  assert.equal(result.projectSlug, 'example');
+  assert.equal(result.planSlug,    'example-design');
 });
 
 test('resolveProject: bare product-repo cwd with Read tool_use → resolves via plan path', async () => {
   const { projectsIndex: pi, plansIndex: pli } = await getIndexes();
-  // Build a product-path → project lookup on the fly
-  // The fixture project "example" has product = "strawberry-app"
-  // We fake the full product-repo path as FIXTURE_PRODUCT_REPO
-  const overrideProjectsIndex = {
-    ...pi,
-    // Inject the full product path for matching
-  };
-  // resolveProject needs to know that FIXTURE_PRODUCT_REPO == "strawberry-app"
-  // We inject a productPathMap: productRepoName → absolutePath
   const productPathMap = { 'strawberry-app': FIXTURE_PRODUCT_REPO };
   const toolUseRecords = [
     {
@@ -132,13 +153,13 @@ test('resolveProject: bare product-repo cwd with Read tool_use → resolves via 
   const result = resolveProject(
     FIXTURE_PRODUCT_REPO,
     toolUseRecords,
-    overrideProjectsIndex,
+    pi,
     pli,
     FIXTURE_RASPBERRY_DIR,
     productPathMap,
   );
   assert.equal(result.projectSlug, 'example');
-  assert.equal(result.planSlug,    '2026-04-30-projected');
+  assert.equal(result.planSlug,    'projected');
 });
 
 test('resolveProject: cwd outside any known repo → (unscoped)', async () => {
@@ -159,8 +180,8 @@ test('scanJsonl: worktree-cwd JSONL → all records carry correct projectSlug + 
   );
   assert.ok(records.length > 0, 'expected records');
   for (const r of records) {
-    assert.equal(r.projectSlug, 'example',             `expected projectSlug=example, got ${r.projectSlug}`);
-    assert.equal(r.planSlug,    '2026-04-30-projected', `expected planSlug=2026-04-30-projected, got ${r.planSlug}`);
+    assert.equal(r.projectSlug, 'example',   `expected projectSlug=example, got ${r.projectSlug}`);
+    assert.equal(r.planSlug,    'projected', `expected planSlug=projected, got ${r.planSlug}`);
   }
 });
 
@@ -172,8 +193,8 @@ test('scanJsonl: raspberry-cwd JSONL with Read tool_use → resolves to plan pro
   );
   assert.ok(records.length > 0, 'expected records');
   for (const r of records) {
-    assert.equal(r.projectSlug, 'example',             `expected projectSlug=example, got ${r.projectSlug}`);
-    assert.equal(r.planSlug,    '2026-04-30-projected', `expected planSlug=2026-04-30-projected, got ${r.planSlug}`);
+    assert.equal(r.projectSlug, 'example',   `expected projectSlug=example, got ${r.projectSlug}`);
+    assert.equal(r.planSlug,    'projected', `expected planSlug=projected, got ${r.planSlug}`);
   }
 });
 

@@ -1,112 +1,248 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-05-03T06:44:21.874Z",
+  "generatedAt": "2026-05-03T07:14:34.376Z",
   "cutoverDate": "2026-04-28",
   "window": {
     "startTime": "2026-05-03T06:00:00.000Z",
     "endTime": "2026-05-03T11:00:00.000Z",
-    "inputTokens": 7624,
-    "outputTokens": 112142,
-    "totalCost": 17.99466544999999
+    "inputTokens": 7898,
+    "outputTokens": 182523,
+    "totalCost": 34.111934799999986
   },
   "grid": {
     "byProject": {
       "(unscoped)": {
         "byPhase": {
           "(unphased)": {
-            "tokens": 16500623038,
-            "durationSec": 2804454,
-            "sessions": 2316
-          },
-          "Plan": {
-            "tokens": 246341584,
-            "durationSec": 27989,
-            "sessions": 11
-          },
-          "Implement": {
-            "tokens": 228079886,
-            "durationSec": 22474,
-            "sessions": 10
+            "tokens": 16111236725,
+            "durationSec": 2776004,
+            "sessions": 2298
           },
           "Debug": {
-            "tokens": 76940100,
-            "durationSec": 8410,
-            "sessions": 3
-          },
-          "Brainstorm": {
-            "tokens": 860202199,
-            "durationSec": 112073,
-            "sessions": 18
-          },
-          "Verify": {
-            "tokens": 646258563,
-            "durationSec": 77192,
-            "sessions": 9
-          },
-          "Review": {
-            "tokens": 34680291,
-            "durationSec": 4211,
+            "tokens": 61421476,
+            "durationSec": 5920,
             "sessions": 2
           },
-          "Finish": {
-            "tokens": 9598173,
-            "durationSec": 530,
+          "Brainstorm": {
+            "tokens": 783486504,
+            "durationSec": 93525,
+            "sessions": 7
+          },
+          "Verify": {
+            "tokens": 638318188,
+            "durationSec": 76263,
+            "sessions": 8
+          },
+          "Plan": {
+            "tokens": 144942509,
+            "durationSec": 16336,
             "sessions": 1
           }
         },
         "total": {
-          "tokens": 18602723834,
-          "durationSec": 3057333,
-          "sessions": 2316
+          "tokens": 17739405402,
+          "durationSec": 2968048,
+          "sessions": 2298
         },
         "byPlan": {
           "(unscoped)": {
             "byPhase": {
               "(unphased)": {
-                "tokens": 16500623038,
-                "durationSec": 2804454,
-                "sessions": 2316
-              },
-              "Plan": {
-                "tokens": 246341584,
-                "durationSec": 27989,
-                "sessions": 11
-              },
-              "Implement": {
-                "tokens": 228079886,
-                "durationSec": 22474,
-                "sessions": 10
+                "tokens": 16111236725,
+                "durationSec": 2776004,
+                "sessions": 2298
               },
               "Debug": {
-                "tokens": 76940100,
-                "durationSec": 8410,
-                "sessions": 3
-              },
-              "Brainstorm": {
-                "tokens": 860202199,
-                "durationSec": 112073,
-                "sessions": 18
-              },
-              "Verify": {
-                "tokens": 646258563,
-                "durationSec": 77192,
-                "sessions": 9
-              },
-              "Review": {
-                "tokens": 34680291,
-                "durationSec": 4211,
+                "tokens": 61421476,
+                "durationSec": 5920,
                 "sessions": 2
               },
-              "Finish": {
-                "tokens": 9598173,
-                "durationSec": 530,
+              "Brainstorm": {
+                "tokens": 783486504,
+                "durationSec": 93525,
+                "sessions": 7
+              },
+              "Verify": {
+                "tokens": 638318188,
+                "durationSec": 76263,
+                "sessions": 8
+              },
+              "Plan": {
+                "tokens": 144942509,
+                "durationSec": 16336,
                 "sessions": 1
               }
             },
             "total": {
-              "tokens": 18602723834,
-              "durationSec": 3057333,
-              "sessions": 2316
+              "tokens": 17739405402,
+              "durationSec": 2968048,
+              "sessions": 2298
+            }
+          }
+        }
+      },
+      "raspberry": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 1534383,
+            "durationSec": 141,
+            "sessions": 5
+          },
+          "Plan": {
+            "tokens": 37986150,
+            "durationSec": 5199,
+            "sessions": 5
+          },
+          "Implement": {
+            "tokens": 97893306,
+            "durationSec": 7297,
+            "sessions": 4
+          },
+          "Brainstorm": {
+            "tokens": 24000556,
+            "durationSec": 5184,
+            "sessions": 4
+          }
+        },
+        "total": {
+          "tokens": 161414395,
+          "durationSec": 17821,
+          "sessions": 5
+        },
+        "byPlan": {
+          "parallel-subagent-isolation-followups": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 144561,
+                "durationSec": 7,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 1461321,
+                "durationSec": 180,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 4977632,
+                "durationSec": 972,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 6583514,
+              "durationSec": 1159,
+              "sessions": 1
+            }
+          },
+          "plans-and-specs-by-project-grouping": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 901944,
+                "durationSec": 46,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 8250158,
+                "durationSec": 968,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 8139423,
+                "durationSec": 928,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 44796001,
+                "durationSec": 2298,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 62087526,
+              "durationSec": 4240,
+              "sessions": 1
+            }
+          },
+          "raspberry-bootstrap": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 77170,
+                "durationSec": 78,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 6972735,
+                "durationSec": 1463,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 16406575,
+                "durationSec": 2239,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 21445345,
+                "durationSec": 1773,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 44901825,
+              "durationSec": 5553,
+              "sessions": 1
+            }
+          },
+          "product-repo-hygiene": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 41832,
+                "durationSec": 0,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 4512980,
+                "durationSec": 1202,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 7627458,
+                "durationSec": 1193,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 12182270,
+              "durationSec": 2395,
+              "sessions": 1
+            }
+          },
+          "parallel-subagent-isolation": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 368876,
+                "durationSec": 10,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 4264683,
+                "durationSec": 1551,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 4351373,
+                "durationSec": 659,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 26674328,
+                "durationSec": 2254,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 35659260,
+              "durationSec": 4474,
+              "sessions": 1
             }
           }
         }
@@ -114,9 +250,9 @@
       "demo-studio-go-live": {
         "byPhase": {
           "(unphased)": {
-            "tokens": 194339853,
-            "durationSec": 20786,
-            "sessions": 10
+            "tokens": 232629407,
+            "durationSec": 24750,
+            "sessions": 15
           },
           "Verify": {
             "tokens": 3083197,
@@ -124,40 +260,40 @@
             "sessions": 1
           },
           "Plan": {
-            "tokens": 54017579,
-            "durationSec": 5641,
-            "sessions": 5
+            "tokens": 65951266,
+            "durationSec": 7292,
+            "sessions": 7
           },
           "Implement": {
-            "tokens": 437405764,
-            "durationSec": 38047,
-            "sessions": 6
+            "tokens": 474847294,
+            "durationSec": 41205,
+            "sessions": 9
           },
           "Brainstorm": {
-            "tokens": 224403531,
-            "durationSec": 22422,
-            "sessions": 5
+            "tokens": 254885617,
+            "durationSec": 28551,
+            "sessions": 9
           },
           "Finish": {
-            "tokens": 89590289,
-            "durationSec": 8205,
-            "sessions": 2
+            "tokens": 99188462,
+            "durationSec": 8735,
+            "sessions": 3
           },
           "Review": {
-            "tokens": 22251203,
-            "durationSec": 3404,
-            "sessions": 1
+            "tokens": 37798525,
+            "durationSec": 5602,
+            "sessions": 2
           },
           "Debug": {
-            "tokens": 5228996,
-            "durationSec": 762,
-            "sessions": 1
+            "tokens": 20747620,
+            "durationSec": 3252,
+            "sessions": 2
           }
         },
         "total": {
-          "tokens": 1030320412,
-          "durationSec": 99664,
-          "sessions": 10
+          "tokens": 1189131388,
+          "durationSec": 119784,
+          "sessions": 15
         },
         "byPlan": {
           "2026-04-29-demo-studio-v3-studio-ui-tweaks": {
@@ -242,6 +378,35 @@
               "sessions": 1
             }
           },
+          "demo-studio-v3-post-pr134-suite-stabilization": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 15601555,
+                "durationSec": 2353,
+                "sessions": 1
+              },
+              "Review": {
+                "tokens": 15547322,
+                "durationSec": 2198,
+                "sessions": 1
+              },
+              "Debug": {
+                "tokens": 15518624,
+                "durationSec": 2490,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 7424573,
+                "durationSec": 2818,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 54092074,
+              "durationSec": 9859,
+              "sessions": 1
+            }
+          },
           "2026-04-30-demo-studio-v3-sse-state-event-delivery": {
             "byPhase": {
               "(unphased)": {
@@ -276,33 +441,47 @@
               "sessions": 1
             }
           },
-          "2026-04-29-demo-studio-v3-agent-sdk-skills": {
+          "demo-studio-v3-local-dev-auth": {
             "byPhase": {
               "(unphased)": {
-                "tokens": 93434299,
-                "durationSec": 7843,
+                "tokens": 2760537,
+                "durationSec": 146,
+                "sessions": 3
+              },
+              "Implement": {
+                "tokens": 37081722,
+                "durationSec": 3143,
                 "sessions": 2
               },
               "Brainstorm": {
-                "tokens": 4726393,
-                "durationSec": 1293,
-                "sessions": 1
+                "tokens": 14829217,
+                "durationSec": 2341,
+                "sessions": 2
               },
               "Plan": {
-                "tokens": 8283155,
-                "durationSec": 1410,
-                "sessions": 1
-              },
-              "Implement": {
-                "tokens": 210037375,
-                "durationSec": 17779,
+                "tokens": 6489061,
+                "durationSec": 604,
                 "sessions": 1
               }
             },
             "total": {
-              "tokens": 316481222,
-              "durationSec": 28325,
-              "sessions": 2
+              "tokens": 61160537,
+              "durationSec": 6234,
+              "sessions": 3
+            }
+          },
+          "demo-studio-v3-agent-sdk-warm-runtime": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 93116061,
+                "durationSec": 7820,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 93116061,
+              "durationSec": 7820,
+              "sessions": 1
             }
           },
           "2026-04-30-demo-studio-v3-output-urls-on-failed-verify": {
@@ -362,6 +541,289 @@
               "durationSec": 14900,
               "sessions": 1
             }
+          },
+          "2026-04-29-demo-studio-v3-agent-sdk-skills": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 318238,
+                "durationSec": 23,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 4726393,
+                "durationSec": 1293,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 8283155,
+                "durationSec": 1410,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 210037375,
+                "durationSec": 17779,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 223365161,
+              "durationSec": 20505,
+              "sessions": 1
+            }
+          },
+          "demo-studio-v3-chat-persistence": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 19927462,
+                "durationSec": 1465,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 8228296,
+                "durationSec": 970,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 5444626,
+                "durationSec": 1047,
+                "sessions": 1
+              },
+              "Implement": {
+                "tokens": 359808,
+                "durationSec": 15,
+                "sessions": 1
+              },
+              "Finish": {
+                "tokens": 9598173,
+                "durationSec": 530,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 43558365,
+              "durationSec": 4027,
+              "sessions": 1
+            }
+          }
+        }
+      },
+      "raspberry-usage-dashboard": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 2792911,
+            "durationSec": 131,
+            "sessions": 2
+          },
+          "Implement": {
+            "tokens": 92140172,
+            "durationSec": 11994,
+            "sessions": 2
+          },
+          "Verify": {
+            "tokens": 7940375,
+            "durationSec": 929,
+            "sessions": 1
+          },
+          "Review": {
+            "tokens": 48272740,
+            "durationSec": 4748,
+            "sessions": 1
+          },
+          "Brainstorm": {
+            "tokens": 7657602,
+            "durationSec": 1798,
+            "sessions": 1
+          },
+          "Plan": {
+            "tokens": 8111507,
+            "durationSec": 655,
+            "sessions": 1
+          }
+        },
+        "total": {
+          "tokens": 166915307,
+          "durationSec": 20255,
+          "sessions": 2
+        },
+        "byPlan": {
+          "raspberry-usage-dashboard": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 2792911,
+                "durationSec": 131,
+                "sessions": 2
+              },
+              "Implement": {
+                "tokens": 92140172,
+                "durationSec": 11994,
+                "sessions": 2
+              },
+              "Verify": {
+                "tokens": 7940375,
+                "durationSec": 929,
+                "sessions": 1
+              },
+              "Review": {
+                "tokens": 48272740,
+                "durationSec": 4748,
+                "sessions": 1
+              },
+              "Brainstorm": {
+                "tokens": 7657602,
+                "durationSec": 1798,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 8111507,
+                "durationSec": 655,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 166915307,
+              "durationSec": 20255,
+              "sessions": 2
+            }
+          }
+        }
+      },
+      "portfolio-tracker": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 332872559,
+            "durationSec": 20352,
+            "sessions": 2
+          },
+          "Implement": {
+            "tokens": 604878,
+            "durationSec": 25,
+            "sessions": 1
+          }
+        },
+        "total": {
+          "tokens": 333477437,
+          "durationSec": 20377,
+          "sessions": 2
+        },
+        "byPlan": {
+          "portfolio-tracker-v0-tasks": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 332872559,
+                "durationSec": 20352,
+                "sessions": 2
+              },
+              "Implement": {
+                "tokens": 604878,
+                "durationSec": 25,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 333477437,
+              "durationSec": 20377,
+              "sessions": 2
+            }
+          }
+        }
+      },
+      "demo-studio-v1-1-reliability": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 36429065,
+            "durationSec": 4806,
+            "sessions": 2
+          },
+          "Brainstorm": {
+            "tokens": 8788312,
+            "durationSec": 1991,
+            "sessions": 1
+          },
+          "Plan": {
+            "tokens": 10550670,
+            "durationSec": 702,
+            "sessions": 1
+          }
+        },
+        "total": {
+          "tokens": 55768047,
+          "durationSec": 7499,
+          "sessions": 2
+        },
+        "byPlan": {
+          "demo-studio-v3-main-py-decomposition": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 36429065,
+                "durationSec": 4806,
+                "sessions": 2
+              },
+              "Brainstorm": {
+                "tokens": 8788312,
+                "durationSec": 1991,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 10550670,
+                "durationSec": 702,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 55768047,
+              "durationSec": 7499,
+              "sessions": 2
+            }
+          }
+        }
+      },
+      "secretary": {
+        "byPhase": {
+          "(unphased)": {
+            "tokens": 1523418,
+            "durationSec": 180,
+            "sessions": 2
+          },
+          "Brainstorm": {
+            "tokens": 5787139,
+            "durationSec": 3446,
+            "sessions": 1
+          },
+          "Plan": {
+            "tokens": 32817061,
+            "durationSec": 3446,
+            "sessions": 1
+          }
+        },
+        "total": {
+          "tokens": 40127618,
+          "durationSec": 7072,
+          "sessions": 2
+        },
+        "byPlan": {
+          "secretary-v1": {
+            "byPhase": {
+              "(unphased)": {
+                "tokens": 1523418,
+                "durationSec": 180,
+                "sessions": 2
+              },
+              "Brainstorm": {
+                "tokens": 5787139,
+                "durationSec": 3446,
+                "sessions": 1
+              },
+              "Plan": {
+                "tokens": 32817061,
+                "durationSec": 3446,
+                "sessions": 1
+              }
+            },
+            "total": {
+              "tokens": 40127618,
+              "durationSec": 7072,
+              "sessions": 2
+            }
           }
         }
       }
@@ -370,7 +832,7 @@
   "perRepo": [
     {
       "repo": "(unknown)",
-      "tokens": 11777567075,
+      "tokens": 11805838099,
       "durationSec": 0,
       "sessions": 228
     }
@@ -437,33 +899,33 @@
     {
       "sessionId": "-Users-duongntd99-Documents-Personal-raspberry",
       "cwd": null,
-      "tokensIn": 35983,
-      "tokensOut": 4493701,
-      "cacheRead": 728134257,
+      "tokensIn": 36053,
+      "tokensOut": 4543421,
+      "cacheRead": 739371930,
       "cacheCreate": 0,
-      "cost": 593.0310497499987,
+      "cost": 600.4246174999987,
       "model": null,
       "startedAt": null
     },
     {
       "sessionId": "subagents",
       "cwd": null,
-      "tokensIn": 977,
-      "tokensOut": 79290,
-      "cacheRead": 32317535,
+      "tokensIn": 1114,
+      "tokensOut": 98968,
+      "cacheRead": 46251469,
       "cacheCreate": 0,
-      "cost": 20.679522950000006,
+      "cost": 28.545788900000012,
       "model": null,
       "startedAt": null
     },
     {
       "sessionId": "subagents",
       "cwd": null,
-      "tokensIn": 12828,
-      "tokensOut": 13071,
-      "cacheRead": 2518017,
+      "tokensIn": 12893,
+      "tokensOut": 17059,
+      "cacheRead": 5543776,
       "cacheCreate": 0,
-      "cost": 3.9347985,
+      "cost": 5.210258699999998,
       "model": null,
       "startedAt": null
     },
@@ -3208,5 +3670,5 @@
       ]
     }
   ],
-  "unphasedCount": 2316
+  "unphasedCount": 2298
 }
