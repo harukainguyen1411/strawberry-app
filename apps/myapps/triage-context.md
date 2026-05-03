@@ -6,7 +6,7 @@
 
 ## What MyApps is
 
-MyApps is a personal multi-app productivity platform built by Duong. It lives at `apps/myapps/` inside the Strawberry monorepo and is hosted on Firebase Hosting at `myapps-b31ea.web.app`. The platform bundles three independent tools — Read Tracker, Portfolio Tracker, and Task List — under a single Vue 3 SPA with shared authentication, a dual-mode data layer (Firestore when authenticated, localStorage in local mode), and a responsive Tailwind UI. The platform is designed for daily personal use by Duong and for task coordination with Evelynn (Duong's AI agent, which writes tasks directly to Firestore via MCP tools). GitHub issues filed against MyApps live in the app repo (configured via `GITHUB_REPOSITORY` env var — e.g. `owner/strawberry-app`) and are tagged with the `myapps` label for downstream routing.
+MyApps is a personal multi-app productivity platform built by Duong. It lives at `apps/myapps/` inside the Strawberry monorepo and is hosted on Firebase Hosting at `myapps-b31ea.web.app`. The platform bundles two independent tools — Read Tracker and Task List — under a single Vue 3 SPA with shared authentication, a dual-mode data layer (Firestore when authenticated, localStorage in local mode), and a responsive Tailwind UI. The platform is designed for daily personal use by Duong and for task coordination with Evelynn (Duong's AI agent, which writes tasks directly to Firestore via MCP tools). GitHub issues filed against MyApps live in the app repo (configured via `GITHUB_REPOSITORY` env var — e.g. `owner/strawberry-app`) and are tagged with the `myapps` label for downstream routing.
 
 ---
 
@@ -23,7 +23,6 @@ The app is not a public product. There is no registration flow — access is Goo
 ## Core features
 
 - **`read-tracker`** — Log reading sessions (date, start time, end time, book). Dashboard with today/week/month/year totals, streaks, and daily averages. Line and bar charts for trend visualization. Books management with status (`reading` / `completed` / `want to read`) and per-book session history. Goal setting at daily, weekly, monthly, and yearly intervals with progress indicators. Stats page with detailed breakdowns. Routes under `/read-tracker/`.
-- **`portfolio-tracker`** — Holdings dashboard showing current stock positions. Transaction logging (buy/sell). Account-level settings. External stock price fetching. Routes under `/portfolio-tracker/`. Partially built — no P&L display, no historical charts, no dividends.
 - **`task-list`** — Weekly drag-and-drop task board. Seven-day grid with a separate On Hold section. Task cards carry `status` (`todo` / `inprogress` / `onhold` / `done`), `priority` (`high` / `medium` / `low`), and optional `notes` (read-only, written by Evelynn). Undo support for deletes and status changes (5-second window). Carry-forward: overdue tasks auto-move to today on load. Inline title and description editing. Touch-friendly drag-and-drop. Routes under `/task-list/`.
 - **`auth`** — Google OAuth via Firebase Auth. Auth guard on all app routes. Local mode: when not signed in, the app falls back to localStorage so all features still work offline. On sign-in, a conflict-resolution modal handles the localStorage-to-Firestore sync.
 - **`sync`** — Dual-backend pattern shared by all stores. Every store has a `isLocal` flag and switches between `firebase/firestore` (authenticated) and `localStorage` (unauthenticated). Real-time Firestore listeners (`onSnapshot`) are being added in the current sprint; previously used one-shot `getDocs`.
@@ -53,11 +52,6 @@ apps/myapps/
 │   │   │   ├── Goals.vue
 │   │   │   ├── Stats.vue
 │   │   │   └── Settings.vue
-│   │   ├── PortfolioTracker/   # Portfolio Tracker pages + layout
-│   │   │   ├── PortfolioTrackerLayout.vue
-│   │   │   ├── Dashboard.vue
-│   │   │   ├── Transactions.vue
-│   │   │   └── Settings.vue
 │   │   └── TaskList/           # Task List pages + layout
 │   │       ├── TaskListLayout.vue
 │   │       ├── Dashboard.vue
@@ -73,7 +67,6 @@ apps/myapps/
 │   │   ├── books.ts            # Read Tracker books
 │   │   ├── goals.ts            # Read Tracker goals
 │   │   ├── readingSessions.ts  # Reading sessions
-│   │   ├── portfolio.ts        # Portfolio holdings + transactions
 │   │   └── taskList.ts         # Tasks CRUD, carry-forward, undo
 │   ├── router/index.ts         # All route definitions + auth guard
 │   ├── firebase/config.ts      # Firebase init (VITE_FIREBASE_* env vars)
@@ -103,7 +96,7 @@ The active sprint (plan: `plans/in-progress/2026-04-05-myapps-task-list.md`) is 
 3. **E2E test** — `e2e/task-list.spec.ts` covering add/edit/status-change/delete/undo in local mode.
 4. **Minor i18n gap check** — verifying all `$t('taskList.*')` keys exist in both locale files.
 
-Secondary gaps (not in current sprint but tracked in README): Portfolio Tracker is missing P&L calculations, historical charts, and dividend tracking. Read Tracker is missing a timer-based session entry and data export. Task List is missing recurring tasks and category filter UI.
+Secondary gaps (not in current sprint but tracked in README): Read Tracker is missing a timer-based session entry and data export. Task List is missing recurring tasks and category filter UI.
 
 ---
 
@@ -120,7 +113,6 @@ Every issue filed by this bot is tagged `myapps` automatically. Gemini chooses t
 | `perf` | Something is measurably slow or wastes resources: slow chart renders, excessive Firestore reads, large bundle size, laggy drag-and-drop. |
 | `docs` | A gap in README, USER_GUIDE.md, SETUP.md, DEPLOYMENT.md, or in-app help text. |
 | `area/read-tracker` | The issue is scoped to the Read Tracker app (`/read-tracker/`, books, sessions, goals, stats). |
-| `area/portfolio-tracker` | The issue is scoped to Portfolio Tracker (`/portfolio-tracker/`, holdings, transactions). |
 | `area/task-list` | The issue is scoped to Task List (`/task-list/`, task cards, week grid, drag-and-drop, carry-forward). |
 | `area/auth` | The issue is about Google sign-in, local mode, the sign-in modal, or the localStorage-to-Firestore sync/conflict flow. |
 | `area/platform` | The issue affects multiple apps or the platform shell: Home page, navigation, i18n/language toggle, dark mode, Firebase config, CI/CD, deployment. |
@@ -151,7 +143,7 @@ If the Discord message is about any of the following, do not create a GitHub iss
 - Agent MCP tools, MCP server config, `.claude/` configuration
 - Plans, plan promotion, agent memory or learnings
 - Discord bot behavior itself (meta-report about the triage bot)
-- Anything not related to the Read Tracker, Portfolio Tracker, Task List, auth, or platform shell
+- Anything not related to the Read Tracker, Task List, auth, or platform shell
 
 ---
 
@@ -159,7 +151,6 @@ If the Discord message is about any of the following, do not create a GitHub iss
 
 No open `myapps`-labeled issues exist at the time this file was written (2026-04-08). The following categories are likely to surface repeatedly based on the README's "known gaps" sections:
 
-- **Portfolio Tracker missing P&L** — the README explicitly lists "No profit/loss calculations displayed" as a known gap. Any report about missing profit numbers or portfolio performance is a known gap, not a new bug.
 - **Read Tracker manual-only session entry** — no timer is implemented. Reports about wanting a start/stop timer are a known feature request.
 - **Task List real-time sync** — partially in progress. If someone reports that Evelynn's tasks do not appear without a refresh, this is the `onSnapshot` gap currently being fixed (task-list sprint). Do not file a new issue; comment on the in-progress work or note it as a near-duplicate.
 - **Mobile drag-and-drop** — TaskCard has touch-drag handling but mobile UX on drag-and-drop is a recurring friction point. Treat individual mobile reports as distinct issues unless the title and symptoms match closely.
