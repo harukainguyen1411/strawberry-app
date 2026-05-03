@@ -99,3 +99,6 @@ playwright-report/
 
 # Stray logs
 firebase-debug.log
+
+# Test-generated registry files (generated from fixture tree during test runs)
+scripts/usage-dashboard/__fixtures__/**/__generated-*.json
