@@ -30,15 +30,15 @@
   ],
   "sessions": [
     {
-      "sessionId": "s1",
-      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app",
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-app",
+      "cwd": null,
       "tokensIn": 100,
       "tokensOut": 50,
       "cacheRead": 200,
       "cacheCreate": 0,
       "cost": 0.05,
       "model": "claude-opus-4-7",
-      "startedAt": "2026-05-01T10:00:00Z"
+      "startedAt": null
     }
   ],
   "plans": [

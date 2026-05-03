@@ -492,6 +492,7 @@ export async function scanJsonl(filePath, opts = {}) {
       tokens: totalTokens(tokens),
       tokensBreakdown: tokens,
       durationSec,
+      timestamp: rec.timestamp ?? null,
       subagent: false,
     });
     prevEmittedTs = rec.timestamp ?? prevEmittedTs;
@@ -557,6 +558,7 @@ export async function scanJsonl(filePath, opts = {}) {
           tokens: totalTokens(subTokens),
           tokensBreakdown: subTokens,
           durationSec: subDuration,
+          timestamp: sr.timestamp ?? null,
           subagent: true,
         });
         prevEmittedTs = sr.timestamp ?? prevEmittedTs;

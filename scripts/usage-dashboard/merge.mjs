@@ -36,7 +36,7 @@ assertKey(phaseScan,'records');
 assertKey(projects, 'projects');
 assertKey(plans,    'plans');
 
-const sessionMap = new Map(sessions.sessions.map(s => [s.sessionId, s]));
+// ── Grid: bucket phase-scan records by project / phase / plan ────────────────
 
 const grid = { byProject: {} };
 for (const r of phaseScan.records) {
@@ -76,42 +76,62 @@ function unsetify(obj) {
 
 const gridSerialized = unsetify(grid);
 
-const perRepo = {};
-for (const s of sessions.sessions) {
-  const repo = repoFromCwd(s.cwd);
-  ensure(perRepo, repo, () => ({ tokens: 0, durationSec: 0, sessions: 0 }));
-  perRepo[repo].tokens   += (s.inputTokens ?? 0) + (s.outputTokens ?? 0) + (s.cacheReadTokens ?? 0) + (s.cacheWriteTokens ?? 0);
-  perRepo[repo].sessions += 1;
-}
+// ── perRepo: derived from phaseScan.records via cwd ──────────────────────────
+// ccusage sessions.json uses project-path slugs as sessionId (not JSONL UUIDs),
+// so a join against r.sessionId is always a miss. Derive everything from records.
+
+const perRepoMap = {};
 for (const r of phaseScan.records) {
-  const sess = sessionMap.get(r.sessionId);
-  if (!sess) continue;
-  const repo = repoFromCwd(sess.cwd);
-  if (perRepo[repo]) perRepo[repo].durationSec += r.durationSec;
+  const repo = repoFromCwd(r.cwd);
+  ensure(perRepoMap, repo, () => ({ tokens: 0, durationSec: 0, sessions: new Set() }));
+  perRepoMap[repo].tokens      += r.tokens;
+  perRepoMap[repo].durationSec += r.durationSec;
+  perRepoMap[repo].sessions.add(r.sessionId);
+}
+
+// perRepo is derived entirely from phaseScan.records (via cwd).
+// ccusage sessions.json is NOT joined here because its sessionId values are
+// project-path slugs, not JSONL UUIDs, so a join against r.sessionId always
+// misses. Token totals from ccusage would also double-count what's in records.
+
+const perRepo = Object.entries(perRepoMap).map(([repo, v]) => ({
+  repo,
+  tokens:      v.tokens,
+  durationSec: v.durationSec,
+  sessions:    v.sessions.size,
+}));
+
+// ── Sparkline: per-day per-project from phase-scan record timestamps ──────────
+// Build a date → { projectSlug → tokens } map from records, then overlay the
+// last-14-days date list from ccusage daily output.
+
+const byDateProject = {};
+for (const r of phaseScan.records) {
+  if (!r.timestamp) continue;
+  const date = r.timestamp.slice(0, 10); // YYYY-MM-DD
+  ensure(byDateProject, date, () => ({}));
+  const p = r.projectSlug ?? '(unscoped)';
+  byDateProject[date][p] = (byDateProject[date][p] ?? 0) + r.tokens;
 }
 
 const last14 = daily.daily.slice(-14);
-const sparkline = last14.map(d => {
-  const byProject = {};
-  for (const r of phaseScan.records) {
-    const sess = sessionMap.get(r.sessionId);
-    if (!sess?.startTime?.startsWith(d.date)) continue;
-    const p = r.projectSlug ?? '(unscoped)';
-    byProject[p] = (byProject[p] ?? 0) + r.tokens;
-  }
-  return { date: d.date, byProject };
-});
+const sparkline = last14.map(d => ({
+  date:      d.date,
+  byProject: byDateProject[d.date] ?? {},
+}));
+
+// ── Sessions output ───────────────────────────────────────────────────────────
 
 const sessionsOut = sessions.sessions.map(s => ({
   sessionId:   s.sessionId,
   cwd:         s.cwd         ?? null,
-  tokensIn:    s.inputTokens     ?? 0,
-  tokensOut:   s.outputTokens    ?? 0,
-  cacheRead:   s.cacheReadTokens ?? 0,
-  cacheCreate: s.cacheWriteTokens ?? 0,
-  cost:        s.totalCost       ?? 0,
-  model:       s.model           ?? null,
-  startedAt:   s.startTime       ?? null,
+  tokensIn:    s.inputTokens         ?? 0,
+  tokensOut:   s.outputTokens        ?? 0,
+  cacheRead:   s.cacheReadTokens     ?? 0,
+  cacheCreate: s.cacheCreationTokens ?? 0,   // real field name from ccusage
+  cost:        s.totalCost           ?? 0,
+  model:       s.model               ?? null,
+  startedAt:   s.startTime           ?? null,
 }));
 
 const unphasedCount = (gridSerialized.byProject['(unscoped)']?.byPhase?.['(unphased)']?.sessions) ?? 0;
@@ -131,7 +151,7 @@ const out = {
   cutoverDate:   CUTOVER,
   window:        windowOut,
   grid:          gridSerialized,
-  perRepo:       Object.entries(perRepo).map(([repo, v]) => ({ repo, ...v })),
+  perRepo,
   sparkline,
   sessions:      sessionsOut,
   plans:         plans.plans,
@@ -164,3 +184,4 @@ function repoFromCwd(cwd) {
   if (cwd.includes('Documents/Work/mmp')) return 'work/mmp';
   return '(other)';
 }
+

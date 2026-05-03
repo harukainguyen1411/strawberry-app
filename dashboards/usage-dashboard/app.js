@@ -35,10 +35,9 @@ function fmtCost(c) {
 
 function metricOf(cell, metric) {
   if (!cell) return 0;
-  if (metric === 'tokens')   return cell.tokens   ?? 0;
+  if (metric === 'tokens')   return cell.tokens      ?? 0;
   if (metric === 'time')     return cell.durationSec ?? 0;
-  if (metric === 'sessions') return cell.sessions ?? 0;
-  if (metric === 'cost')     return cell.cost     ?? 0;
+  if (metric === 'sessions') return cell.sessions    ?? 0;
   return 0;
 }
 
@@ -47,7 +46,6 @@ function formatMetric(v, metric) {
   if (metric === 'tokens')   return fmt(v);
   if (metric === 'time')     return formatDuration(v);
   if (metric === 'sessions') return String(v);
-  if (metric === 'cost')     return '$' + Number(v).toFixed(2);
   return String(v);
 }
 
@@ -289,11 +287,9 @@ function renderPerRepo(data, { metric }) {
   const sorted = [...data.perRepo].sort((a, b) => {
     const va = metric === 'sessions' ? (a.sessions || 0)
       : metric === 'time'     ? (a.durationSec || 0)
-      : metric === 'cost'     ? (a.cost || 0)
       : (a.tokens || 0);
     const vb = metric === 'sessions' ? (b.sessions || 0)
       : metric === 'time'     ? (b.durationSec || 0)
-      : metric === 'cost'     ? (b.cost || 0)
       : (b.tokens || 0);
     return vb - va;
   });
@@ -301,7 +297,6 @@ function renderPerRepo(data, { metric }) {
   const rows = sorted.map(r => {
     const metricVal = metric === 'sessions' ? String(r.sessions || 0)
       : metric === 'time'     ? formatDuration(r.durationSec || 0)
-      : metric === 'cost'     ? ('$' + Number(r.cost || 0).toFixed(2))
       : fmt(r.tokens || 0);
     return `<tr class="border-b border-[#313244]">
       <td class="py-1.5 pr-4">${r.repo || '—'}</td>

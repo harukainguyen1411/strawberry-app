@@ -2,15 +2,15 @@
   "totals": { "totalCost": 0.05 },
   "sessions": [
     {
-      "sessionId": "s1",
+      "sessionId": "-Users-duongntd99-Documents-Personal-strawberry-app",
       "inputTokens": 100,
       "outputTokens": 50,
       "cacheReadTokens": 200,
-      "cacheWriteTokens": 0,
+      "cacheCreationTokens": 0,
       "totalCost": 0.05,
       "model": "claude-opus-4-7",
-      "startTime": "2026-05-01T10:00:00Z",
-      "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app"
+      "lastActivity": "2026-05-01",
+      "projectPath": "-Users-duongntd99-Documents-Personal-strawberry-app"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "records": [
-    { "sessionId": "s1", "messageIdx": 0, "phase": "Brainstorm", "projectSlug": "example", "planSlug": "2026-05-02-example", "tokens": 100, "durationSec": 60, "subagent": false },
-    { "sessionId": "s1", "messageIdx": 1, "phase": "Plan",       "projectSlug": "example", "planSlug": "2026-05-02-example", "tokens": 250, "durationSec": 120, "subagent": false }
+    { "sessionId": "s1", "messageIdx": 0, "phase": "Brainstorm", "projectSlug": "example", "planSlug": "2026-05-02-example", "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app", "tokens": 100, "durationSec": 60, "timestamp": "2026-05-01T10:01:00Z", "subagent": false },
+    { "sessionId": "s1", "messageIdx": 1, "phase": "Plan",       "projectSlug": "example", "planSlug": "2026-05-02-example", "cwd": "/Users/duongntd99/Documents/Personal/strawberry-app", "tokens": 250, "durationSec": 120, "timestamp": "2026-05-01T10:03:00Z", "subagent": false }
   ]
 }
