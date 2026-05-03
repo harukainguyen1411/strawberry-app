@@ -24,23 +24,6 @@ Tracks daily reading time with book management and goal setting.
 - Charts could use more interactivity (no drill-down, no date range picker)
 - No social/sharing features
 
-### Portfolio Tracker (partially built)
-
-Tracks stock holdings and investment performance.
-
-**Features:**
-- Holdings dashboard with current positions
-- Transaction logging (buy/sell)
-- Account-level settings
-- Stock price fetching (via external API)
-
-**What's missing / known gaps:**
-- No historical performance charts
-- No profit/loss calculations displayed
-- No dividend tracking
-- No multi-currency support
-- No portfolio allocation visualization
-
 ### Task List (partially built)
 
 Weekly task board with drag-and-drop.
@@ -78,7 +61,7 @@ Weekly task board with drag-and-drop.
 ## Architecture Notes
 
 - Each app lives under `src/views/<AppName>/` with its own layout component
-- Stores are per-domain: `books.ts`, `goals.ts`, `readingSessions.ts`, `portfolio.ts`, `taskList.ts`
+- Stores are per-domain: `books.ts`, `goals.ts`, `readingSessions.ts`, `taskList.ts`
 - All stores support dual backends: Firebase (authenticated) and localStorage (local mode)
 - Routing uses nested routes with a shared auth guard
 - Components are organized by app under `src/components/<AppName>/`

@@ -120,13 +120,6 @@ const allApps = ref<App[]>([
     route: '/myApps/read-tracker'
   },
   {
-    id: 'portfolio-tracker',
-    name: t('home.portfolioTracker.name'),
-    description: t('home.portfolioTracker.description'),
-    icon: '📈',
-    route: '/myApps/portfolio-tracker'
-  },
-  {
     id: 'task-list',
     name: t('home.taskList.name'),
     description: t('home.taskList.description'),

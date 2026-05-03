@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import Home from '@/views/Home.vue'
 import ReadTrackerLayout from '@/views/ReadTracker/ReadTrackerLayout.vue'
-import PortfolioTrackerLayout from '@/views/PortfolioTracker/PortfolioTrackerLayout.vue'
 import TaskListLayout from '@/views/TaskList/TaskListLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -62,33 +61,6 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: '/myApps/portfolio-tracker',
-    component: PortfolioTrackerLayout,
-    meta: { requiresAuth: true, appId: 'portfolio-tracker' },
-    children: [
-      {
-        path: '',
-        name: 'portfolio-tracker',
-        redirect: '/myApps/portfolio-tracker/dashboard'
-      },
-      {
-        path: 'dashboard',
-        name: 'portfolio-tracker-dashboard',
-        component: () => import('@/views/PortfolioTracker/Dashboard.vue')
-      },
-      {
-        path: 'transactions',
-        name: 'portfolio-tracker-transactions',
-        component: () => import('@/views/PortfolioTracker/Transactions.vue')
-      },
-      {
-        path: 'settings',
-        name: 'portfolio-tracker-settings',
-        component: () => import('@/views/PortfolioTracker/Settings.vue')
-      }
-    ]
-  },
-  {
     path: '/myApps/task-list',
     component: TaskListLayout,
     meta: { requiresAuth: true, appId: 'task-list' },
@@ -136,7 +108,6 @@ const routes: RouteRecordRaw[] = [
 
   // === Legacy redirects from old paths ===
   { path: '/read-tracker/:pathMatch(.*)*', redirect: to => `/myApps/read-tracker/${(to.params.pathMatch as string[]).join('/')}` },
-  { path: '/portfolio-tracker/:pathMatch(.*)*', redirect: to => `/myApps/portfolio-tracker/${(to.params.pathMatch as string[]).join('/')}` },
   { path: '/task-list/:pathMatch(.*)*', redirect: to => `/myApps/task-list/${(to.params.pathMatch as string[]).join('/')}` },
   { path: '/bee/:pathMatch(.*)*', redirect: to => `/yourApps/bee/${(to.params.pathMatch as string[]).join('/')}` }
 ]
