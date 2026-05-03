@@ -244,14 +244,41 @@ export function usePortfolio(): UsePortfolioReturn {
   const holdings = computed(() => derived.value.holdings)
   const summary = computed(() => derived.value.summary)
 
+  // Surface FX errors. Watching `derived.value.fxError` directly is enough
+  // for the going-to-error transition. Recovery is handled by a separate
+  // watcher on `fx` itself — see below.
+  //
+  // Why split: when this watcher sets status='error', `derived` re-runs
+  // (it depends on status, line ~182's early-return) and now returns
+  // { fxError: null } — not because FX recovered, but as a side-effect of
+  // the early-return. Combining both branches in one watcher (the V0.17
+  // shape) caused an infinite loop:
+  //   derived throws → fxError=err → status='error' → derived early-returns
+  //   → fxError=null → recovery branch → status='ready' → derived throws
+  //   → … (Vue's recursion guard eventually warns and bails). See A.6.1
+  //   regression test.
   watch(() => derived.value.fxError, (fxError) => {
     if (fxError) {
       error.value = fxError
       status.value = 'error'
-    } else if (status.value === 'error' && error.value instanceof FxRateMissingError) {
-      // FX rates recovered (e.g. fx doc updated with the missing pair).
+    }
+  })
+
+  // Recovery — fires when the fx ref changes AND the new fx actually
+  // contains the previously-missing pair. The hasRate check is what makes
+  // this loop-safe: at initial load the fx watcher also fires (because
+  // the snapshot subscription populates fx for the first time), but the
+  // newly-loaded fx is the same data that caused the error, so hasRate
+  // is false and we don't trigger a status flip. Only a real fx update
+  // (via Firestore snapshot) that adds the missing pair recovers.
+  watch(fx, (newFx) => {
+    if (!(error.value instanceof FxRateMissingError)) return
+    const missingPair = error.value.pair
+    const hasRate =
+      newFx?.overrides?.[missingPair] != null || newFx?.rates?.[missingPair] != null
+    if (hasRate) {
       error.value = null
-      status.value = 'ready'
+      if (status.value === 'error') status.value = 'ready'
     }
   })
 

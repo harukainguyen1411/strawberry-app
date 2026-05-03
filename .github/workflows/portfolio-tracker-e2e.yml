@@ -1,10 +1,13 @@
 name: Portfolio Tracker E2E
 
+# Disabled on PR — V0 portfolio-tracker is too early-stage for E2E to be a
+# blocking gate (product fit isn't yet locked in; spec churn outpaces test
+# investment value). Spec files + emulator orchestration kept on disk; run
+# manually via `gh workflow run portfolio-tracker-e2e.yml` or locally via
+# `npm run dev:e2e` (which uses the same emulator topology). Re-enable the
+# `pull_request` trigger once V0 ships and the surface is stable.
 on:
-  pull_request:
-    paths:
-      - 'apps/myapps/portfolio-tracker/**'
-      - '.github/workflows/portfolio-tracker-e2e.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
