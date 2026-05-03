@@ -214,3 +214,86 @@ test('regression C4: grid cells have no cost field (cost dropped from grid)', ()
     rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+// ── Bucketing matrix: cwd → repo mapping pinned ─────────────────────────────
+// Pins repoFromCwd's behaviour. Each case is one phase-scan record on its own
+// sessionId, so each repo bucket gets exactly one session and we can read
+// perRepo back as a {repo → record} map.
+
+const BUCKETING_CASES = [
+  { name: 'raspberry',                 cwd: '/Users/duongntd99/Documents/Personal/raspberry',                                      expectedRepo: 'raspberry' },
+  { name: 'strawberry-app bare',       cwd: '/Users/duongntd99/Documents/Personal/strawberry-app',                                 expectedRepo: 'strawberry-app' },
+  { name: 'strawberry-app worktree',   cwd: '/Users/duongntd99/Documents/Personal/strawberry-app/.worktrees/foo',                  expectedRepo: 'strawberry-app' },
+  { name: 'strawberry-agents',         cwd: '/Users/duongntd99/Documents/Personal/strawberry-agents',                              expectedRepo: 'strawberry-agents' },
+  { name: 'strawberry (sibling)',      cwd: '/Users/duongntd99/Documents/Personal/strawberry',                                     expectedRepo: 'strawberry' },
+  { name: 'work/mmp/api',              cwd: '/Users/duongntd99/Documents/Work/mmp/api',                                            expectedRepo: 'work/mmp/api' },
+  { name: 'work/mmp/workspace nested', cwd: '/Users/duongntd99/Documents/Work/mmp/workspace/some/nested/path',                     expectedRepo: 'work/mmp/workspace' },
+  { name: 'random unrelated',          cwd: '/tmp/random',                                                                         expectedRepo: '(other)' },
+];
+
+for (const tc of BUCKETING_CASES) {
+  test(`bucketing matrix: cwd "${tc.name}" → repo "${tc.expectedRepo}"`, () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'merge-'));
+    try {
+      const phaseScanPath = join(tmp, 'phase-scan.json');
+      writeFileSync(phaseScanPath, JSON.stringify({
+        records: [{
+          sessionId: 's-test', messageIdx: 0, phase: 'Plan',
+          projectSlug: '(unscoped)', planSlug: '(unscoped)',
+          cwd: tc.cwd, tokens: 1, durationSec: 1,
+          timestamp: '2026-05-01T10:00:00Z', subagent: false,
+        }],
+      }));
+      const out = join(tmp, 'data.json');
+      const r = spawnSync('node', [
+        mergeMjs,
+        '--sessions',   join(fix, 'sessions.json'),
+        '--blocks',     join(fix, 'blocks.json'),
+        '--daily',      join(fix, 'daily.json'),
+        '--phase-scan', phaseScanPath,
+        '--projects',   join(fix, 'projects.json'),
+        '--plans',      join(fix, 'plans.json'),
+        '--out',        out,
+      ], { encoding: 'utf8', env: { ...process.env, CUTOVER_DATE: '2026-04-28' } });
+      assert.equal(r.status, 0, r.stderr);
+      const got = JSON.parse(readFileSync(out, 'utf8'));
+      assert.equal(got.perRepo.length, 1,
+        `expected exactly 1 perRepo entry, got ${JSON.stringify(got.perRepo)}`);
+      assert.equal(got.perRepo[0].repo, tc.expectedRepo,
+        `cwd "${tc.cwd}" → repo "${got.perRepo[0].repo}", expected "${tc.expectedRepo}"`);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+}
+
+test('bucketing matrix: empty/null cwd → "(unknown)"', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'merge-'));
+  try {
+    const phaseScanPath = join(tmp, 'phase-scan.json');
+    writeFileSync(phaseScanPath, JSON.stringify({
+      records: [{
+        sessionId: 's-test', messageIdx: 0, phase: 'Plan',
+        projectSlug: '(unscoped)', planSlug: '(unscoped)',
+        cwd: null, tokens: 1, durationSec: 1,
+        timestamp: '2026-05-01T10:00:00Z', subagent: false,
+      }],
+    }));
+    const out = join(tmp, 'data.json');
+    const r = spawnSync('node', [
+      mergeMjs,
+      '--sessions',   join(fix, 'sessions.json'),
+      '--blocks',     join(fix, 'blocks.json'),
+      '--daily',      join(fix, 'daily.json'),
+      '--phase-scan', phaseScanPath,
+      '--projects',   join(fix, 'projects.json'),
+      '--plans',      join(fix, 'plans.json'),
+      '--out',        out,
+    ], { encoding: 'utf8', env: { ...process.env, CUTOVER_DATE: '2026-04-28' } });
+    assert.equal(r.status, 0, r.stderr);
+    const got = JSON.parse(readFileSync(out, 'utf8'));
+    assert.equal(got.perRepo[0].repo, '(unknown)');
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});

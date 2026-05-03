@@ -181,7 +181,8 @@ function repoFromCwd(cwd) {
   if (cwd.includes('Documents/Personal/strawberry-agents')) return 'strawberry-agents';
   if (cwd.includes('Documents/Personal/raspberry')) return 'raspberry';
   if (cwd.includes('Documents/Personal/strawberry')) return 'strawberry';
-  if (cwd.includes('Documents/Work/mmp')) return 'work/mmp';
+  const mmp = cwd.match(/Documents\/Work\/mmp\/([^/]+)/);
+  if (mmp) return `work/mmp/${mmp[1]}`;
   return '(other)';
 }
 
