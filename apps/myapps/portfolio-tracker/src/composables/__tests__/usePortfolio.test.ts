@@ -20,7 +20,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ref, effectScope, nextTick, watch, type Ref } from 'vue'
+import { ref, effectScope, nextTick, watch } from 'vue'
 
 const mockUid = ref<string | null>(null)
 
