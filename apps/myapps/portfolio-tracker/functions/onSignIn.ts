@@ -1,14 +1,13 @@
-import { initializeApp, getApps } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import * as admin from 'firebase-admin'
 import { beforeUserSignedIn, type AuthBlockingEvent } from 'firebase-functions/v2/identity'
 import { checkAllowlist } from './checkAllowlist.js'
 
-if (!getApps().length) {
-  initializeApp()
+if (!admin.apps.length) {
+  admin.initializeApp()
 }
 
 export const onSignIn = beforeUserSignedIn(async (event: AuthBlockingEvent) => {
   const email = event.data.email
-  const db = getFirestore()
+  const db = admin.firestore()
   await checkAllowlist(email, db)
 })
