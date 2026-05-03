@@ -61,7 +61,10 @@ jobs:
         working-directory: apps/myapps/portfolio-tracker/functions
 
       - name: Build Cloud Functions (emit JS despite type errors)
-        run: npx tsc --noEmitOnError false
+        # --noEmitOnError false makes tsc emit JS, but it still exits non-zero on
+        # type errors. global-setup.ts wraps this in try/catch locally; CI's
+        # bash -e doesn't, so swallow the exit code while keeping the JS output.
+        run: npx tsc --noEmitOnError false || true
         working-directory: apps/myapps/portfolio-tracker/functions
 
       - name: Run Portfolio Tracker E2E
