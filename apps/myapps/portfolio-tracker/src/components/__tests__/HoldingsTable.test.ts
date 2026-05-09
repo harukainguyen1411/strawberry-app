@@ -5,10 +5,13 @@
  * the same component rendering a <ul> of <HoldingRow>, gated by Tailwind
  * responsive classes (`hidden md:table` vs `md:hidden`). Default sort is
  * market-value desc; clicking a header toggles direction and reflects state
- * via aria-sort. Currency badge appears on avg cost when its currency ≠
- * the user's base currency.
+ * via aria-sort.
  *
- * Refs V0.15
+ * V0.1.3 — currency-code badges removed (Intl symbol $ / € disambiguates);
+ * desktop qty column trimmed via formatQuantity (≤6 decimals, trailing zeros
+ * stripped) to match the mobile HoldingRow.
+ *
+ * Refs V0.15, V0.1.3
  */
 
 import { describe, it, expect } from 'vitest'
@@ -118,15 +121,13 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
     expect(tickerTh.attributes('aria-sort')).toBe('none')
   })
 
-  it('avg cost shows the uppercase currency badge when avgCost.currency !== baseCurrency', () => {
+  // V0.1.3: badge removed — Intl symbol ($ / €) disambiguates; no trailing code suffix shown
+  it('V0.1.3: no currency-code badges rendered (symbol in formatted amount is sufficient)', () => {
     const wrapper = mount(HoldingsTable, {
       props: { holdings: HOLDINGS, baseCurrency: 'EUR' },
     })
     const badges = wrapper.findAll('[data-testid="currency-badge"]')
-    expect(badges.length).toBeGreaterThan(0)
-    const badgeTexts = badges.map((b) => b.text())
-    expect(badgeTexts).toContain('USD')
-    expect(badgeTexts).not.toContain('EUR')
+    expect(badges).toHaveLength(0)
   })
 
   it('every P/L cell is rendered via <PlCell> (data-testid="pl-cell"), one per row', () => {
@@ -157,6 +158,27 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
     expect(mobileList.classes()).toContain('md:hidden')
     const rows = mobileList.findAll('[data-testid="holding-row"]')
     expect(rows).toHaveLength(5)
+  })
+})
+
+describe('V0.1.3 — HoldingsTable desktop qty decimal trimming', () => {
+  it('desktop tbody renders qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
+    const HOLDING_RAW: Holding = {
+      ticker: 'BTC',
+      broker: 'T212',
+      quantity: 279.20583987000003,
+      avgCost: { amount: 100, currency: 'USD' },
+      marketValue: { amount: 100, currency: 'EUR' },
+      pl: { amount: 0, currency: 'EUR' },
+      plPct: 0,
+    }
+    const wrapper = mount(HoldingsTable, {
+      props: { holdings: [HOLDING_RAW], baseCurrency: 'EUR' },
+    })
+    const row = wrapper.find('tbody tr')
+    expect(row.exists()).toBe(true)
+    expect(row.text()).toContain('279.20584')
+    expect(row.text()).not.toContain('279.20583987')
   })
 })
 

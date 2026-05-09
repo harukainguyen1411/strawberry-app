@@ -1,11 +1,14 @@
 /**
  * V0.14 — MoneyCell component.
  *
- * Renders a Money value with locale-aware Intl.NumberFormat output, tabular
- * numerals, and an optional uppercase currency badge when the value's
- * currency differs from the user's base (per design spec §4.3.2 + §6).
+ * Renders a Money value with locale-aware Intl.NumberFormat output and
+ * tabular numerals (per design spec §4.3.2 + §6).
  *
- * Refs V0.14
+ * V0.1.3 — currency-label consistency: the Intl symbol ($ / €) already
+ * disambiguates the currency, so the trailing code badge has been removed.
+ * The showCurrencyBadge prop has been dropped entirely.
+ *
+ * Refs V0.14, V0.1.3
  */
 
 import { describe, it, expect } from 'vitest'
@@ -27,25 +30,22 @@ describe('V0.14 — MoneyCell', () => {
     expect(wrapper.text()).toContain('€14,850.00')
   })
 
-  it('shows uppercase currency badge when showCurrencyBadge=true and money.currency !== baseCurrency', () => {
+  it('V0.1.3: no currency badge when money.currency !== baseCurrency (symbol disambiguates)', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 148.5, currency: 'USD' },
         baseCurrency: 'EUR',
-        showCurrencyBadge: true,
       },
     })
-    const badge = wrapper.find('[data-testid="currency-badge"]')
-    expect(badge.exists()).toBe(true)
-    expect(badge.text()).toBe('USD')
+    // After V0.1.3: badge must not be rendered — the $ symbol is sufficient
+    expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
   })
 
-  it('hides currency badge when money.currency === baseCurrency even with showCurrencyBadge=true', () => {
+  it('V0.1.3: no currency badge when money.currency === baseCurrency', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 148.5, currency: 'USD' },
         baseCurrency: 'USD',
-        showCurrencyBadge: true,
       },
     })
     expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
@@ -56,5 +56,29 @@ describe('V0.14 — MoneyCell', () => {
       props: { money: { amount: 14850, currency: 'USD' } },
     })
     expect(wrapper.find('.tabular-nums').exists()).toBe(true)
+  })
+})
+
+describe('V0.1.3 — MoneyCell currency-label consistency', () => {
+  it('EUR foreign to USD base: shows "€11.46" with no trailing EUR code', () => {
+    const wrapper = mount(MoneyCell, {
+      props: {
+        money: { amount: 11.46, currency: 'EUR' },
+        baseCurrency: 'USD',
+      },
+    })
+    expect(wrapper.text()).toContain('€11.46')
+    expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
+  })
+
+  it('USD foreign to EUR base: shows "$398.70" with no trailing USD code', () => {
+    const wrapper = mount(MoneyCell, {
+      props: {
+        money: { amount: 398.70, currency: 'USD' },
+        baseCurrency: 'EUR',
+      },
+    })
+    expect(wrapper.text()).toContain('$398.70')
+    expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
   })
 })
