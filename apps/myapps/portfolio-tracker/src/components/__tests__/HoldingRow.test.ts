@@ -38,7 +38,7 @@ describe('V0.15 — HoldingRow (mobile)', () => {
     expect(text).toContain('T212')
   })
 
-  it.fails('V0.1.3: renders quantity and avg cost; no trailing currency code badge (symbol disambiguates)', () => {
+  it('V0.1.3: renders quantity and avg cost; no trailing currency code badge (symbol disambiguates)', () => {
     const wrapper = mount(HoldingRow, {
       props: { holding: HOLDING, baseCurrency: 'EUR' },
     })
@@ -83,7 +83,7 @@ describe('V0.15 — HoldingRow (mobile)', () => {
 })
 
 describe('V0.1.3 — HoldingRow qty decimal trimming', () => {
-  it.fails('renders float qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
+  it('renders float qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
     const wrapper = mount(HoldingRow, {
       props: {
         holding: { ...HOLDING, quantity: 279.20583987000003 },
@@ -95,7 +95,7 @@ describe('V0.1.3 — HoldingRow qty decimal trimming', () => {
     expect(text).not.toContain('279.20583987000003')
   })
 
-  it.fails('renders float qty 52.497975839999995 as "52.497976" (≤6 decimals, trailing zeros stripped)', () => {
+  it('renders float qty 52.497975839999995 as "52.497976" (≤6 decimals, trailing zeros stripped)', () => {
     const wrapper = mount(HoldingRow, {
       props: {
         holding: { ...HOLDING, quantity: 52.497975839999995 },
@@ -107,7 +107,7 @@ describe('V0.1.3 — HoldingRow qty decimal trimming', () => {
     expect(text).not.toContain('52.497975839999995')
   })
 
-  it.fails('renders qty 10.100000000000001 as "10.1" (trailing zeros stripped after rounding)', () => {
+  it('renders qty 10.100000000000001 as "10.1" (trailing zeros stripped after rounding)', () => {
     const wrapper = mount(HoldingRow, {
       props: {
         holding: { ...HOLDING, quantity: 10.100000000000001 },

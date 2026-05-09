@@ -31,7 +31,7 @@ describe('V0.14 — MoneyCell', () => {
     expect(wrapper.text()).toContain('€14,850.00')
   })
 
-  it.fails('V0.1.3: no currency badge even when showCurrencyBadge=true and money.currency !== baseCurrency (symbol disambiguates)', () => {
+  it('V0.1.3: no currency badge even when showCurrencyBadge=true and money.currency !== baseCurrency (symbol disambiguates)', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 148.5, currency: 'USD' },
@@ -63,7 +63,7 @@ describe('V0.14 — MoneyCell', () => {
 })
 
 describe('V0.1.3 — MoneyCell currency-label consistency', () => {
-  it.fails('EUR foreign to USD base: shows "€11.46" with no trailing EUR code', () => {
+  it('EUR foreign to USD base: shows "€11.46" with no trailing EUR code', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 11.46, currency: 'EUR' },
@@ -75,7 +75,7 @@ describe('V0.1.3 — MoneyCell currency-label consistency', () => {
     expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
   })
 
-  it.fails('USD foreign to EUR base: shows "$398.70" with no trailing USD code', () => {
+  it('USD foreign to EUR base: shows "$398.70" with no trailing USD code', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 398.70, currency: 'USD' },

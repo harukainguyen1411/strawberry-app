@@ -118,15 +118,13 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
     expect(tickerTh.attributes('aria-sort')).toBe('none')
   })
 
-  it('avg cost shows the uppercase currency badge when avgCost.currency !== baseCurrency', () => {
+  // V0.1.3: badge removed — Intl symbol ($ / €) disambiguates; no trailing code suffix shown
+  it('V0.1.3: no currency-code badges rendered (symbol in formatted amount is sufficient)', () => {
     const wrapper = mount(HoldingsTable, {
       props: { holdings: HOLDINGS, baseCurrency: 'EUR' },
     })
     const badges = wrapper.findAll('[data-testid="currency-badge"]')
-    expect(badges.length).toBeGreaterThan(0)
-    const badgeTexts = badges.map((b) => b.text())
-    expect(badgeTexts).toContain('USD')
-    expect(badgeTexts).not.toContain('EUR')
+    expect(badges).toHaveLength(0)
   })
 
   it('every P/L cell is rendered via <PlCell> (data-testid="pl-cell"), one per row', () => {
