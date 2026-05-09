@@ -3,16 +3,13 @@ import { computed } from 'vue'
 import type { CurrencyCode, Money } from '@/types/firestore'
 import { useMoneyFormat } from '@/composables/useMoneyFormat'
 
-const props = withDefaults(
-  defineProps<{
-    money: Money
-    baseCurrency?: CurrencyCode
-    // showCurrencyBadge is retained for API compatibility but the badge is no
-    // longer rendered — the Intl currency symbol ($ / €) already disambiguates.
-    showCurrencyBadge?: boolean
-  }>(),
-  { showCurrencyBadge: false },
-)
+// V0.1.3: showCurrencyBadge prop dropped — the Intl currency symbol ($ / €)
+// already disambiguates, so the trailing code suffix is redundant.
+// baseCurrency is retained for callers that may want to thread it later.
+const props = defineProps<{
+  money: Money
+  baseCurrency?: CurrencyCode
+}>()
 
 const { format } = useMoneyFormat()
 

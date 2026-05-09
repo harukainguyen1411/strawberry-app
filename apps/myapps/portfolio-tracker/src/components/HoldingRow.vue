@@ -27,7 +27,6 @@ defineProps<{
         <MoneyCell
           :money="holding.avgCost"
           :base-currency="baseCurrency"
-          show-currency-badge
         />
       </span>
     </div>

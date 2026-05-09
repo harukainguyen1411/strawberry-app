@@ -5,10 +5,13 @@
  * the same component rendering a <ul> of <HoldingRow>, gated by Tailwind
  * responsive classes (`hidden md:table` vs `md:hidden`). Default sort is
  * market-value desc; clicking a header toggles direction and reflects state
- * via aria-sort. Currency badge appears on avg cost when its currency ≠
- * the user's base currency.
+ * via aria-sort.
  *
- * Refs V0.15
+ * V0.1.3 — currency-code badges removed (Intl symbol $ / € disambiguates);
+ * desktop qty column trimmed via formatQuantity (≤6 decimals, trailing zeros
+ * stripped) to match the mobile HoldingRow.
+ *
+ * Refs V0.15, V0.1.3
  */
 
 import { describe, it, expect } from 'vitest'
@@ -159,7 +162,7 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
 })
 
 describe('V0.1.3 — HoldingsTable desktop qty decimal trimming', () => {
-  it.fails('desktop tbody renders qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
+  it('desktop tbody renders qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
     const HOLDING_RAW: Holding = {
       ticker: 'BTC',
       broker: 'T212',

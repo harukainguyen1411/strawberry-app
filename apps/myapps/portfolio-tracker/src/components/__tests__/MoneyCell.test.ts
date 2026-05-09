@@ -1,13 +1,12 @@
 /**
  * V0.14 — MoneyCell component.
  *
- * Renders a Money value with locale-aware Intl.NumberFormat output, tabular
- * numerals, and an optional uppercase currency badge when the value's
- * currency differs from the user's base (per design spec §4.3.2 + §6).
+ * Renders a Money value with locale-aware Intl.NumberFormat output and
+ * tabular numerals (per design spec §4.3.2 + §6).
  *
  * V0.1.3 — currency-label consistency: the Intl symbol ($ / €) already
- * disambiguates the currency, so the trailing code badge is dropped. The
- * showCurrencyBadge prop is kept for API compat but no badge is rendered.
+ * disambiguates the currency, so the trailing code badge has been removed.
+ * The showCurrencyBadge prop has been dropped entirely.
  *
  * Refs V0.14, V0.1.3
  */
@@ -31,24 +30,22 @@ describe('V0.14 — MoneyCell', () => {
     expect(wrapper.text()).toContain('€14,850.00')
   })
 
-  it('V0.1.3: no currency badge even when showCurrencyBadge=true and money.currency !== baseCurrency (symbol disambiguates)', () => {
+  it('V0.1.3: no currency badge when money.currency !== baseCurrency (symbol disambiguates)', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 148.5, currency: 'USD' },
         baseCurrency: 'EUR',
-        showCurrencyBadge: true,
       },
     })
     // After V0.1.3: badge must not be rendered — the $ symbol is sufficient
     expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
   })
 
-  it('hides currency badge when money.currency === baseCurrency even with showCurrencyBadge=true', () => {
+  it('V0.1.3: no currency badge when money.currency === baseCurrency', () => {
     const wrapper = mount(MoneyCell, {
       props: {
         money: { amount: 148.5, currency: 'USD' },
         baseCurrency: 'USD',
-        showCurrencyBadge: true,
       },
     })
     expect(wrapper.find('[data-testid="currency-badge"]').exists()).toBe(false)
@@ -68,7 +65,6 @@ describe('V0.1.3 — MoneyCell currency-label consistency', () => {
       props: {
         money: { amount: 11.46, currency: 'EUR' },
         baseCurrency: 'USD',
-        showCurrencyBadge: true,
       },
     })
     expect(wrapper.text()).toContain('€11.46')
@@ -80,7 +76,6 @@ describe('V0.1.3 — MoneyCell currency-label consistency', () => {
       props: {
         money: { amount: 398.70, currency: 'USD' },
         baseCurrency: 'EUR',
-        showCurrencyBadge: true,
       },
     })
     expect(wrapper.text()).toContain('$398.70')
