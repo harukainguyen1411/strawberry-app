@@ -60,8 +60,15 @@ export function useImportT212Pdf(): UseImportT212PdfReturn {
     loading.value = true
     error.value = null
     try {
-      // Encode to base64 for JSON transport (callable data must be JSON-serializable)
-      const pdfBase64 = btoa(String.fromCharCode(...pdfBytes))
+      // Encode to base64 for JSON transport (callable data must be JSON-serializable).
+      // Chunk the Uint8Array to avoid exceeding the JS call stack limit — spreading
+      // large arrays into String.fromCharCode(...bytes) fails for files > ~64 KB.
+      const CHUNK = 8192
+      let binary = ''
+      for (let i = 0; i < pdfBytes.length; i += CHUNK) {
+        binary += String.fromCharCode(...pdfBytes.subarray(i, i + CHUNK))
+      }
+      const pdfBase64 = btoa(binary)
 
       const callable = httpsCallable<{ pdfBase64: string }, ImportResult>(
         getFunctions(),
