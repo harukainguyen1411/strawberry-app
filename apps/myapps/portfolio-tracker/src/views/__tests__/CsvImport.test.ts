@@ -123,7 +123,7 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     wrapper.unmount()
   })
 
-  it.fails('V012.2 failed parse → toast shows parse error message + router.push NOT called + no inline banner', async () => {
+  it('V012.2 failed parse → toast shows parse error message + router.push NOT called + no inline banner', async () => {
     mockParseMode = 'error'
     const { default: CsvImport } = await import('@/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })

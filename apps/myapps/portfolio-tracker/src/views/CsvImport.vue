@@ -60,22 +60,11 @@
         <p>{{ dropError }}</p>
       </div>
 
-      <!-- Error banner (parse failure) -->
-      <div
-        v-if="parseError"
-        role="alert"
-        class="mb-4 rounded-lg px-4 py-3 text-sm"
-        style="
-          border: 1px solid var(--accent);
-          background: color-mix(in srgb, var(--accent) 10%, transparent);
-          color: var(--text);
-        "
-      >
-        <p class="font-medium mb-1" style="color: var(--accent);">
-          Could not parse CSV
-        </p>
-        <p>{{ parseError }}</p>
-      </div>
+      <!--
+        Parse-error surface: toast (see onParse → showToast). The previous
+        inline banner here was redundant with the toast and was removed in
+        V0.1.2 to keep parse-error UX consistent with commit-error UX.
+      -->
 
       <!-- CTAs -->
       <div class="flex items-center gap-3">
