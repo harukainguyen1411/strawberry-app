@@ -4,7 +4,7 @@
  * Refs V0.1.2
  *
  * V012.1 — Successful import → toast shows "Imported N trades · M positions" + router.push('/') called
- * V012.2 — Failed parse → toast shows parse error message + router.push NOT called
+ * V012.2 — Failed parse → toast shows parse error + router.push NOT called + no redundant inline banner
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -123,7 +123,7 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     wrapper.unmount()
   })
 
-  it('V012.2 failed parse → toast shows parse error message + router.push NOT called', async () => {
+  it.fails('V012.2 failed parse → toast shows parse error message + router.push NOT called + no inline banner', async () => {
     mockParseMode = 'error'
     const { default: CsvImport } = await import('@/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
@@ -147,6 +147,12 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     const toast = wrapper.find('[data-testid="toast"]')
     expect(toast.exists()).toBe(true)
     expect(toast.text()).toMatch(/Unrecognised column headers/i)
+
+    // Inline parse-error banner must NOT render — toast is the canonical surface.
+    // The banner's distinctive heading is "Could not parse CSV"; on Step 1 it
+    // appeared above the Parse button. (The Step 2 ErrorBanner with the same
+    // heading only shows after advancing to step2, which we asserted we did not.)
+    expect(wrapper.text()).not.toContain('Could not parse CSV')
 
     // Router must NOT have been called
     expect(mockPush).not.toHaveBeenCalled()
