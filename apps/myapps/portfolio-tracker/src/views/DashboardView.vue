@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePortfolio } from '@/composables/usePortfolio'
+import { FxRateMissingError, usePortfolio } from '@/composables/usePortfolio'
 import SummaryCard from '@/components/SummaryCard.vue'
 import HoldingsTable from '@/components/HoldingsTable.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import type { CurrencyCode, Money } from '@/types/firestore'
 
-const { status, loading, holdings, summary, baseCurrency } = usePortfolio()
+const { status, loading, holdings, summary, baseCurrency, error } = usePortfolio()
 
 const fallbackBase = computed<CurrencyCode>(() => baseCurrency.value ?? 'USD')
 
@@ -18,6 +18,14 @@ const isEmpty = computed(() =>
   isReady.value
   && holdings.value.length === 0
   && (summary.value?.cashTotal.amount ?? 0) === 0,
+)
+
+// A.6.3 — narrow the FxRateMissingError pair off the generic Error
+// surface from usePortfolio so the banner can name the missing rate
+// (e.g. "USD->EUR"). Other Error subclasses fall through to a generic
+// message via error.message in the template.
+const fxPair = computed(() =>
+  error.value instanceof FxRateMissingError ? error.value.pair : null,
 )
 </script>
 
@@ -33,6 +41,60 @@ const isEmpty = computed(() =>
         loading
       />
       <HoldingsTable :holdings="[]" :base-currency="fallbackBase" loading />
+    </template>
+
+    <template v-else-if="status === 'error'">
+      <!-- A.6.3 — usePortfolio surfaced an error (most commonly
+        FxRateMissingError on a multi-currency import without a seeded
+        users/{uid}/meta/fx). Surface the missing pair + recovery CTAs
+        so the dashboard does not render a blank <main>. /legacy/settings
+        is the V0 settings route (the in-app v1.x FX-overrides UI will
+        replace it); Re-import is the live primary recovery — pick a
+        base currency that does not require conversion.
+
+        role="alert" alone implies assertive announcement; aria-live is
+        intentionally not set so the role's default behaviour is honoured. -->
+      <section
+        data-testid="error-banner"
+        role="alert"
+        class="rounded-lg px-4 py-3 text-sm flex flex-col gap-3"
+        :style="{
+          border: '1px solid var(--accent)',
+          background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+        }"
+      >
+        <div>
+          <p class="font-medium mb-1" style="color: var(--accent);">
+            Couldn't load your portfolio
+          </p>
+          <p style="color: var(--text);">
+            <template v-if="fxPair">
+              Missing FX rate for <code class="font-mono">{{ fxPair }}</code>.
+              Add the rate in Settings, or re-import with a base currency that
+              doesn't need conversion.
+            </template>
+            <template v-else>
+              {{ error?.message ?? 'Unknown error' }}
+            </template>
+          </p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <a
+            data-testid="error-settings-link"
+            href="/legacy/settings"
+            class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
+          >
+            Go to Settings
+          </a>
+          <a
+            data-testid="error-reimport-link"
+            href="/import?mode=replace"
+            class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
+          >
+            Re-import CSV
+          </a>
+        </div>
+      </section>
     </template>
 
     <template v-else-if="isEmpty">

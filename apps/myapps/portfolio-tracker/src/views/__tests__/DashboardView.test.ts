@@ -14,10 +14,12 @@
  * mock usePortfolio. Real Firestore wiring is exercised end-to-end in
  * V0.18's Playwright happy path.
  *
- * The mock spreads `...actual` so `FxRateMissingError` (the real class
- * exported by usePortfolio.ts) is reachable in tests — the impl uses
- * `instanceof FxRateMissingError`, so the test must drive that branch
- * with a real instance, not a duck-typed Error.
+ * The mock factory re-declares `FxRateMissingError` (instead of
+ * importing the real class) so the test stays off the firebase/config
+ * side-effect chain — vitest has no VITE_FIREBASE_* env. Both the test
+ * and DashboardView.vue resolve `FxRateMissingError` through the mock,
+ * so the impl's `instanceof` check matches the same constructor on
+ * both sides.
  *
  * Refs V0.17, A.6.3
  */
@@ -46,12 +48,11 @@ const mockError: Ref<Error | null> = ref<Error | null>(null)
 // loading too (no uid yet → skeleton). Drift here would let regressions
 // in the real composable's status state machine pass silently.
 //
-// FxRateMissingError is re-declared inside the factory — keeps the
-// test off the real firebase/config side-effect chain (vitest has no
-// VITE_FIREBASE_* env). The impl's `instanceof FxRateMissingError`
-// check resolves against the same mocked class because both the test
-// and DashboardView.vue import from `@/composables/usePortfolio` and
-// the mock replaces that export for both.
+// FxRateMissingError is re-declared in the factory rather than imported
+// via `importOriginal` — see the file-level docblock for why (firebase
+// side-effect avoidance). The impl's `instanceof` check resolves
+// against this same mocked class because Vitest replaces the export
+// for every importer, including DashboardView.vue.
 vi.mock('@/composables/usePortfolio', () => {
   class FxRateMissingError extends Error {
     constructor(public readonly pair: string) {
@@ -220,7 +221,7 @@ describe('V0.17 — DashboardView', () => {
 // loading/empty/ready branches. `it.fails` markers convert to `it` in
 // the impl commit (matched by tdd-gate's xfail regex).
 describe('A.6.3 — DashboardView error state', () => {
-  it.fails('renders an error banner with the FxRateMissingError pair when status="error"', async () => {
+  it('renders an error banner with the FxRateMissingError pair when status="error"', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()
@@ -230,27 +231,30 @@ describe('A.6.3 — DashboardView error state', () => {
     expect(banner.text()).toContain('USD->EUR')
   })
 
-  it.fails('renders Go-to-Settings and Re-import CTAs in the error branch', async () => {
+  it('renders Go-to-Settings and Re-import CTAs in the error branch', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
-    expect(wrapper.find('a[href="/settings"]').exists()).toBe(true)
-    expect(wrapper.find('a[href="/import?mode=replace"]').exists()).toBe(true)
+    // /legacy/settings is the V0 settings route (the v1.x in-app FX
+    // overrides UI replaces it). Re-import is the live primary recovery.
+    expect(wrapper.find('a[href="/legacy/settings"]').exists()).toBe(true)
+    expect(wrapper.find('a[data-testid="error-reimport-link"]').exists()).toBe(true)
   })
 
-  it.fails('suppresses loading/empty/ready branches in favour of the error banner when status="error"', async () => {
+  it('renders only the error banner (not the ready-branch re-import or loading skeletons) when status="error"', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
-    // Branches that must NOT render in error state — these already pass
-    // pre-fix because status='error' drops out of every existing branch,
-    // so the positive assertion below is what carries the xfail until
-    // the impl lands.
-    expect(wrapper.find('section[aria-busy="true"]').exists()).toBe(false)
-    expect(wrapper.text()).not.toContain('No portfolio data yet')
-    // Positive: the error banner IS the rendered branch.
+    // Positive: error banner IS the rendered branch.
     expect(wrapper.find('[data-testid="error-banner"]').exists()).toBe(true)
+    // Negatives that pin branch-mutual-exclusion against future
+    // regressions where someone widens isReady / isEmpty / loading to
+    // also fire under status='error'. The ready-branch link is
+    // `data-testid="reimport-link"` (no "error-" prefix), distinct from
+    // the error-banner's CTA — guards against a duplicate render.
+    expect(wrapper.find('a[data-testid="reimport-link"]').exists()).toBe(false)
+    expect(wrapper.find('section[aria-busy="true"]').exists()).toBe(false)
   })
 })
