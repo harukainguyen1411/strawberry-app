@@ -16,14 +16,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const FIXTURE = path.resolve(__dirname, '../../../test/fixtures/t212-statement.pdf')
 
 describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
-  it.fails('T212-PDF-01 parses 13 open positions from fixture', async () => {
+  it('T212-PDF-01 parses 13 open positions from fixture', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
     expect(result.positions).toHaveLength(13)
   })
 
-  it.fails('T212-PDF-02 position tickers match expected set', async () => {
+  it('T212-PDF-02 position tickers match expected set', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -31,7 +31,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     expect(tickers).toEqual(['AMZN', 'BRK.B', 'GOOGL', 'LLY', 'MELI', 'META', 'MSFT', 'NVO', 'OSCR', 'UNH', 'VFEA', 'VUAA', 'WEBN'])
   })
 
-  it.fails('T212-PDF-03 AMZN position has correct quantity and avgCost', async () => {
+  it('T212-PDF-03 AMZN position has correct quantity and avgCost', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -44,7 +44,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     expect(amzn!.broker).toBe('T212')
   })
 
-  it.fails('T212-PDF-04 EUR positions (VFEA, VUAA, WEBN) have currency EUR and FX rate 1', async () => {
+  it('T212-PDF-04 EUR positions (VFEA, VUAA, WEBN) have currency EUR and FX rate 1', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -55,7 +55,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     }
   })
 
-  it.fails('T212-PDF-05 accountValue is €20,643.09', async () => {
+  it('T212-PDF-05 accountValue is €20,643.09', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -63,7 +63,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     expect(result.accountValue.currency).toBe('EUR')
   })
 
-  it.fails('T212-PDF-06 cash is derived correctly (account_value - sum positions EUR value)', async () => {
+  it('T212-PDF-06 cash is derived correctly (account_value - sum positions EUR value)', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -72,20 +72,20 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     expect(result.cash.currency).toBe('EUR')
   })
 
-  it.fails('T212-PDF-07 fxRates contains USD->EUR from fixture (1.16951)', async () => {
+  it('T212-PDF-07 fxRates contains USD->EUR from fixture (1.16951)', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
     expect(result.fxRates['USD->EUR']).toBeCloseTo(1 / 1.16951, 4)
   })
 
-  it.fails('T212-PDF-08 non-PDF buffer throws ParseError', async () => {
+  it('T212-PDF-08 non-PDF buffer throws ParseError', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const notPdf = Buffer.from('Action,Time,ISIN\n')
     await expect(parseT212StatementPdf(notPdf)).rejects.toMatchObject({ kind: 'not_pdf' })
   })
 
-  it.fails('T212-PDF-09 positions have marketValue in native currency', async () => {
+  it('T212-PDF-09 positions have marketValue in native currency', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
@@ -96,7 +96,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     expect(amzn!.marketValue!.currency).toBe('USD')
   })
 
-  it.fails('T212-PDF-10 lastPrice is current price from PRICE column', async () => {
+  it('T212-PDF-10 lastPrice is current price from PRICE column', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)
