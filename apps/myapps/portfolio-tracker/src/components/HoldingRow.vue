@@ -2,6 +2,7 @@
 import type { CurrencyCode, Holding } from '@/types/firestore'
 import MoneyCell from '@/components/MoneyCell.vue'
 import PlCell from '@/components/PlCell.vue'
+import { formatQuantity } from '@/composables/useMoneyFormat'
 
 defineProps<{
   holding: Holding
@@ -20,13 +21,12 @@ defineProps<{
       <span class="text-xs uppercase" style="color: var(--muted);">{{ holding.broker }}</span>
     </div>
     <div class="text-sm flex items-baseline gap-2" style="color: var(--muted);">
-      <span>{{ holding.quantity }} ·</span>
+      <span>{{ formatQuantity(holding.quantity) }} ·</span>
       <span class="inline-flex items-baseline gap-1">
         avg
         <MoneyCell
           :money="holding.avgCost"
           :base-currency="baseCurrency"
-          show-currency-badge
         />
       </span>
     </div>

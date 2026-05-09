@@ -4,6 +4,7 @@ import type { CurrencyCode, Holding } from '@/types/firestore'
 import MoneyCell from '@/components/MoneyCell.vue'
 import PlCell from '@/components/PlCell.vue'
 import HoldingRow from '@/components/HoldingRow.vue'
+import { formatQuantity } from '@/composables/useMoneyFormat'
 
 const props = withDefaults(
   defineProps<{
@@ -121,12 +122,11 @@ function onHeaderClick(key: SortKey): void {
           >
             <td class="px-3 py-3 font-medium">{{ h.ticker }}</td>
             <td class="px-3 py-3 text-xs uppercase" style="color: var(--muted);">{{ h.broker }}</td>
-            <td class="px-3 py-3 text-right tabular-nums">{{ h.quantity }}</td>
+            <td class="px-3 py-3 text-right tabular-nums">{{ formatQuantity(h.quantity) }}</td>
             <td class="px-3 py-3 text-right">
               <MoneyCell
                 :money="h.avgCost"
                 :base-currency="baseCurrency"
-                show-currency-badge
               />
             </td>
             <td class="px-3 py-3 text-right">
