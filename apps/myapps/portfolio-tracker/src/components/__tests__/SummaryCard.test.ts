@@ -8,7 +8,7 @@
  * Refs V0.14
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, test } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SummaryCard from '@/components/SummaryCard.vue'
 
@@ -60,6 +60,37 @@ describe('V0.14 — SummaryCard', () => {
     expect(dayChange.text()).toContain('▲')
     expect(dayChange.text()).toContain('+$1,204.50')
     expect(dayChange.text()).toContain('+0.97%')
+  })
+
+  // V0.1.4: null dayChange must render "—" alone, not "— today"
+  test.fails('V0.1.4 null dayChange renders "—" only, no dangling "today"', () => {
+    const wrapper = mount(SummaryCard, {
+      props: {
+        totalValue: { amount: 50000, currency: 'USD' },
+        dayChange: null,
+        dayChangePct: null,
+        positionsCount: 5,
+        cashTotal: { amount: 1000, currency: 'USD' },
+      },
+    })
+    const dayChange = wrapper.find('[data-testid="day-change"]')
+    expect(dayChange.text()).toContain('—')
+    expect(dayChange.text()).not.toContain('today')
+  })
+
+  // V0.1.4: non-null dayChange must still show "today"
+  it('V0.1.4 non-null dayChange renders "today" label', () => {
+    const wrapper = mount(SummaryCard, {
+      props: {
+        totalValue: { amount: 50000, currency: 'USD' },
+        dayChange: { amount: 200, currency: 'USD' },
+        dayChangePct: 0.4,
+        positionsCount: 5,
+        cashTotal: { amount: 1000, currency: 'USD' },
+      },
+    })
+    const dayChange = wrapper.find('[data-testid="day-change"]')
+    expect(dayChange.text()).toContain('today')
   })
 })
 
