@@ -29,17 +29,44 @@
         </span>
       </div>
 
-      <!-- Right: avatar -->
-      <div class="flex items-center gap-2">
+      <!-- Right: avatar + sign-out menu -->
+      <div class="relative flex items-center gap-2">
         <!-- Avatar circle — 32px, initials fallback -->
         <button
+          data-testid="avatar-btn"
           class="flex items-center justify-center w-8 h-8 rounded-full text-xs font-semibold uppercase tracking-wide select-none"
           style="background: var(--accent); color: var(--text);"
           :aria-label="`Account: ${email ?? 'signed out'}`"
-          @click="$emit('avatar-click')"
+          @click="toggleMenu"
         >
           {{ initials }}
         </button>
+
+        <!-- Sign-out dropdown — anchored to avatar -->
+        <div
+          v-if="showMenu"
+          data-testid="avatar-menu"
+          class="absolute right-0 top-10 w-56 rounded-lg py-1 z-50"
+          style="background: var(--nav-bg); border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.4);"
+        >
+          <!-- User email header -->
+          <div class="px-4 py-3" style="border-bottom: 1px solid var(--border);">
+            <p class="text-xs truncate" style="color: var(--muted);">{{ email }}</p>
+          </div>
+
+          <!-- Sign out button -->
+          <button
+            data-testid="sign-out-btn"
+            class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm transition-colors"
+            style="color: var(--text);"
+            @click="handleSignOut"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign out
+          </button>
+        </div>
       </div>
     </header>
 
@@ -51,15 +78,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useAuthStore } from '@/stores/auth'
 
 defineEmits<{
   menu: []
-  'avatar-click': []
 }>()
 
+const router = useRouter()
+const authStore = useAuthStore()
 const { email } = useAuth()
+
+/** Controls visibility of the avatar sign-out dropdown. */
+const showMenu = ref(false)
+
+const toggleMenu = (): void => {
+  showMenu.value = !showMenu.value
+}
+
+const handleSignOut = async (): Promise<void> => {
+  showMenu.value = false
+  await authStore.signOut()
+  router.push('/sign-in')
+}
 
 /**
  * Derive 2-letter initials from email.

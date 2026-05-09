@@ -84,8 +84,8 @@ describe('A.16 — AppShell', () => {
     expect(wrapper.text()).toMatch(/DA/)
   })
 
-  // V0.1.5 xfail — avatar click opens sign-out menu showing user email + Sign out button
-  it.fails('A.16.5 avatar click opens dropdown menu with user email and Sign out button', async () => {
+  // V0.1.5 — avatar click opens sign-out menu showing user email + Sign out button
+  it('A.16.5 avatar click opens dropdown menu with user email and Sign out button', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell)
 
@@ -109,8 +109,8 @@ describe('A.16 — AppShell', () => {
     expect(signOutBtn.exists()).toBe(true)
   })
 
-  // V0.1.5 xfail — Sign out click calls authStore.signOut() and navigates to /sign-in
-  it.fails('A.16.6 sign-out button calls authStore.signOut() and navigates to /sign-in', async () => {
+  // V0.1.5 — Sign out click calls authStore.signOut() and navigates to /sign-in
+  it('A.16.6 sign-out button calls authStore.signOut() and navigates to /sign-in', async () => {
     mockSignOut.mockClear()
     mockPush.mockClear()
 
