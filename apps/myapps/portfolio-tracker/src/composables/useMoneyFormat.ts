@@ -13,6 +13,19 @@ export interface UseMoneyFormatReturn {
   format: (money: Money, options?: FormatOptions) => string
 }
 
+/**
+ * Format a raw float quantity for display: cap at 6 decimal places and strip
+ * trailing zeros so e.g. 52.497975839999995 → "52.497976" and 12 → "12".
+ *
+ * Domain: finite numbers (negative or non-negative). Behavior is undefined
+ * for NaN and ±Infinity — callers should validate the holding quantity is a
+ * finite real number before display. (In portfolio-tracker, quantities come
+ * from Firestore typed as `number`; CSV imports validate finiteness upstream.)
+ */
+export function formatQuantity(qty: number): string {
+  return parseFloat(qty.toFixed(6)).toString()
+}
+
 export function useMoneyFormat(): UseMoneyFormatReturn {
   return {
     format(money, options) {

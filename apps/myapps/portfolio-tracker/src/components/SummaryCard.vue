@@ -46,7 +46,7 @@ const hasDayChange = computed(() => props.dayChange !== null && props.dayChangeP
           <span class="ml-2" style="color: var(--muted);">today</span>
         </template>
         <template v-else>
-          <span style="color: var(--muted);">— today</span>
+          <span style="color: var(--muted);">—</span>
         </template>
       </div>
 
