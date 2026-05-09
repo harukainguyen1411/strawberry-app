@@ -60,22 +60,11 @@
         <p>{{ dropError }}</p>
       </div>
 
-      <!-- Error banner (parse failure) -->
-      <div
-        v-if="parseError"
-        role="alert"
-        class="mb-4 rounded-lg px-4 py-3 text-sm"
-        style="
-          border: 1px solid var(--accent);
-          background: color-mix(in srgb, var(--accent) 10%, transparent);
-          color: var(--text);
-        "
-      >
-        <p class="font-medium mb-1" style="color: var(--accent);">
-          Could not parse CSV
-        </p>
-        <p>{{ parseError }}</p>
-      </div>
+      <!--
+        Parse-error surface: toast (see onParse → showToast). The previous
+        inline banner here was redundant with the toast and was removed in
+        V0.1.2 to keep parse-error UX consistent with commit-error UX.
+      -->
 
       <!-- CTAs -->
       <div class="flex items-center gap-3">
@@ -400,6 +389,8 @@ async function onParse() {
   if (!parseError.value) {
     parseResult.value = parserResult.value
     if (parseResult.value) step.value = 'step2'
+  } else {
+    showToast(parseError.value, false)
   }
 }
 
@@ -418,10 +409,11 @@ async function onCommit() {
       showToast(`Import rejected: ${result.errors.length} errors. See preview.`, true)
       return
     }
+    const positionsPart = `${result.positionsWritten} position${result.positionsWritten === 1 ? '' : 's'}`
     if (result.errors && result.errors.length > 0) {
-      showToast(`Imported ${result.tradesAdded} trades, ${result.errors.length} skipped`, false)
+      showToast(`Imported ${result.tradesAdded} trades · ${positionsPart}, ${result.errors.length} skipped`, false)
     } else {
-      showToast(`Imported ${result.tradesAdded} trades`, false)
+      showToast(`Imported ${result.tradesAdded} trades · ${positionsPart}`, false)
     }
     router.push('/')
   } catch {
