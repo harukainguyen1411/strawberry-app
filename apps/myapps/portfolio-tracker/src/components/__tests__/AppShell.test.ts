@@ -135,4 +135,26 @@ describe('A.16 — AppShell', () => {
     // router.push('/sign-in') must have been called
     expect(mockPush).toHaveBeenCalledWith('/sign-in')
   })
+
+  // V0.1.5 xfail — ARIA on avatar button + dropdown for screen-reader correctness
+  it.fails('A.16.7 avatar button + dropdown carry correct ARIA attributes', async () => {
+    const AppShell = (await import('@/components/AppShell.vue')).default
+    const wrapper = mount(AppShell)
+
+    const avatarBtn = wrapper.find('[data-testid="avatar-btn"]')
+    expect(avatarBtn.exists()).toBe(true)
+
+    // Default: closed → aria-haspopup=menu, aria-expanded=false
+    expect(avatarBtn.attributes('aria-haspopup')).toBe('menu')
+    expect(avatarBtn.attributes('aria-expanded')).toBe('false')
+
+    // Open the menu
+    await avatarBtn.trigger('click')
+
+    // After click: aria-expanded=true, dropdown carries role=menu
+    expect(avatarBtn.attributes('aria-expanded')).toBe('true')
+    const menu = wrapper.find('[data-testid="avatar-menu"]')
+    expect(menu.exists()).toBe(true)
+    expect(menu.attributes('role')).toBe('menu')
+  })
 })
