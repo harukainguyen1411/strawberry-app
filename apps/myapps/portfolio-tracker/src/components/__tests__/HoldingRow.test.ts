@@ -7,7 +7,10 @@
  * §8). All money cells route through <MoneyCell>/<PlCell> — no inline
  * Intl.NumberFormat.
  *
- * Refs V0.15
+ * V0.1.3 — qty decimal trimming (≤6 decimal places, trailing zeros stripped);
+ * currency-label consistency (symbol only, no trailing code suffix).
+ *
+ * Refs V0.15, V0.1.3
  */
 
 import { describe, it, expect } from 'vitest'
@@ -35,16 +38,16 @@ describe('V0.15 — HoldingRow (mobile)', () => {
     expect(text).toContain('T212')
   })
 
-  it('renders quantity and avg cost; avg cost shows USD badge when baseCurrency=EUR', () => {
+  it.fails('V0.1.3: renders quantity and avg cost; no trailing currency code badge (symbol disambiguates)', () => {
     const wrapper = mount(HoldingRow, {
       props: { holding: HOLDING, baseCurrency: 'EUR' },
     })
     const text = wrapper.text()
     expect(text).toContain('12')
     expect(text).toContain('$148.50')
+    // V0.1.3: no currency-code badge — the $ symbol already disambiguates
     const badges = wrapper.findAll('[data-testid="currency-badge"]')
-    const badgeTexts = badges.map((b) => b.text())
-    expect(badgeTexts).toContain('USD')
+    expect(badges).toHaveLength(0)
   })
 
   it('omits the currency badge when avgCost.currency === baseCurrency', () => {
@@ -76,5 +79,43 @@ describe('V0.15 — HoldingRow (mobile)', () => {
     const root = wrapper.find('[data-testid="holding-row"]')
     expect(root.exists()).toBe(true)
     expect(root.classes()).toContain('min-h-[44px]')
+  })
+})
+
+describe('V0.1.3 — HoldingRow qty decimal trimming', () => {
+  it.fails('renders float qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
+    const wrapper = mount(HoldingRow, {
+      props: {
+        holding: { ...HOLDING, quantity: 279.20583987000003 },
+        baseCurrency: 'EUR',
+      },
+    })
+    const text = wrapper.text()
+    expect(text).toContain('279.20584')
+    expect(text).not.toContain('279.20583987000003')
+  })
+
+  it.fails('renders float qty 52.497975839999995 as "52.497976" (≤6 decimals, trailing zeros stripped)', () => {
+    const wrapper = mount(HoldingRow, {
+      props: {
+        holding: { ...HOLDING, quantity: 52.497975839999995 },
+        baseCurrency: 'EUR',
+      },
+    })
+    const text = wrapper.text()
+    expect(text).toContain('52.497976')
+    expect(text).not.toContain('52.497975839999995')
+  })
+
+  it.fails('renders qty 10.100000000000001 as "10.1" (trailing zeros stripped after rounding)', () => {
+    const wrapper = mount(HoldingRow, {
+      props: {
+        holding: { ...HOLDING, quantity: 10.100000000000001 },
+        baseCurrency: 'EUR',
+      },
+    })
+    const text = wrapper.text()
+    expect(text).toContain('10.1')
+    expect(text).not.toContain('10.100000000000001')
   })
 })
