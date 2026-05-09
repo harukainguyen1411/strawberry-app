@@ -104,7 +104,7 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     vi.resetModules()
   })
 
-  it.fails('V012.1 successful commit → toast shows "Imported N trades · M positions" and router.push("/") is called', async () => {
+  it('V012.1 successful commit → toast shows "Imported N trades · M positions" and router.push("/") is called', async () => {
     const wrapper = await mountImportAtStep2()
 
     // Click "Commit import →"
@@ -123,7 +123,7 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     wrapper.unmount()
   })
 
-  it.fails('V012.2 failed parse → toast shows parse error message + router.push NOT called', async () => {
+  it('V012.2 failed parse → toast shows parse error message + router.push NOT called', async () => {
     mockParseMode = 'error'
     const { default: CsvImport } = await import('@/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })

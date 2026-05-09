@@ -339,6 +339,8 @@ async function onParse() {
   if (!parseError.value) {
     parseResult.value = parserResult.value
     if (parseResult.value) step.value = 'step2'
+  } else {
+    showToast(parseError.value, false)
   }
 }
 
@@ -357,10 +359,11 @@ async function onCommit() {
       showToast(`Import rejected: ${result.errors.length} errors. See preview.`, true)
       return
     }
+    const positionsPart = `${result.positionsWritten} position${result.positionsWritten === 1 ? '' : 's'}`
     if (result.errors && result.errors.length > 0) {
-      showToast(`Imported ${result.tradesAdded} trades, ${result.errors.length} skipped`, false)
+      showToast(`Imported ${result.tradesAdded} trades · ${positionsPart}, ${result.errors.length} skipped`, false)
     } else {
-      showToast(`Imported ${result.tradesAdded} trades`, false)
+      showToast(`Imported ${result.tradesAdded} trades · ${positionsPart}`, false)
     }
     router.push('/')
   } catch {
