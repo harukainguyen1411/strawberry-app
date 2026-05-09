@@ -171,4 +171,19 @@ describe('V0.1.0 — importT212Pdf callable integration', () => {
     const ibCash = db.store.get('users/userA/cash/IB')
     expect(ibCash?.amount).toBe(5000)
   })
+
+  // V0.1.0 regression — both-sides FX seeding (USD-base dashboard repro).
+  // Live smoke: USD base + T212 PDF → A.6.3 banner "Missing FX rate for EUR->USD"
+  // because parser only seeded the USD->EUR direction. After fix, both are written.
+  it.fails('PDF-INT-07 fxRates seeded for both directions (USD->EUR and EUR->USD)', async () => {
+    const { importT212Pdf } = await import('../importT212Pdf.js')
+    const buf = fixture('t212-statement.pdf')
+    await importT212Pdf({ uid: 'userA', db, pdfBuffer: buf })
+    const fx = db.store.get('users/userA/meta/fx')
+    const rates = fx?.rates as Record<string, number>
+    expect(rates?.['USD->EUR']).toBeDefined()
+    expect(rates?.['EUR->USD']).toBeDefined()
+    // The two should be reciprocals (within rounding)
+    expect(rates['USD->EUR'] * rates['EUR->USD']).toBeCloseTo(1, 3)
+  })
 })

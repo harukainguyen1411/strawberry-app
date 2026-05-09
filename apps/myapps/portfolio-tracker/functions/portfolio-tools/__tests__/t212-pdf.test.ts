@@ -103,4 +103,21 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
     const amzn = result.positions.find(p => p.ticker === 'AMZN')
     expect(amzn!.lastPrice).toBeCloseTo(272.75, 2)
   })
+
+  // V0.1.0 regression — both-sides FX seeding.
+  // Live smoke (USD base, T212 PDF) hit FxRateMissingError because the parser
+  // only seeded `<src>->EUR` (the direction it reads from the statement).
+  // A USD-base dashboard with EUR positions needs `EUR->USD` to render —
+  // convertMoney() does NOT auto-invert. So the parser must seed both sides:
+  // `<src>->EUR = 1/fxRate` AND `EUR-><src> = fxRate` (the printed value is
+  // already the EUR-><src> direction: 1 EUR → 1.16951 USD).
+  it.fails('T212-PDF-11 fxRates seeds both directions (USD->EUR and EUR->USD)', async () => {
+    const { parseT212StatementPdf } = await import('../t212-pdf.js')
+    const buf = fs.readFileSync(FIXTURE)
+    const result = await parseT212StatementPdf(buf)
+    // Original direction (already covered by T212-PDF-07): USD->EUR = 1/1.16951
+    expect(result.fxRates['USD->EUR']).toBeCloseTo(1 / 1.16951, 4)
+    // Inverse direction — the printed FX RATE value (1 EUR → 1.16951 USD)
+    expect(result.fxRates['EUR->USD']).toBeCloseTo(1.16951, 4)
+  })
 })
