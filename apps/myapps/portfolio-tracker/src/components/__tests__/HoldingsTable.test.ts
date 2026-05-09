@@ -158,6 +158,27 @@ describe('V0.15 — HoldingsTable (desktop)', () => {
   })
 })
 
+describe('V0.1.3 — HoldingsTable desktop qty decimal trimming', () => {
+  it.fails('desktop tbody renders qty 279.20583987000003 as "279.20584" (≤6 decimals, trailing zeros stripped)', () => {
+    const HOLDING_RAW: Holding = {
+      ticker: 'BTC',
+      broker: 'T212',
+      quantity: 279.20583987000003,
+      avgCost: { amount: 100, currency: 'USD' },
+      marketValue: { amount: 100, currency: 'EUR' },
+      pl: { amount: 0, currency: 'EUR' },
+      plPct: 0,
+    }
+    const wrapper = mount(HoldingsTable, {
+      props: { holdings: [HOLDING_RAW], baseCurrency: 'EUR' },
+    })
+    const row = wrapper.find('tbody tr')
+    expect(row.exists()).toBe(true)
+    expect(row.text()).toContain('279.20584')
+    expect(row.text()).not.toContain('279.20583987')
+  })
+})
+
 describe('V0.16 — HoldingsTable loading state', () => {
   it('renders 5 skeleton rows with aria-busy="true" when loading=true', () => {
     const wrapper = mount(HoldingsTable, {
