@@ -7,9 +7,9 @@
   <div class="px-4 py-6 max-w-2xl mx-auto">
     <!-- Step 1 -->
     <template v-if="step === 'step1'">
-      <h1 class="text-2xl font-medium mb-1" style="color: var(--text);">Import trades</h1>
+      <h1 class="text-2xl font-medium mb-1" style="color: var(--text);">Import portfolio</h1>
       <p class="text-sm mb-6" style="color: var(--muted);">
-        Paste a CSV from Trading 212 or Interactive Brokers, or drop a file below.
+        Drop your T212 Activity Statement (PDF) for the live snapshot, or paste an IB CSV / T212 trading-history CSV for trade-by-trade data.
       </p>
 
       <!-- Source select -->
@@ -23,7 +23,7 @@
       <!-- Drop zone -->
       <div class="mb-4">
         <DropZone
-          accept=".csv"
+          accept=".csv,.pdf"
           :maxSizeMb="10"
           @file="onFileDropped"
           @error="onDropError"
@@ -107,6 +107,14 @@
       >
         Add a CSV to continue
       </p>
+    </template>
+
+    <!-- PDF importing: full-page loader while PDF callable runs -->
+    <template v-else-if="step === 'pdf-importing'">
+      <div class="flex flex-col items-center justify-center py-16 gap-4">
+        <p class="text-base" style="color: var(--text);">Importing T212 Activity Statement…</p>
+        <p class="text-sm" style="color: var(--muted);">Parsing positions, cash, and FX rates.</p>
+      </div>
     </template>
 
     <!-- Step 2: preview + commit -->
@@ -205,25 +213,31 @@ import ErrorBanner from '@/components/ErrorBanner.vue'
 import Toast from '@/components/Toast.vue'
 import { useCsvParser, type CsvSource, type ParseResult } from '@/composables/useCsvParser'
 import { useImportCsv } from '@/composables/useImportCsv'
+import { useImportT212Pdf, detectFileFormat } from '@/composables/useImportT212Pdf'
 
-type Step = 'step1' | 'step2'
+type Step = 'step1' | 'step2' | 'pdf-importing'
 
 const router = useRouter()
 const step = ref<Step>('step1')
 const source = ref<CsvSource | ''>('')
 const pasteText = ref('')
 const fileText = ref<string | null>(null)
+/** Raw bytes of the dropped file (used for format detection + PDF import) */
+const fileBytes = ref<Uint8Array | null>(null)
 const dropError = ref<string | null>(null)
 const parseResult = ref<ParseResult | null>(null)
 
 const { parse, parseError, loading: parsing, reset: resetParser, result: parserResult } = useCsvParser()
 const { importCsv, loading: committing } = useImportCsv()
+const { importT212Pdf, loading: pdfImporting } = useImportT212Pdf()
 
 const toastVisible = ref(false)
 const toastMessage = ref('')
 const toastRetry = ref(false)
 
 const canParse = computed(() => {
+  // PDF files auto-submit directly (no parse step needed)
+  if (fileBytes.value && detectFileFormat(fileBytes.value) === 'pdf') return false
   return !!(fileText.value || pasteText.value.trim()) && !!source.value
 })
 
@@ -303,6 +317,7 @@ function onSourceChange() {
   parseResult.value = null
   parseError.value = null
   fileText.value = null
+  fileBytes.value = null
   pasteText.value = ''
   dropError.value = null
   resetParser()
@@ -320,15 +335,61 @@ function onPasteTooLarge(sizeBytes: number) {
 function onFileDropped(file: File) {
   dropError.value = null
   fileText.value = null
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    fileText.value = (e.target?.result as string) ?? null
+  fileBytes.value = null
+
+  // Read as ArrayBuffer first to detect format from magic bytes.
+  // After detection: PDF → importT212Pdf; CSV → fileText for parse step.
+  const arrayReader = new FileReader()
+  arrayReader.onload = async (e) => {
+    const buf = e.target?.result as ArrayBuffer | null
+    if (!buf) {
+      dropError.value = 'Could not read the file. Please try again.'
+      return
+    }
+    const bytes = new Uint8Array(buf)
+    fileBytes.value = bytes
+    const fmt = detectFileFormat(bytes)
+
+    if (fmt === 'unsupported') {
+      dropError.value = 'Unsupported format. Please upload a PDF (T212 Activity Statement) or CSV.'
+      fileBytes.value = null
+      return
+    }
+
+    if (fmt === 'pdf') {
+      // PDF path: auto-import without requiring Source select or Parse step
+      try {
+        step.value = 'pdf-importing'
+        const result = await importT212Pdf(bytes)
+        if (result.errors && result.errors.length > 0 && result.positionsWritten === 0) {
+          step.value = 'step1'
+          dropError.value = `Could not parse PDF: ${result.errors[0].message ?? result.errors[0].kind}`
+          return
+        }
+        showToast(`Imported ${result.positionsWritten} positions from T212 statement`, false)
+        router.push('/')
+      } catch {
+        step.value = 'step1'
+        showToast("PDF import failed. Retry?", true)
+      }
+      return
+    }
+
+    // CSV path: read as text for the existing parse step
+    const textReader = new FileReader()
+    textReader.onload = (te) => {
+      fileText.value = (te.target?.result as string) ?? null
+    }
+    textReader.onerror = () => {
+      fileText.value = null
+      dropError.value = 'Could not read the file. Please try again.'
+    }
+    textReader.readAsText(file)
   }
-  reader.onerror = () => {
-    fileText.value = null
+  arrayReader.onerror = () => {
     dropError.value = 'Could not read the file. Please try again.'
   }
-  reader.readAsText(file)
+  arrayReader.readAsArrayBuffer(file)
 }
 
 async function onParse() {
@@ -382,8 +443,9 @@ function showToast(message: string, retry: boolean) {
 function goBack() {
   step.value = 'step1'
   parseResult.value = null
+  fileBytes.value = null
   resetParser()
 }
 
-defineExpose({ step, source, parseResult, goBack })
+defineExpose({ step, source, parseResult, goBack, pdfImporting })
 </script>

@@ -34,15 +34,18 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    // Vitest globs unit tests under src/ and functions source. Excludes:
+    // Vitest globs unit tests under src/. Excludes:
     //   test/rules/** + test/emulator/** — Jest + @firebase/rules-unit-testing, not Vitest
     //   e2e/**                            — Playwright, not Vitest
-    //   functions/lib/**                  — compiled output (gitignored), source lives in functions/__tests__/
+    //   functions/**                      — has its own vitest runner at functions/vitest.config.ts;
+    //                                       functions deps (e.g. pdf-parse) live only in functions/package.json,
+    //                                       and CI per-workspace install does not hoist, so pulling functions
+    //                                       tests into the app's vitest scope would fail to resolve them.
     exclude: [
       '**/test/rules/**',
       '**/test/emulator/**',
       '**/e2e/**',
-      '**/functions/lib/**',
+      '**/functions/**',
       '**/node_modules/**',
     ],
   }

@@ -195,12 +195,18 @@ describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
 
 describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
   it('A.17.R5 FileReader read failure populates dropError and keeps fileText null', async () => {
-    // Stub FileReader to fire onerror synchronously
+    // Stub FileReader to fire onerror synchronously on any read method.
+    // CsvImport now calls readAsArrayBuffer first (for format detection).
     const OriginalFileReader = globalThis.FileReader
     class FakeFileReader {
       onerror: ((e: ProgressEvent) => void) | null = null
       onload: ((e: ProgressEvent) => void) | null = null
       readAsText(_blob: Blob) {
+        if (this.onerror) {
+          this.onerror(new ProgressEvent('error'))
+        }
+      }
+      readAsArrayBuffer(_blob: Blob) {
         if (this.onerror) {
           this.onerror(new ProgressEvent('error'))
         }

@@ -66,12 +66,12 @@
       </svg>
       <p class="text-sm font-medium" style="color: var(--text);">
         <span v-if="state === 'dragover'">Release to upload</span>
-        <span v-else>Drop CSV here &nbsp;<span style="color: var(--muted);">or</span>&nbsp;
+        <span v-else>Drop file here &nbsp;<span style="color: var(--muted);">or</span>&nbsp;
           <button
             type="button"
             class="underline font-medium"
             style="color: var(--accent-soft);"
-            aria-label="Browse for a CSV file"
+            aria-label="Browse for a file"
             @click.stop="openFilePicker"
             @keydown.enter.stop.prevent="openFilePicker"
           >browse</button>
@@ -155,13 +155,27 @@ function validateFile(file: File): string | null {
   // Check extension or MIME.
   // text/plain is intentionally accepted as a UX convenience — many OS/browser
   // combinations report .csv files with text/plain. This is a UX gate only;
-  // actual CSV structure validation happens in the parser.
+  // actual format validation (magic bytes) happens in CsvImport.vue.
   const name = file.name.toLowerCase()
-  const isCsvMime = file.type === 'text/csv' || file.type === 'application/csv' || file.type === 'text/plain'
-  const isCsvExt = name.endsWith('.csv')
+  const acceptList = props.accept.split(',').map(a => a.trim().toLowerCase())
 
-  if (!isCsvExt && !isCsvMime) {
-    return `Invalid file type: "${file.name}". Please upload a .csv file.`
+  const isCsvExt = name.endsWith('.csv')
+  const isCsvMime = file.type === 'text/csv' || file.type === 'application/csv' || file.type === 'text/plain'
+  const isPdfExt = name.endsWith('.pdf')
+  const isPdfMime = file.type === 'application/pdf'
+
+  const acceptsCsv = acceptList.includes('.csv')
+  const acceptsPdf = acceptList.includes('.pdf')
+
+  const validCsv = acceptsCsv && (isCsvExt || isCsvMime)
+  const validPdf = acceptsPdf && (isPdfExt || isPdfMime)
+  // Also accept plain text for CSV (OS quirk); and unknown extension files are
+  // passed through — magic-byte detection in the parent handles the real rejection.
+  const validUnknown = acceptsCsv && !isPdfExt && file.type === ''
+
+  if (!validCsv && !validPdf && !validUnknown) {
+    const exts = acceptList.join(', ')
+    return `Invalid file type: "${file.name}". Please upload a ${exts} file.`
   }
 
   const maxBytes = props.maxSizeMb * 1024 * 1024
