@@ -37,6 +37,8 @@
           class="flex items-center justify-center w-8 h-8 rounded-full text-xs font-semibold uppercase tracking-wide select-none"
           style="background: var(--accent); color: var(--text);"
           :aria-label="`Account: ${email ?? 'signed out'}`"
+          aria-haspopup="menu"
+          :aria-expanded="showMenu"
           @click="toggleMenu"
         >
           {{ initials }}
@@ -46,17 +48,23 @@
         <div
           v-if="showMenu"
           data-testid="avatar-menu"
+          role="menu"
           class="absolute right-0 top-10 w-56 rounded-lg py-1 z-50"
           style="background: var(--nav-bg); border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.4);"
         >
           <!-- User email header -->
           <div class="px-4 py-3" style="border-bottom: 1px solid var(--border);">
-            <p class="text-xs truncate" style="color: var(--muted);">{{ email }}</p>
+            <p
+              data-testid="avatar-menu-email"
+              class="text-xs truncate"
+              style="color: var(--muted);"
+            >{{ email ?? '' }}</p>
           </div>
 
           <!-- Sign out button -->
           <button
             data-testid="sign-out-btn"
+            role="menuitem"
             class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm transition-colors"
             style="color: var(--text);"
             @click="handleSignOut"
@@ -94,14 +102,20 @@ const { email } = useAuth()
 /** Controls visibility of the avatar sign-out dropdown. */
 const showMenu = ref(false)
 
+/** Toggles the avatar sign-out dropdown open/closed. */
 const toggleMenu = (): void => {
   showMenu.value = !showMenu.value
 }
 
+/**
+ * Signs the user out and navigates to /sign-in.
+ * Closes the menu first so it doesn't flash on the sign-in screen.
+ * `router.push` is awaited so navigation rejections are not silently swallowed.
+ */
 const handleSignOut = async (): Promise<void> => {
   showMenu.value = false
   await authStore.signOut()
-  router.push('/sign-in')
+  await router.push('/sign-in')
 }
 
 /**

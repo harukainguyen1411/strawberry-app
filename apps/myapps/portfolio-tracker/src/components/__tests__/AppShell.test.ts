@@ -4,7 +4,7 @@
  * Implementation: all it.fails() flipped to it() — component is implemented.
  */
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, computed } from 'vue'
 
@@ -41,6 +41,12 @@ vi.mock('@/stores/auth', () => ({
 }))
 
 describe('A.16 — AppShell', () => {
+  // Reset shared spies before every test so order-dependent assertions never leak.
+  beforeEach(() => {
+    mockSignOut.mockClear()
+    mockPush.mockClear()
+  })
+
   it('A.16.1 header has sticky class, height 56px, brand text "Strawberry · Portfolio"', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell, {
@@ -111,9 +117,6 @@ describe('A.16 — AppShell', () => {
 
   // V0.1.5 — Sign out click calls authStore.signOut() and navigates to /sign-in
   it('A.16.6 sign-out button calls authStore.signOut() and navigates to /sign-in', async () => {
-    mockSignOut.mockClear()
-    mockPush.mockClear()
-
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell)
 
@@ -136,8 +139,8 @@ describe('A.16 — AppShell', () => {
     expect(mockPush).toHaveBeenCalledWith('/sign-in')
   })
 
-  // V0.1.5 xfail — ARIA on avatar button + dropdown for screen-reader correctness
-  it.fails('A.16.7 avatar button + dropdown carry correct ARIA attributes', async () => {
+  // V0.1.5 — ARIA on avatar button + dropdown for screen-reader correctness
+  it('A.16.7 avatar button + dropdown carry correct ARIA attributes', async () => {
     const AppShell = (await import('@/components/AppShell.vue')).default
     const wrapper = mount(AppShell)
 
