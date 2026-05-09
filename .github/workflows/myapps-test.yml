@@ -89,7 +89,7 @@ jobs:
 
       - name: Cache Playwright browsers
         if: steps.changed.outputs.changed == 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('apps/myapps/package-lock.json') }}
