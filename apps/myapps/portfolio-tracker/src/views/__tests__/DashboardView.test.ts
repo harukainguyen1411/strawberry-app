@@ -165,7 +165,7 @@ describe('V0.17 — DashboardView', () => {
     expect(rows).toHaveLength(12)
   })
 
-  it.fails('renders ready-branch re-import as RouterLink with to=/import?mode=replace (V0.1.1)', async () => {
+  it('renders ready-branch re-import as RouterLink with to=/import?mode=replace (V0.1.1)', async () => {
     mockStatus.value = 'ready'
     mockHoldings.value = TWELVE_HOLDINGS
     mockSummary.value = TWELVE_SUMMARY
@@ -237,7 +237,7 @@ describe('A.6.3 — DashboardView error state', () => {
     expect(banner.text()).toContain('USD->EUR')
   })
 
-  it.fails('renders Go-to-Settings and Re-import CTAs as RouterLinks in the error branch (V0.1.1)', async () => {
+  it('renders Go-to-Settings and Re-import CTAs as RouterLinks in the error branch (V0.1.1)', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()

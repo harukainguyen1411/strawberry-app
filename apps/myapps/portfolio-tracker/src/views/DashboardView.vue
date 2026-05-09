@@ -79,20 +79,20 @@ const fxPair = computed(() =>
           </p>
         </div>
         <div class="flex gap-2 flex-wrap">
-          <a
+          <router-link
             data-testid="error-settings-link"
-            href="/legacy/settings"
+            to="/legacy/settings"
             class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
           >
             Go to Settings
-          </a>
-          <a
+          </router-link>
+          <router-link
             data-testid="error-reimport-link"
-            href="/import?mode=replace"
+            to="/import?mode=replace"
             class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
           >
             Re-import CSV
-          </a>
+          </router-link>
         </div>
       </section>
     </template>
@@ -117,13 +117,13 @@ const fxPair = computed(() =>
       />
       <HoldingsTable :holdings="holdings" :base-currency="fallbackBase" />
       <div class="flex">
-        <a
+        <router-link
           data-testid="reimport-link"
-          href="/import?mode=replace"
+          to="/import?mode=replace"
           class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm w-full md:w-auto"
         >
           Re-import CSV
-        </a>
+        </router-link>
       </div>
     </template>
   </main>
