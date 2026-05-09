@@ -14,9 +14,9 @@
 // pins the contract (which package owns a path, and is it TDD-enabled) at
 // the workspace level, independent of any one workflow's bash implementation.
 //
-// xfail-first: written as `test.fails` in the V0.19 xfail commit (assertion
-// fails because PT lacks `tdd.enabled`); converted to `test` in the impl
-// commit that adds the flag — making the assertion pass.
+// xfail-first: was written as `test.fails` in the V0.19 xfail commit
+// (assertion failed because PT lacked `tdd.enabled`); converted to `test`
+// in this impl commit that adds the flag — making the assertion pass.
 
 import { describe, test, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -50,13 +50,13 @@ function findOwningTddPkg(repoRoot: string, file: string): OwningPkg | null {
 }
 
 describe('V0.19 — tdd-gate scoping for portfolio-tracker', () => {
-  test.fails('a hypothetical impl-only commit on apps/myapps/portfolio-tracker/src/foo.ts is detected as TDD-governed', () => {
+  test('a hypothetical impl-only commit on apps/myapps/portfolio-tracker/src/foo.ts is detected as TDD-governed', () => {
     const result = findOwningTddPkg(REPO_ROOT, 'apps/myapps/portfolio-tracker/src/foo.ts')
     expect(result?.pkgDir).toBe('apps/myapps/portfolio-tracker')
     expect(result?.tddEnabled).toBe(true)
   })
 
-  test.fails('portfolio-tracker package.json declares scripts["test:unit"] so pre-commit-unit-tests.sh runs vitest on staged PT changes', () => {
+  test('portfolio-tracker package.json declares scripts["test:unit"] so pre-commit-unit-tests.sh runs vitest on staged PT changes', () => {
     const pkg = JSON.parse(
       readFileSync(join(REPO_ROOT, 'apps/myapps/portfolio-tracker/package.json'), 'utf-8'),
     )
