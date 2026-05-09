@@ -175,7 +175,7 @@ describe('V0.1.0 — importT212Pdf callable integration', () => {
   // V0.1.0 regression — both-sides FX seeding (USD-base dashboard repro).
   // Live smoke: USD base + T212 PDF → A.6.3 banner "Missing FX rate for EUR->USD"
   // because parser only seeded the USD->EUR direction. After fix, both are written.
-  it.fails('PDF-INT-07 fxRates seeded for both directions (USD->EUR and EUR->USD)', async () => {
+  it('PDF-INT-07 fxRates seeded for both directions (USD->EUR and EUR->USD)', async () => {
     const { importT212Pdf } = await import('../importT212Pdf.js')
     const buf = fixture('t212-statement.pdf')
     await importT212Pdf({ uid: 'userA', db, pdfBuffer: buf })

@@ -111,7 +111,7 @@ describe('T212 PDF parser — fixture tests (V0.1.0)', () => {
   // convertMoney() does NOT auto-invert. So the parser must seed both sides:
   // `<src>->EUR = 1/fxRate` AND `EUR-><src> = fxRate` (the printed value is
   // already the EUR-><src> direction: 1 EUR → 1.16951 USD).
-  it.fails('T212-PDF-11 fxRates seeds both directions (USD->EUR and EUR->USD)', async () => {
+  it('T212-PDF-11 fxRates seeds both directions (USD->EUR and EUR->USD)', async () => {
     const { parseT212StatementPdf } = await import('../t212-pdf.js')
     const buf = fs.readFileSync(FIXTURE)
     const result = await parseT212StatementPdf(buf)

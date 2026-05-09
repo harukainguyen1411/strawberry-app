@@ -105,14 +105,22 @@ export async function parseT212StatementPdf(buf: Buffer): Promise<T212PdfResult>
 
   // --- Derive FX rates ---
   // The PDF's FX RATE column shows the EUR/nativeCcy rate (e.g. 1.16951 means 1 EUR = 1.16951 USD).
-  // convertMoney in usePortfolio needs USD->EUR, i.e. 1/fxRate.
+  // Seed BOTH directions because convertMoney in usePortfolio does not
+  // auto-invert: a USD-base dashboard with EUR positions needs EUR->USD;
+  // a EUR-base dashboard with USD positions needs USD->EUR.
+  //   src->EUR  = 1 / fxRate  (the inversion of what's printed)
+  //   EUR->src  = fxRate      (what's printed in the FX RATE column)
   const fxRates: Record<string, number> = {}
   for (const pos of positions) {
     if (pos.currency !== 'EUR' && pos._fxRate != null && pos._fxRate !== 1) {
-      const pair = `${pos.currency}->EUR`
-      if (!(pair in fxRates)) {
-        // Round to 6 decimal places to avoid floating-point noise
-        fxRates[pair] = Math.round((1 / pos._fxRate) * 1_000_000) / 1_000_000
+      const srcToEur = `${pos.currency}->EUR`
+      const eurToSrc = `EUR->${pos.currency}`
+      // Round to 6 decimal places to avoid floating-point noise
+      if (!(srcToEur in fxRates)) {
+        fxRates[srcToEur] = Math.round((1 / pos._fxRate) * 1_000_000) / 1_000_000
+      }
+      if (!(eurToSrc in fxRates)) {
+        fxRates[eurToSrc] = Math.round(pos._fxRate * 1_000_000) / 1_000_000
       }
     }
   }
