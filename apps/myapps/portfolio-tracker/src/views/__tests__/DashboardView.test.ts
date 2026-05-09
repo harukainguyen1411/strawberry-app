@@ -1,6 +1,7 @@
 /**
  * V0.17 — DashboardView wire-up.
  * A.6.3 — DashboardView error-state template (extends V0.17 contract).
+ * V0.1.1 — Re-import CTA + ready-branch link <a href> → <router-link>.
  *
  * Per design spec §4.3 + plan task V0.17. The view consumes a single
  * usePortfolio composable that returns derived `holdings`, `summary`, and
@@ -21,13 +22,13 @@
  * so the impl's `instanceof` check matches the same constructor on
  * both sides.
  *
- * Refs V0.17, A.6.3
+ * Refs V0.17, A.6.3, V0.1.1
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { mount } from '@vue/test-utils'
-import { createRouter, createMemoryHistory, type Router } from 'vue-router'
+import { createRouter, createMemoryHistory, RouterLink, type Router } from 'vue-router'
 import type { CurrencyCode, Holding } from '@/types/firestore'
 import {
   FxRateMissingError,
@@ -91,6 +92,7 @@ function makeRouter(): Router {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/import', component: { template: '<div />' } },
+      { path: '/legacy/settings', component: { template: '<div />' } },
     ],
   })
 }
@@ -163,15 +165,19 @@ describe('V0.17 — DashboardView', () => {
     expect(rows).toHaveLength(12)
   })
 
-  it('renders a re-import link to /import?mode=replace once data is loaded', async () => {
+  it.fails('renders ready-branch re-import as RouterLink with to=/import?mode=replace (V0.1.1)', async () => {
     mockStatus.value = 'ready'
     mockHoldings.value = TWELVE_HOLDINGS
     mockSummary.value = TWELVE_SUMMARY
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
-    const reimport = wrapper.find('a[data-testid="reimport-link"]')
+    const reimport = wrapper.find('[data-testid="reimport-link"]')
     expect(reimport.exists()).toBe(true)
-    expect(reimport.attributes('href')).toBe('/import?mode=replace')
+    // Must be a RouterLink (not a bare <a href>), routing through Vue Router.
+    const links = wrapper.findAllComponents(RouterLink)
+    const reimportLink = links.find(l => l.attributes('data-testid') === 'reimport-link')
+    expect(reimportLink).toBeDefined()
+    expect(reimportLink!.props('to')).toBe('/import?mode=replace')
   })
 
   it('re-renders totals in EUR when baseCurrency switches from USD to EUR', async () => {
@@ -231,15 +237,21 @@ describe('A.6.3 — DashboardView error state', () => {
     expect(banner.text()).toContain('USD->EUR')
   })
 
-  it('renders Go-to-Settings and Re-import CTAs in the error branch', async () => {
+  it.fails('renders Go-to-Settings and Re-import CTAs as RouterLinks in the error branch (V0.1.1)', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
     // /legacy/settings is the V0 settings route (the v1.x in-app FX
     // overrides UI replaces it). Re-import is the live primary recovery.
-    expect(wrapper.find('a[href="/legacy/settings"]').exists()).toBe(true)
-    expect(wrapper.find('a[data-testid="error-reimport-link"]').exists()).toBe(true)
+    // Both must be RouterLinks routing through Vue Router, not bare <a href>.
+    const links = wrapper.findAllComponents(RouterLink)
+    const settingsLink = links.find(l => l.attributes('data-testid') === 'error-settings-link')
+    const reimportLink = links.find(l => l.attributes('data-testid') === 'error-reimport-link')
+    expect(settingsLink).toBeDefined()
+    expect(settingsLink!.props('to')).toBe('/legacy/settings')
+    expect(reimportLink).toBeDefined()
+    expect(reimportLink!.props('to')).toBe('/import?mode=replace')
   })
 
   it('renders only the error banner (not the ready-branch re-import or loading skeletons) when status="error"', async () => {
