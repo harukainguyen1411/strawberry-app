@@ -3,32 +3,21 @@ import { computed } from 'vue'
 import type { CurrencyCode, Money } from '@/types/firestore'
 import { useMoneyFormat } from '@/composables/useMoneyFormat'
 
-const props = withDefaults(
-  defineProps<{
-    money: Money
-    baseCurrency?: CurrencyCode
-    showCurrencyBadge?: boolean
-  }>(),
-  { showCurrencyBadge: false },
-)
+// V0.1.3: showCurrencyBadge prop dropped — the Intl currency symbol ($ / €)
+// already disambiguates, so the trailing code suffix is redundant.
+// baseCurrency is retained for callers that may want to thread it later.
+const props = defineProps<{
+  money: Money
+  baseCurrency?: CurrencyCode
+}>()
 
 const { format } = useMoneyFormat()
 
 const formatted = computed(() => format(props.money))
-
-const showBadge = computed(
-  () => props.showCurrencyBadge && !!props.baseCurrency && props.money.currency !== props.baseCurrency,
-)
 </script>
 
 <template>
   <span class="inline-flex items-baseline gap-1">
     <span class="tabular-nums">{{ formatted }}</span>
-    <span
-      v-if="showBadge"
-      data-testid="currency-badge"
-      class="text-xs uppercase"
-      style="color: var(--muted);"
-    >{{ money.currency }}</span>
   </span>
 </template>
