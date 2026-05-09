@@ -1,5 +1,5 @@
 /**
- * A.16 — AppShell component tests (Refs V0.9)
+ * A.16 — AppShell component tests (Refs V0.9, V0.1.5)
  *
  * Implementation: all it.fails() flipped to it() — component is implemented.
  */
@@ -7,6 +7,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, computed } from 'vue'
+
+// Shared spies — captured once so all tests reference the same instance
+const mockSignOut = vi.fn().mockResolvedValue(undefined)
+const mockPush = vi.fn()
 
 // Mock useAuth composable — email must be a Vue ref so .value works in the component
 vi.mock('@/composables/useAuth', () => ({
@@ -17,14 +21,23 @@ vi.mock('@/composables/useAuth', () => ({
   }),
 }))
 
-// Mock vue-router
+// Mock vue-router — push spy is shared so tests can assert on it
 vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockPush }),
   useRoute: () => ({ path: '/', meta: {} }),
   RouterView: defineComponent({ render: () => h('div', { class: 'router-view-slot' }) }),
   RouterLink: defineComponent({ props: ['to'], render() { return h('a', {}, this.$slots.default?.()) } }),
   createRouter: vi.fn(),
   createWebHistory: vi.fn(),
+}))
+
+// Mock auth store — signOut spy is shared so tests can assert on it
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({
+    signOut: mockSignOut,
+    user: null,
+    isAuthenticated: false,
+  }),
 }))
 
 describe('A.16 — AppShell', () => {
@@ -69,5 +82,57 @@ describe('A.16 — AppShell', () => {
     const wrapper = mount(AppShell)
     // "duong@allowed.test" → "DA"
     expect(wrapper.text()).toMatch(/DA/)
+  })
+
+  // V0.1.5 xfail — avatar click opens sign-out menu showing user email + Sign out button
+  it.fails('A.16.5 avatar click opens dropdown menu with user email and Sign out button', async () => {
+    const AppShell = (await import('@/components/AppShell.vue')).default
+    const wrapper = mount(AppShell)
+
+    // Menu should not be visible initially
+    expect(wrapper.find('[data-testid="avatar-menu"]').exists()).toBe(false)
+
+    // Click the avatar button
+    const avatarBtn = wrapper.find('[data-testid="avatar-btn"]')
+    expect(avatarBtn.exists()).toBe(true)
+    await avatarBtn.trigger('click')
+
+    // Menu should now be visible
+    const menu = wrapper.find('[data-testid="avatar-menu"]')
+    expect(menu.exists()).toBe(true)
+
+    // Menu shows the user email
+    expect(menu.text()).toContain('duong@allowed.test')
+
+    // Menu has a Sign out button
+    const signOutBtn = wrapper.find('[data-testid="sign-out-btn"]')
+    expect(signOutBtn.exists()).toBe(true)
+  })
+
+  // V0.1.5 xfail — Sign out click calls authStore.signOut() and navigates to /sign-in
+  it.fails('A.16.6 sign-out button calls authStore.signOut() and navigates to /sign-in', async () => {
+    mockSignOut.mockClear()
+    mockPush.mockClear()
+
+    const AppShell = (await import('@/components/AppShell.vue')).default
+    const wrapper = mount(AppShell)
+
+    // Open the menu first
+    const avatarBtn = wrapper.find('[data-testid="avatar-btn"]')
+    await avatarBtn.trigger('click')
+
+    // Click Sign out
+    const signOutBtn = wrapper.find('[data-testid="sign-out-btn"]')
+    expect(signOutBtn.exists()).toBe(true)
+    await signOutBtn.trigger('click')
+
+    // Wait for async signOut to resolve
+    await wrapper.vm.$nextTick()
+
+    // authStore.signOut() must have been called
+    expect(mockSignOut).toHaveBeenCalledOnce()
+
+    // router.push('/sign-in') must have been called
+    expect(mockPush).toHaveBeenCalledWith('/sign-in')
   })
 })
