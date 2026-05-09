@@ -8,7 +8,7 @@
  * Refs V0.14
  */
 
-import { describe, it, expect, test } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SummaryCard from '@/components/SummaryCard.vue'
 
@@ -63,7 +63,7 @@ describe('V0.14 — SummaryCard', () => {
   })
 
   // V0.1.4: null dayChange must render "—" alone, not "— today"
-  test.fails('V0.1.4 null dayChange renders "—" only, no dangling "today"', () => {
+  it('V0.1.4 null dayChange renders "—" only, no dangling "today"', () => {
     const wrapper = mount(SummaryCard, {
       props: {
         totalValue: { amount: 50000, currency: 'USD' },
