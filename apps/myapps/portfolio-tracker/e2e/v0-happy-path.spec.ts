@@ -59,7 +59,10 @@ test.describe('V0 happy path — sign-in → import → render', () => {
     await popup.getByLabel(/display name/i).fill('Duong Test')
     await popup.getByRole('button', { name: /sign in with google\.com/i }).click()
 
-    // Wait for the popup to finish processing the submission before listening for close
+    // Post-submit, the popup navigates internally (auth handler sets state, then
+    // window.close()). Bare popup.waitForEvent('close') times out because Playwright
+    // misses the close signal during that internal nav — this load-state wait gives
+    // it a stable hook to settle on first. Don't strip this line.
     await popup.waitForLoadState('domcontentloaded')
 
     // Popup closes; main page navigates to / once auth state propagates
