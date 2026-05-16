@@ -11,53 +11,16 @@
         class="rounded-2xl p-6 border"
         style="background: var(--surface); border-color: var(--border)"
       >
-        <template v-if="!linkSent">
-          <form @submit.prevent="handleSendLink">
-            <label class="block text-sm mb-2" style="color: var(--muted)" for="email">
-              Email address
-            </label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              placeholder="you@example.com"
-              class="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2"
-              style="
-                background: var(--surface-hi);
-                border: 1px solid var(--border-hi);
-                color: var(--text);
-              "
-            />
-            <p v-if="error" class="mt-2 text-sm" style="color: var(--accent)">{{ error }}</p>
-            <button
-              type="submit"
-              :disabled="sending || !email"
-              class="mt-4 w-full rounded-lg py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-              style="background: var(--accent); color: #fff"
-            >
-              {{ sending ? 'Sending…' : 'Send sign-in link' }}
-            </button>
-          </form>
-        </template>
-
-        <template v-else>
-          <div class="text-center">
-            <p class="text-base font-medium mb-2" style="color: var(--text)">Check your email</p>
-            <p class="text-sm" style="color: var(--muted)">
-              We sent a sign-in link to <strong>{{ email }}</strong>. Open it on this device to
-              sign in.
-            </p>
-            <button
-              class="mt-4 text-sm underline"
-              style="color: var(--muted)"
-              @click="linkSent = false"
-            >
-              Use a different email
-            </button>
-          </div>
-        </template>
+        <button
+          type="button"
+          :disabled="signingIn"
+          @click="handleSignIn"
+          class="w-full rounded-lg py-2.5 text-sm font-medium transition-opacity disabled:opacity-50"
+          style="background: var(--accent); color: #fff"
+        >
+          {{ signingIn ? 'Signing in…' : 'Continue with Google' }}
+        </button>
+        <p v-if="error" role="alert" class="mt-3 text-sm text-center" style="color: var(--negative)">{{ error }}</p>
       </div>
     </div>
   </div>
@@ -65,24 +28,23 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { sendSignInLink } from '@/auth/emailLink'
+import { useRouter } from 'vue-router'
+import { signInWithGoogle } from '@/firebase/auth'
 
-const email = ref('')
-const sending = ref(false)
-const linkSent = ref(false)
+const router = useRouter()
+const signingIn = ref(false)
 const error = ref('')
 
-async function handleSendLink() {
-  sending.value = true
+async function handleSignIn() {
+  signingIn.value = true
   error.value = ''
   try {
-    await sendSignInLink(email.value)
-    linkSent.value = true
+    await signInWithGoogle()
+    router.replace('/')
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : 'Failed to send link. Please try again.'
-    error.value = msg
+    error.value = e instanceof Error ? e.message : 'Sign-in failed. Please try again.'
   } finally {
-    sending.value = false
+    signingIn.value = false
   }
 }
 </script>

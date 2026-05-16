@@ -4,8 +4,7 @@
  * Routes:
  *   /                → DashboardView (auth required)
  *   /import          → CsvImport (auth required)
- *   /sign-in         → auth/SignInView (public, V0.2 email-link abstraction)
- *   /sign-in-callback → auth/SignInCallbackView (public, V0.2)
+ *   /sign-in         → auth/SignInView (public)
  *
  * Legacy routes retained for the existing portfolio tracker sub-app.
  *
@@ -22,12 +21,6 @@ export const routes = [
     path: '/sign-in',
     name: 'sign-in',
     component: () => import('@/views/auth/SignInView.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/sign-in-callback',
-    name: 'sign-in-callback',
-    component: () => import('@/views/auth/SignInCallbackView.vue'),
     meta: { requiresAuth: false },
   },
   {

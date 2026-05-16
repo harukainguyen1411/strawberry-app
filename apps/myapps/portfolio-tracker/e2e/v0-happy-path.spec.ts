@@ -1,7 +1,7 @@
 /**
  * V0 happy path — sign-in → currency pick → import CSV → dashboard render.
  *
- * Covers test plan §C.1: email-link sign-in via auth emulator oobCodes,
+ * Covers test plan §C.1: Google popup sign-in via auth emulator chooser,
  * BaseCurrencyPicker modal, EmptyState CTA to import, T212 CSV upload,
  * preview + commit, and dashboard SummaryCard + HoldingsTable visibility.
  *
@@ -17,7 +17,6 @@ import { fileURLToPath } from 'node:url'
 import { mkdirSync } from 'node:fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const PROJECT_ID = 'portfolio-tracker-e2e'
 const TEST_EMAIL = 'duong@allowed.test'
 const T212_CSV = path.resolve(__dirname, '../test/fixtures/t212-sample.csv')
 const ARTIFACTS_DIR = path.join(__dirname, 'artifacts')
@@ -26,7 +25,7 @@ const ARTIFACTS_DIR = path.join(__dirname, 'artifacts')
 mkdirSync(ARTIFACTS_DIR, { recursive: true })
 
 test.describe('V0 happy path — sign-in → import → render', () => {
-  test('full happy path', async ({ page, request }) => {
+  test('full happy path', async ({ page }) => {
     // Vue 3 render exception guard: listen early so the whole test is covered.
     // Render errors show in console.error, not window.onerror / pageerror.
     const consoleErrors: string[] = []
@@ -44,32 +43,30 @@ test.describe('V0 happy path — sign-in → import → render', () => {
     await page.screenshot({ path: path.join(ARTIFACTS_DIR, '01-signin.png') })
 
     // ---------------------------------------------------------------------------
-    // Step 2 — email link sign-in via auth emulator oobCodes
+    // Step 2 — Google popup sign-in via auth emulator chooser
     // ---------------------------------------------------------------------------
-    const emailInput = page.locator('input[type="email"]')
-    await expect(emailInput).toBeVisible()
-    await emailInput.fill(TEST_EMAIL)
+    const signInBtn = page.getByRole('button', { name: /continue with google/i })
+    await expect(signInBtn).toBeVisible()
 
-    const sendBtn = page.getByRole('button', { name: /send sign-in link/i })
-    await sendBtn.click()
+    // signInWithPopup → emulator opens a popup at /emulator/auth/handler
+    const [popup] = await Promise.all([page.waitForEvent('popup'), signInBtn.click()])
+    await popup.waitForLoadState('domcontentloaded')
+    await popup.screenshot({ path: path.join(ARTIFACTS_DIR, '02-popup-chooser.png') })
 
-    // Wait for "Check your email" confirmation state
-    await expect(page.getByText(/check your email/i)).toBeVisible({ timeout: 10_000 })
-    await page.screenshot({ path: path.join(ARTIFACTS_DIR, '02-link-sent.png') })
+    // Add a new account with TEST_EMAIL (seeded into the allowlist by seed-allowlist.mjs)
+    await popup.getByRole('button', { name: /add new account/i }).click()
+    await popup.getByLabel(/email/i).fill(TEST_EMAIL)
+    await popup.getByLabel(/display name/i).fill('Duong Test')
+    await popup.getByRole('button', { name: /sign in with google\.com/i }).click()
 
-    // Fetch oob link from auth emulator
-    const oobRes = await request.get(
-      `http://127.0.0.1:9099/emulator/v1/projects/${PROJECT_ID}/oobCodes`,
-    )
-    expect(oobRes.ok()).toBeTruthy()
-    const oobBody = await oobRes.json()
-    const oobCodes: { email: string; oobLink: string }[] = oobBody.oobCodes ?? []
-    const oobEntry = oobCodes.find((c) => c.email === TEST_EMAIL)
-    expect(oobEntry, `Expected oob code for ${TEST_EMAIL} but got: ${JSON.stringify(oobCodes)}`).toBeTruthy()
+    // Post-submit, the popup navigates internally (auth handler sets state, then
+    // window.close()). Bare popup.waitForEvent('close') times out because Playwright
+    // misses the close signal during that internal nav — this load-state wait gives
+    // it a stable hook to settle on first. Don't strip this line.
+    await popup.waitForLoadState('domcontentloaded')
 
-    // Navigate to the sign-in callback link to complete auth
-    await page.goto(oobEntry!.oobLink)
-    // Callback view (SignInCallbackView.vue) calls completeSignIn then router.replace('/')
+    // Popup closes; main page navigates to / once auth state propagates
+    await popup.waitForEvent('close', { timeout: 10_000 })
     await page.waitForURL(/\/$/, { timeout: 15_000 })
 
     // ---------------------------------------------------------------------------

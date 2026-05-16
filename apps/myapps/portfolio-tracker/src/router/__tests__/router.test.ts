@@ -37,8 +37,4 @@ describe('router — no duplicate routes', () => {
     expect(routes.filter((r) => r.path === '/sign-in').length).toBe(1)
   })
 
-  it('/sign-in-callback route is present', async () => {
-    const { routes } = await import('../index')
-    expect(routes.find((r) => r.path === '/sign-in-callback')).toBeDefined()
-  })
 })
