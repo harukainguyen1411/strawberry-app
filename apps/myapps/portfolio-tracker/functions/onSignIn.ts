@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { beforeUserSignedIn, type AuthBlockingEvent } from 'firebase-functions/v2/identity'
-import { checkAllowlist } from './checkAllowlist.js'
+import { checkAllowlist, type AllowlistDb } from './checkAllowlist.js'
 
 // Subpath imports are required: the functions package is ESM ("type":"module")
 // and firebase-admin v12's top-level CJS namespace doesn't bind cleanly through
@@ -15,5 +15,5 @@ if (!getApps().length) {
 export const onSignIn = beforeUserSignedIn(async (event: AuthBlockingEvent) => {
   const email = event.data.email
   const db = getFirestore()
-  await checkAllowlist(email, db)
+  await checkAllowlist(email, db as unknown as AllowlistDb)
 })

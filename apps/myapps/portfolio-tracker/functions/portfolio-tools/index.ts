@@ -31,7 +31,7 @@ export async function portfolio_get_snapshot(ctx: HandlerContext) {
   const { uid, db } = ctx
   const posSnap = await db.collection('users').doc(uid).collection('positions').get()
   const cashSnap = await db.collection('users').doc(uid).collection('cash').get()
-  const positions = posSnap.docs.map((d: { id: string; data: () => unknown }) => ({ id: d.id, ...d.data() }))
+  const positions = posSnap.docs.map((d: { id: string; data: () => Record<string, unknown> }) => ({ id: d.id, ...d.data() }))
   const cash = cashSnap.docs.map((d: { data: () => unknown }) => d.data())
   return { positions, cash }
 }
@@ -47,7 +47,7 @@ export async function portfolio_get_trades(ctx: HandlerContext & { ticker?: stri
     ref = ref.where('ticker', '==', ticker)
   }
   const snap = await ref.get()
-  return snap.docs.map((d: { id: string; data: () => unknown }) => ({ id: d.id, ...d.data() }))
+  return snap.docs.map((d: { id: string; data: () => Record<string, unknown> }) => ({ id: d.id, ...d.data() }))
 }
 
 // ---------------------------------------------------------------------------

@@ -69,8 +69,9 @@ export function convert(
   let overrides: Record<string, number> | undefined
 
   if ('rates' in fxRates && typeof fxRates.rates === 'object') {
-    rates = fxRates.rates
-    overrides = fxRates.overrides
+    const structured = fxRates as { rates: Record<string, number>; overrides?: Record<string, number> }
+    rates = structured.rates
+    overrides = structured.overrides
   } else {
     rates = fxRates as Record<string, number>
   }
