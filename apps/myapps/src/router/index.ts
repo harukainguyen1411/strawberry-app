@@ -106,6 +106,25 @@ const routes: RouteRecordRaw[] = [
     ]
   },
 
+  {
+    path: '/yourApps/portfolio-tracker',
+    meta: { requiresAuth: true, appId: 'portfolio-tracker' },
+    children: [
+      {
+        path: '',
+        name: 'portfolio-tracker-dashboard',
+        meta: { requiresAuth: true, appId: 'portfolio-tracker' },
+        component: () => import('@/views/portfolio-tracker/DashboardView.vue')
+      },
+      {
+        path: 'import',
+        name: 'portfolio-tracker-import',
+        meta: { requiresAuth: true, appId: 'portfolio-tracker' },
+        component: () => import('@/views/portfolio-tracker/CsvImport.vue')
+      }
+    ]
+  },
+
   // === Legacy redirects from old paths ===
   { path: '/read-tracker/:pathMatch(.*)*', redirect: to => `/myApps/read-tracker/${(to.params.pathMatch as string[]).join('/')}` },
   { path: '/task-list/:pathMatch(.*)*', redirect: to => `/myApps/task-list/${(to.params.pathMatch as string[]).join('/')}` },
