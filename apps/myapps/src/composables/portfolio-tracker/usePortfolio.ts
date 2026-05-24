@@ -23,8 +23,8 @@
 import { computed, onScopeDispose, ref, watch, type ComputedRef, type Ref } from 'vue'
 import { collection, doc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import { useAuth } from '@/composables/useAuth'
-import type { CurrencyCode, Cash, FxMeta, Holding, Money, Position } from '@/types/firestore'
+import { useAuth } from './useAuth'
+import type { CurrencyCode, Cash, FxMeta, Holding, Money, Position } from '@/types/portfolio-tracker/firestore'
 
 export class FxRateMissingError extends Error {
   constructor(public readonly pair: string) {

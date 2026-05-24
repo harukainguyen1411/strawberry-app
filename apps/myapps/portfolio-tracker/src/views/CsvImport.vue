@@ -200,9 +200,9 @@ import ImportPreviewTable from '@/components/ImportPreviewTable.vue'
 import WarnBanner from '@/components/WarnBanner.vue'
 import ErrorBanner from '@/components/ErrorBanner.vue'
 import Toast from '@/components/Toast.vue'
-import { useCsvParser, type CsvSource, type ParseResult } from '@/composables/useCsvParser'
-import { useImportCsv } from '@/composables/useImportCsv'
-import { useImportT212Pdf, detectFileFormat } from '@/composables/useImportT212Pdf'
+import { useCsvParser, type CsvSource, type ParseResult } from '../../../src/composables/portfolio-tracker/useCsvParser'
+import { useImportCsv } from '../../../src/composables/portfolio-tracker/useImportCsv'
+import { useImportT212Pdf, detectFileFormat } from '../../../src/composables/portfolio-tracker/useImportT212Pdf'
 
 type Step = 'step1' | 'step2' | 'pdf-importing'
 

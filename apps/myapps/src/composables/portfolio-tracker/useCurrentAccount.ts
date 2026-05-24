@@ -14,7 +14,7 @@
  */
 
 import { computed, type ComputedRef } from 'vue'
-import { useAuth } from '@/composables/useAuth'
+import { useAuth } from './useAuth'
 
 export interface UseCurrentAccountReturn {
   currentUid: ComputedRef<string | null>

@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useClickOutside } from '@/composables/useClickOutside'
+import { useClickOutside } from '../../../../src/composables/useClickOutside'
 import { useI18n } from 'vue-i18n'
 import SyncConflictModal from './SyncConflictModal.vue'
 import { syncLocalToFirebase, type SyncStrategy } from '@/utils/dataSync'

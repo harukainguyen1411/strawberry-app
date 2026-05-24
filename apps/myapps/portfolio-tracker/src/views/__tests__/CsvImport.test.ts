@@ -24,7 +24,7 @@ vi.mock('vue-router', () => ({
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: { value: 'duong@test.com' },
     uid: { value: 'user123' },
@@ -35,7 +35,7 @@ vi.mock('@/composables/useAuth', () => ({
 // Controlled mock for useCsvParser — two modes: success and parse-error
 let mockParseMode: 'success' | 'error' = 'success'
 
-vi.mock('@/composables/useCsvParser', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
   useCsvParser: vi.fn(() => {
     const FAKE_RESULT = { trades: [{ id: 'T1' }, { id: 'T2' }], positions: [{ ticker: 'AAPL' }], errors: [] }
     const result = ref<typeof FAKE_RESULT | null>(null)
@@ -56,7 +56,7 @@ vi.mock('@/composables/useCsvParser', () => ({
 }))
 
 // Controlled mock for useImportCsv — resolves with 2 trades + 1 position
-vi.mock('@/composables/useImportCsv', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useImportCsv', () => ({
   useImportCsv: vi.fn(() => ({
     importCsv: vi.fn().mockResolvedValue({
       tradesAdded: 2,

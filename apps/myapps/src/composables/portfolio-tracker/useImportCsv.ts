@@ -9,8 +9,8 @@
 
 import { ref, type Ref } from 'vue'
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import type { CsvSource } from '@/composables/useCsvParser'
-import type { ImportResult } from '@/../functions/portfolio-tools/types.js'
+import type { CsvSource } from './useCsvParser'
+import type { ImportResult } from '../../../portfolio-tracker/functions/portfolio-tools/types.js'
 
 export interface UseImportCsvReturn {
   importCsv: (source: CsvSource, csv: string) => Promise<ImportResult>

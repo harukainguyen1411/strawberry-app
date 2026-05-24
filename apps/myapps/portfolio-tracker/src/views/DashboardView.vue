@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FxRateMissingError, usePortfolio } from '@/composables/usePortfolio'
+import { FxRateMissingError, usePortfolio } from '../../../src/composables/portfolio-tracker/usePortfolio'
 import SummaryCard from '@/components/SummaryCard.vue'
 import HoldingsTable from '@/components/HoldingsTable.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import type { CurrencyCode, Money } from '@/types/firestore'
+import type { CurrencyCode, Money } from '../../../src/types/portfolio-tracker/firestore'
 
 const { status, loading, holdings, summary, baseCurrency, error } = usePortfolio()
 

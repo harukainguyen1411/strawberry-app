@@ -1,4 +1,4 @@
-import type { CurrencyCode, Money } from '@/types/firestore'
+import type { CurrencyCode, Money } from '@/types/portfolio-tracker/firestore'
 
 const LOCALE_BY_CURRENCY: Record<CurrencyCode, string> = {
   USD: 'en-US',

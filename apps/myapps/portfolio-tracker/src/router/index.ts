@@ -13,7 +13,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useAuth } from '@/composables/useAuth'
+import { useAuth } from '../../../src/composables/portfolio-tracker/useAuth'
 
 export const routes = [
   // Portfolio v0 routes

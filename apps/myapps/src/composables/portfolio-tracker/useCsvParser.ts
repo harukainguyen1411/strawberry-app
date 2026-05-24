@@ -11,7 +11,7 @@
  */
 
 import { ref, type Ref } from 'vue'
-import type { Trade, Position, ImportError } from '@/../functions/portfolio-tools/types.js'
+import type { Trade, Position, ImportError } from '../../../portfolio-tracker/functions/portfolio-tools/types.js'
 
 export type CsvSource = 'T212' | 'IB'
 
@@ -41,10 +41,10 @@ export function useCsvParser(): UseCsvParserReturn {
 
     try {
       if (source === 'T212') {
-        const { parseT212Csv } = await import('@/../functions/portfolio-tools/csv/t212.js')
+        const { parseT212Csv } = await import('../../../portfolio-tracker/functions/portfolio-tools/csv/t212.js')
         result.value = parseT212Csv(text)
       } else if (source === 'IB') {
-        const { parseIbCsv } = await import('@/../functions/portfolio-tools/csv/ib.js')
+        const { parseIbCsv } = await import('../../../portfolio-tracker/functions/portfolio-tools/csv/ib.js')
         result.value = parseIbCsv(text)
       } else {
         parseError.value = 'Unknown source. Please select T212 or IB.'

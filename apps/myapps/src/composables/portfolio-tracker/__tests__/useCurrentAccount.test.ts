@@ -14,13 +14,13 @@ import { ref, computed } from 'vue'
 
 const mockUid = ref<string | null>('user-123')
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('@/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     uid: computed(() => mockUid.value),
   }),
 }))
 
-import { useCurrentAccount } from '@/composables/useCurrentAccount'
+import { useCurrentAccount } from '@/composables/portfolio-tracker/useCurrentAccount'
 
 describe('V0.13 — useCurrentAccount', () => {
   it('exposes currentUid mirroring useAuth().uid for the signed-in user', () => {

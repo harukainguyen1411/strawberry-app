@@ -36,7 +36,7 @@ vi.mock('vue-router', () => ({
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: { value: 'duong@test.com' },
     uid: { value: 'user123' },
@@ -49,7 +49,7 @@ vi.mock('@/composables/useAuth', () => ({
 // This must be at module scope (vi.mock is hoisted; closures over inner consts fail).
 const FAKE_RESULT = { trades: [{ id: 'T1' }], positions: [], errors: [] } as const
 
-vi.mock('@/composables/useCsvParser', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
   useCsvParser: vi.fn(() => {
     const result = ref<typeof FAKE_RESULT | null>(null)
     const parseError = ref<string | null>(null)

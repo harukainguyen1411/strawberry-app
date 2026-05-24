@@ -13,7 +13,7 @@ vi.mock('@/firebase/auth', () => ({ auth: {} }))
 vi.mock('@/stores/auth', () => ({
   useAuthStore: () => ({ loading: false, isAuthenticated: false }),
 }))
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({ isAuthenticated: { value: false } }),
 }))
 

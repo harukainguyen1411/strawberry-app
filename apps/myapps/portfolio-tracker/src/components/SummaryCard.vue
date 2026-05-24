@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Money } from '@/types/firestore'
+import type { Money } from '../../../src/types/portfolio-tracker/firestore'
 import MoneyCell from '@/components/MoneyCell.vue'
 import PlCell from '@/components/PlCell.vue'
 

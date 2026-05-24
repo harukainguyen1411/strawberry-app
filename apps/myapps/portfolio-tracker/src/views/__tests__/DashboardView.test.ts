@@ -29,13 +29,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory, RouterLink, type Router } from 'vue-router'
-import type { CurrencyCode, Holding } from '@/types/firestore'
+import type { CurrencyCode, Holding } from '../../../../src/types/portfolio-tracker/firestore'
 import {
   FxRateMissingError,
   type PortfolioStatus,
   type PortfolioSummary,
   type UsePortfolioReturn,
-} from '@/composables/usePortfolio'
+} from '../../../../src/composables/portfolio-tracker/usePortfolio'
 
 // Mutable refs that the mocked composable returns; tests mutate these
 // before mounting to drive the branching logic.
@@ -54,7 +54,7 @@ const mockError: Ref<Error | null> = ref<Error | null>(null)
 // side-effect avoidance). The impl's `instanceof` check resolves
 // against this same mocked class because Vitest replaces the export
 // for every importer, including DashboardView.vue.
-vi.mock('@/composables/usePortfolio', () => {
+vi.mock('../../../../src/composables/portfolio-tracker/usePortfolio', () => {
   class FxRateMissingError extends Error {
     constructor(public readonly pair: string) {
       super(`FX rate missing for ${pair}`)

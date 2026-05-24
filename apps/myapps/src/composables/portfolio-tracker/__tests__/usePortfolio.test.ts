@@ -24,7 +24,7 @@ import { ref, effectScope, nextTick, watch } from 'vue'
 
 const mockUid = ref<string | null>(null)
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('@/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     uid: mockUid,
   }),
@@ -67,7 +67,7 @@ vi.mock('firebase/firestore', () => ({
   },
 }))
 
-import { usePortfolio, FxRateMissingError } from '@/composables/usePortfolio'
+import { usePortfolio, FxRateMissingError } from '@/composables/portfolio-tracker/usePortfolio'
 
 function withScope<T>(fn: () => T): { value: T; scope: ReturnType<typeof effectScope> } {
   const scope = effectScope()

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Money } from '@/types/firestore'
-import { useMoneyFormat } from '@/composables/useMoneyFormat'
+import type { Money } from '../../../src/types/portfolio-tracker/firestore'
+import { useMoneyFormat } from '../../../src/composables/portfolio-tracker/useMoneyFormat'
 
 const props = defineProps<{
   pl: Money

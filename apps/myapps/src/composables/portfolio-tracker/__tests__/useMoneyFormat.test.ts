@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { formatQuantity, useMoneyFormat } from '@/composables/useMoneyFormat'
+import { formatQuantity, useMoneyFormat } from '@/composables/portfolio-tracker/useMoneyFormat'
 
 describe('V0.14 — useMoneyFormat', () => {
   it('formats USD with en-US locale (currency symbol $, comma thousands, two decimals)', () => {

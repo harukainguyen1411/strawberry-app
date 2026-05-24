@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useClickOutside } from '@/composables/useClickOutside'
+import { useClickOutside } from '../../../../src/composables/useClickOutside'
 
 const { locale } = useI18n()
 const showDropdown = ref(false)

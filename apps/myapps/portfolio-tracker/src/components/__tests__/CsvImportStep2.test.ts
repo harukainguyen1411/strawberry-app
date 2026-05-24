@@ -22,7 +22,7 @@ vi.mock('vue-router', () => ({
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: { value: 'duong@test.com' },
     uid: { value: 'user123' },
@@ -31,7 +31,7 @@ vi.mock('@/composables/useAuth', () => ({
 }))
 
 // Mock importCsv callable
-vi.mock('@/composables/useImportCsv', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useImportCsv', () => ({
   useImportCsv: vi.fn(() => ({
     importCsv: vi.fn().mockResolvedValue({ tradesAdded: 5, tradesSkipped: 0, positionsWritten: 3, errors: [] }),
     loading: { value: false },

@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { CurrencyCode } from '@/types/firestore'
+import type { CurrencyCode } from '../../../src/types/portfolio-tracker/firestore'
 
 defineProps<{
   show: boolean

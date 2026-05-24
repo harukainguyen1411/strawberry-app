@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { CurrencyCode, Holding } from '@/types/firestore'
+import type { CurrencyCode, Holding } from '../../../src/types/portfolio-tracker/firestore'
 import MoneyCell from '@/components/MoneyCell.vue'
 import PlCell from '@/components/PlCell.vue'
 import HoldingRow from '@/components/HoldingRow.vue'
-import { formatQuantity } from '@/composables/useMoneyFormat'
+import { formatQuantity } from '../../../src/composables/portfolio-tracker/useMoneyFormat'
 
 const props = withDefaults(
   defineProps<{

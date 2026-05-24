@@ -16,7 +16,7 @@
 
 import { ref, type Ref } from 'vue'
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import type { ImportResult } from '@/../functions/portfolio-tools/types.js'
+import type { ImportResult } from '../../../portfolio-tracker/functions/portfolio-tools/types.js'
 
 export type FileFormat = 'pdf' | 'csv' | 'unsupported'
 

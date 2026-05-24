@@ -24,7 +24,7 @@ vi.mock('vue-router', () => ({
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: { value: 'duong@test.com' },
     uid: { value: 'user123' },
@@ -33,7 +33,7 @@ vi.mock('@/composables/useAuth', () => ({
 }))
 
 // Mock the CSV parsers to avoid importing Node.js functions modules in jsdom
-vi.mock('@/composables/useCsvParser', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
   useCsvParser: vi.fn(() => ({
     parse: vi.fn(),
     result: { value: null },

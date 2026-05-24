@@ -13,7 +13,7 @@ const mockSignOut = vi.fn().mockResolvedValue(undefined)
 const mockPush = vi.fn()
 
 // Mock useAuth composable — email must be a Vue ref so .value works in the component
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: computed(() => 'duong@allowed.test'),
     uid: computed(() => 'user123'),

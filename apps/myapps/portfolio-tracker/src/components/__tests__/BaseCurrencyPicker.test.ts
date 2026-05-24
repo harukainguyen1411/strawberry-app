@@ -21,7 +21,7 @@ vi.mock('vue-router', () => ({
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('@/composables/useAuth', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: computed(() => 'duong@allowed.test'),
     uid: computed(() => 'user123'),
@@ -29,7 +29,7 @@ vi.mock('@/composables/useAuth', () => ({
   }),
 }))
 
-vi.mock('@/composables/useBaseCurrency', () => ({
+vi.mock('../../../../src/composables/portfolio-tracker/useBaseCurrency', () => ({
   useBaseCurrency: () => ({
     baseCurrency: ref(null),
     setBaseCurrency: vi.fn().mockResolvedValue(undefined),

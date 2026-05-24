@@ -75,7 +75,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useClickOutside } from '@/composables/useClickOutside'
+import { useClickOutside } from '../../../../src/composables/useClickOutside'
 import { useI18n } from 'vue-i18n'
 import type { User } from 'firebase/auth'
 
