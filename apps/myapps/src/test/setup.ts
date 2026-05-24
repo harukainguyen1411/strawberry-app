@@ -20,6 +20,8 @@ vi.mock('@/firebase/config', () => ({
   default: {},
   db: {},
   auth: {},
+  storage: {},
+  functions: {},
   analytics: null,
   remoteConfig: {}
 }))
