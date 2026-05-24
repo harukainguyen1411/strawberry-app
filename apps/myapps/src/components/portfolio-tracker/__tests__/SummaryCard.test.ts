@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import SummaryCard from '@/components/SummaryCard.vue'
+import SummaryCard from '@/components/portfolio-tracker/SummaryCard.vue'
 
 describe('V0.14 — SummaryCard', () => {
   it('renders totalValue, positions count, and cash total in base currency', () => {

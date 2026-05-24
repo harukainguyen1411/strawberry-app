@@ -10,7 +10,7 @@
 
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import Toast from '@/components/Toast.vue'
+import Toast from '@/components/portfolio-tracker/Toast.vue'
 
 describe('V0.16 — Toast', () => {
   it('emits "dismiss" after 5 seconds with fake timers', async () => {

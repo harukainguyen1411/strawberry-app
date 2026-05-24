@@ -45,7 +45,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
 
 describe('A.17 — CsvImport Step 1', () => {
   it('A.17.1 "Parse →" button is disabled when both file and paste are empty', async () => {
-    const CsvImport = (await import('@/views/CsvImport.vue')).default
+    const CsvImport = (await import('../../../../portfolio-tracker/src/views/CsvImport.vue')).default
     const wrapper = mount(CsvImport, {
       attachTo: document.body,
     })
@@ -59,7 +59,7 @@ describe('A.17 — CsvImport Step 1', () => {
   })
 
   it('A.17.2 DropZone emits "error" when a non-CSV file is dropped', async () => {
-    const DropZone = (await import('@/components/DropZone.vue')).default
+    const DropZone = (await import('@/components/portfolio-tracker/DropZone.vue')).default
     const wrapper = mount(DropZone, {
       props: { accept: '.csv', maxSizeMb: 10 },
       attachTo: document.body,
@@ -80,7 +80,7 @@ describe('A.17 — CsvImport Step 1', () => {
   })
 
   it('A.17.3 Changing the source select emits update:modelValue', async () => {
-    const SourceSelect = (await import('@/components/SourceSelect.vue')).default
+    const SourceSelect = (await import('@/components/portfolio-tracker/SourceSelect.vue')).default
     const wrapper = mount(SourceSelect, {
       props: { modelValue: 'T212' },
     })
@@ -97,7 +97,7 @@ describe('A.17 — CsvImport Step 1', () => {
   })
 
   it('A.17.4 CsvPasteArea emits update:modelValue when text is typed', async () => {
-    const CsvPasteArea = (await import('@/components/CsvPasteArea.vue')).default
+    const CsvPasteArea = (await import('@/components/portfolio-tracker/CsvPasteArea.vue')).default
     const wrapper = mount(CsvPasteArea, {
       props: { modelValue: '' },
     })

@@ -15,8 +15,8 @@
 
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import HoldingRow from '@/components/HoldingRow.vue'
-import type { Holding } from '../../../../src/types/portfolio-tracker/firestore'
+import HoldingRow from '@/components/portfolio-tracker/HoldingRow.vue'
+import type { Holding } from '@/types/portfolio-tracker/firestore'
 
 const HOLDING: Holding = {
   ticker: 'AAPL',

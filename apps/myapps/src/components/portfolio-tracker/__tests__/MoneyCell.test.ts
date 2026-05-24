@@ -13,7 +13,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import MoneyCell from '@/components/MoneyCell.vue'
+import MoneyCell from '@/components/portfolio-tracker/MoneyCell.vue'
 
 describe('V0.14 — MoneyCell', () => {
   it('renders { amount: 14850, currency: USD } as "$14,850.00"', () => {

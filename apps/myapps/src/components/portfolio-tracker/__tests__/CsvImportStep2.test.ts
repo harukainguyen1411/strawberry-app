@@ -57,7 +57,7 @@ const SAMPLE_COLUMNS = [
 
 describe('A.18 — CsvImport Step 2', () => {
   it('A.18.1 ImportPreviewTable shows maxVisible rows with "Show all" expander when rows > maxVisible', async () => {
-    const ImportPreviewTable = (await import('@/components/ImportPreviewTable.vue')).default
+    const ImportPreviewTable = (await import('@/components/portfolio-tracker/ImportPreviewTable.vue')).default
     const wrapper = mount(ImportPreviewTable, {
       props: {
         rows: SAMPLE_ROWS,
@@ -80,7 +80,7 @@ describe('A.18 — CsvImport Step 2', () => {
   })
 
   it('A.18.2 ImportPreviewTable "Show all" expands to all rows', async () => {
-    const ImportPreviewTable = (await import('@/components/ImportPreviewTable.vue')).default
+    const ImportPreviewTable = (await import('@/components/portfolio-tracker/ImportPreviewTable.vue')).default
     const wrapper = mount(ImportPreviewTable, {
       props: {
         rows: SAMPLE_ROWS,
@@ -101,7 +101,7 @@ describe('A.18 — CsvImport Step 2', () => {
   })
 
   it('A.18.3 WarnBanner click expands details list of skipped rows', async () => {
-    const WarnBanner = (await import('@/components/WarnBanner.vue')).default
+    const WarnBanner = (await import('@/components/portfolio-tracker/WarnBanner.vue')).default
     const wrapper = mount(WarnBanner, {
       props: {
         count: 2,
@@ -129,7 +129,7 @@ describe('A.18 — CsvImport Step 2', () => {
   })
 
   it('A.18.4 Toast component auto-dismisses and renders retry message', async () => {
-    const Toast = (await import('@/components/Toast.vue')).default
+    const Toast = (await import('@/components/portfolio-tracker/Toast.vue')).default
     const wrapper = mount(Toast, {
       props: {
         message: "Couldn't save import. Retry?",

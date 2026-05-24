@@ -11,7 +11,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
-import EmptyState from '@/components/EmptyState.vue'
+import EmptyState from '@/components/portfolio-tracker/EmptyState.vue'
 
 function makeRouter() {
   return createRouter({

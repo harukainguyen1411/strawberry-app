@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import PlCell from '@/components/PlCell.vue'
+import PlCell from '@/components/portfolio-tracker/PlCell.vue'
 
 describe('V0.14 — PlCell', () => {
   it('positive P/L renders ▲ + leading + + --positive color', () => {

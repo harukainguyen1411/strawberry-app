@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { CurrencyCode, Money } from '../../../src/types/portfolio-tracker/firestore'
-import { useMoneyFormat } from '../../../src/composables/portfolio-tracker/useMoneyFormat'
+import type { CurrencyCode, Money } from '../../types/portfolio-tracker/firestore'
+import { useMoneyFormat } from '../../composables/portfolio-tracker/useMoneyFormat'
 
 // V0.1.3: showCurrencyBadge prop dropped — the Intl currency symbol ($ / €)
 // already disambiguates, so the trailing code suffix is redundant.

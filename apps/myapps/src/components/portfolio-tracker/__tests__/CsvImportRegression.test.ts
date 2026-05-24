@@ -68,7 +68,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
 
 describe('A.17.R1 — parseResult populated after onParse (regression: double-instance bug)', () => {
   it('A.17.R1 parseResult is non-null and equals result.value after parse() succeeds', async () => {
-    const { default: CsvImport } = await import('@/views/CsvImport.vue')
+    const { default: CsvImport } = await import('../../../../portfolio-tracker/src/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 
@@ -103,7 +103,7 @@ describe('A.17.R1 — parseResult populated after onParse (regression: double-in
 
 describe('A.17.R2 — DropZone errorId is stable (regression: Math.random in computed)', () => {
   it('A.17.R2 errorId is stable across multiple ticks in same instance', async () => {
-    const { default: DropZone } = await import('@/components/DropZone.vue')
+    const { default: DropZone } = await import('@/components/portfolio-tracker/DropZone.vue')
     const wrapper = mount(DropZone, {
       props: { accept: '.csv', maxSizeMb: 10 },
       attachTo: document.body,
@@ -136,7 +136,7 @@ describe('A.17.R2 — DropZone errorId is stable (regression: Math.random in com
 
 describe('A.17.R3 — DropZone rejects multi-file drop', () => {
   it('A.17.R3 onDrop with >1 file emits error instead of silently using files[0]', async () => {
-    const { default: DropZone } = await import('@/components/DropZone.vue')
+    const { default: DropZone } = await import('@/components/portfolio-tracker/DropZone.vue')
     const wrapper = mount(DropZone, {
       props: { accept: '.csv', maxSizeMb: 10 },
       attachTo: document.body,
@@ -168,7 +168,7 @@ describe('A.17.R3 — DropZone rejects multi-file drop', () => {
 
 describe('A.17.R4 — CsvPasteArea hard-rejects content > 10 MB', () => {
   it('A.17.R4 pasting > 10 MB emits too-large and does not propagate modelValue', async () => {
-    const { default: CsvPasteArea } = await import('@/components/CsvPasteArea.vue')
+    const { default: CsvPasteArea } = await import('@/components/portfolio-tracker/CsvPasteArea.vue')
     const wrapper = mount(CsvPasteArea, {
       props: { modelValue: '' },
       attachTo: document.body,
@@ -214,7 +214,7 @@ describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
     }
     globalThis.FileReader = FakeFileReader as unknown as typeof FileReader
 
-    const { default: CsvImport } = await import('@/views/CsvImport.vue')
+    const { default: CsvImport } = await import('../../../../portfolio-tracker/src/views/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 

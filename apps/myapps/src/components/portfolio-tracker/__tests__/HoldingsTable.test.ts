@@ -16,8 +16,8 @@
 
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import HoldingsTable from '@/components/HoldingsTable.vue'
-import type { Holding } from '../../../../src/types/portfolio-tracker/firestore'
+import HoldingsTable from '@/components/portfolio-tracker/HoldingsTable.vue'
+import type { Holding } from '@/types/portfolio-tracker/firestore'
 
 const HOLDINGS: Holding[] = [
   {

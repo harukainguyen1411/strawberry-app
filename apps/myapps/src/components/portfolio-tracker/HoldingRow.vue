@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { CurrencyCode, Holding } from '../../../src/types/portfolio-tracker/firestore'
-import MoneyCell from '@/components/MoneyCell.vue'
-import PlCell from '@/components/PlCell.vue'
-import { formatQuantity } from '../../../src/composables/portfolio-tracker/useMoneyFormat'
+import type { CurrencyCode, Holding } from '../../types/portfolio-tracker/firestore'
+import MoneyCell from './MoneyCell.vue'
+import PlCell from './PlCell.vue'
+import { formatQuantity } from '../../composables/portfolio-tracker/useMoneyFormat'
 
 defineProps<{
   holding: Holding

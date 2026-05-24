@@ -47,7 +47,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.1 Continue button is disabled on mount (no radio selected)', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -59,7 +59,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.2 clicking USD radio enables Continue', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -74,7 +74,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.3 Escape key does not close the modal (show is prop-controlled)', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -90,7 +90,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.4 clicking backdrop does not close modal', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -107,7 +107,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.5 clicking Continue with USD selected emits confirm with "USD"', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -124,7 +124,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.6 guard: modal renders when show=true', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: true },
       attachTo: document.body,
@@ -134,7 +134,7 @@ describe('A.11 — BaseCurrencyPicker', () => {
   })
 
   it('A.11.7 modal does not render when show=false', async () => {
-    const BaseCurrencyPicker = (await import('@/components/BaseCurrencyPicker.vue')).default
+    const BaseCurrencyPicker = (await import('@/components/portfolio-tracker/BaseCurrencyPicker.vue')).default
     wrapper = mount(BaseCurrencyPicker, {
       props: { show: false },
       attachTo: document.body,
