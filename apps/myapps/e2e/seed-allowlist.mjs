@@ -9,7 +9,7 @@
 //
 // Refs V0.18
 
-const PROJECT_ID = process.env.GCLOUD_PROJECT || 'portfolio-tracker-e2e'
+const PROJECT_ID = process.env.GCLOUD_PROJECT || 'myapps-e2e'
 const FIRESTORE_HOST = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080'
 
 const emails = process.argv.slice(2)
