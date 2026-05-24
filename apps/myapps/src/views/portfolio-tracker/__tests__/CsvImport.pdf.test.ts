@@ -14,7 +14,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { detectFileFormat } from '../../../../src/composables/portfolio-tracker/useImportT212Pdf'
+import { detectFileFormat } from '@/composables/portfolio-tracker/useImportT212Pdf'
 
 // ----- Format detection unit tests (pure function) -----
 
@@ -55,7 +55,7 @@ describe('V0.1.0 — useImportT212Pdf composable', () => {
       httpsCallable: vi.fn().mockReturnValue(mockCallable),
     }))
 
-    const { useImportT212Pdf } = await import('../../../../src/composables/portfolio-tracker/useImportT212Pdf')
+    const { useImportT212Pdf } = await import('@/composables/portfolio-tracker/useImportT212Pdf')
     const { importT212Pdf } = useImportT212Pdf()
 
     // Create a fake PDF buffer

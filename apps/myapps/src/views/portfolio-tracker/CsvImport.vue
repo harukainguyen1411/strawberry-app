@@ -69,7 +69,7 @@
       <!-- CTAs -->
       <div class="flex items-center gap-3">
         <router-link
-          to="/"
+          to="/yourApps/portfolio-tracker"
           class="ds-btn-ghost"
           aria-label="Cancel import and return to dashboard"
         >
@@ -193,16 +193,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import DropZone from '../../../src/components/portfolio-tracker/DropZone.vue'
-import CsvPasteArea from '../../../src/components/portfolio-tracker/CsvPasteArea.vue'
-import SourceSelect from '../../../src/components/portfolio-tracker/SourceSelect.vue'
-import ImportPreviewTable from '../../../src/components/portfolio-tracker/ImportPreviewTable.vue'
-import WarnBanner from '../../../src/components/portfolio-tracker/WarnBanner.vue'
-import ErrorBanner from '../../../src/components/portfolio-tracker/ErrorBanner.vue'
-import Toast from '../../../src/components/portfolio-tracker/Toast.vue'
-import { useCsvParser, type CsvSource, type ParseResult } from '../../../src/composables/portfolio-tracker/useCsvParser'
-import { useImportCsv } from '../../../src/composables/portfolio-tracker/useImportCsv'
-import { useImportT212Pdf, detectFileFormat } from '../../../src/composables/portfolio-tracker/useImportT212Pdf'
+import DropZone from '@/components/portfolio-tracker/DropZone.vue'
+import CsvPasteArea from '@/components/portfolio-tracker/CsvPasteArea.vue'
+import SourceSelect from '@/components/portfolio-tracker/SourceSelect.vue'
+import ImportPreviewTable from '@/components/portfolio-tracker/ImportPreviewTable.vue'
+import WarnBanner from '@/components/portfolio-tracker/WarnBanner.vue'
+import ErrorBanner from '@/components/portfolio-tracker/ErrorBanner.vue'
+import Toast from '@/components/portfolio-tracker/Toast.vue'
+import { useCsvParser, type CsvSource, type ParseResult } from '@/composables/portfolio-tracker/useCsvParser'
+import { useImportCsv } from '@/composables/portfolio-tracker/useImportCsv'
+import { useImportT212Pdf, detectFileFormat } from '@/composables/portfolio-tracker/useImportT212Pdf'
 
 type Step = 'step1' | 'step2' | 'pdf-importing'
 
@@ -356,7 +356,7 @@ function onFileDropped(file: File) {
           return
         }
         showToast(`Imported ${result.positionsWritten} positions from T212 statement`, false)
-        router.push('/')
+        router.push('/yourApps/portfolio-tracker')
       } catch {
         step.value = 'step1'
         showToast("PDF import failed. Retry?", true)
@@ -415,7 +415,7 @@ async function onCommit() {
     } else {
       showToast(`Imported ${result.tradesAdded} trades · ${positionsPart}`, false)
     }
-    router.push('/')
+    router.push('/yourApps/portfolio-tracker')
   } catch {
     showToast("Couldn't save import. Retry?", true)
   }

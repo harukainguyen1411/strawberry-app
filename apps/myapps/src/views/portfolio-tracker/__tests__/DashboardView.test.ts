@@ -2,6 +2,9 @@
  * V0.17 — DashboardView wire-up.
  * A.6.3 — DashboardView error-state template (extends V0.17 contract).
  * V0.1.1 — Re-import CTA + ready-branch link <a href> → <router-link>.
+ * v0.2 shell migration — views relocated to src/views/portfolio-tracker/;
+ *   Go-to-Settings CTA dropped (no settings view in v0.2; v1.x adds
+ *   in-app FX-overrides UI). Only Re-import CTA remains in error state.
  *
  * Per design spec §4.3 + plan task V0.17. The view consumes a single
  * usePortfolio composable that returns derived `holdings`, `summary`, and
@@ -9,7 +12,7 @@
  *   - status='loading' → SummaryCard + HoldingsTable in skeleton state
  *   - status='ready'  + holdings.length===0 + cashTotal===0 → EmptyState
  *   - status='ready'  + non-empty → SummaryCard + HoldingsTable rendered
- *   - status='error'  → error banner with FxRateMissingError pair + recovery CTAs (A.6.3)
+ *   - status='error'  → error banner with FxRateMissingError pair + Re-import CTA (A.6.3)
  *
  * Per coordinator decision 2026-05-02 (recorded in PR #82 body): tests
  * mock usePortfolio. Real Firestore wiring is exercised end-to-end in
@@ -29,13 +32,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory, RouterLink, type Router } from 'vue-router'
-import type { CurrencyCode, Holding } from '../../../../src/types/portfolio-tracker/firestore'
+import type { CurrencyCode, Holding } from '@/types/portfolio-tracker/firestore'
 import {
   FxRateMissingError,
   type PortfolioStatus,
   type PortfolioSummary,
   type UsePortfolioReturn,
-} from '../../../../src/composables/portfolio-tracker/usePortfolio'
+} from '@/composables/portfolio-tracker/usePortfolio'
 
 // Mutable refs that the mocked composable returns; tests mutate these
 // before mounting to drive the branching logic.
@@ -54,7 +57,7 @@ const mockError: Ref<Error | null> = ref<Error | null>(null)
 // side-effect avoidance). The impl's `instanceof` check resolves
 // against this same mocked class because Vitest replaces the export
 // for every importer, including DashboardView.vue.
-vi.mock('../../../../src/composables/portfolio-tracker/usePortfolio', () => {
+vi.mock('@/composables/portfolio-tracker/usePortfolio', () => {
   class FxRateMissingError extends Error {
     constructor(public readonly pair: string) {
       super(`FX rate missing for ${pair}`)
@@ -74,7 +77,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/usePortfolio', () => {
   }
 })
 
-let DashboardView: typeof import('@/views/DashboardView.vue')['default']
+let DashboardView: typeof import('@/views/portfolio-tracker/DashboardView.vue')['default']
 
 beforeEach(async () => {
   mockStatus.value = 'loading'
@@ -83,7 +86,7 @@ beforeEach(async () => {
   mockBaseCurrency.value = 'USD'
   mockError.value = null
   vi.resetModules()
-  DashboardView = (await import('@/views/DashboardView.vue')).default
+  DashboardView = (await import('@/views/portfolio-tracker/DashboardView.vue')).default
 })
 
 function makeRouter(): Router {
@@ -91,8 +94,8 @@ function makeRouter(): Router {
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: { template: '<div />' } },
-      { path: '/import', component: { template: '<div />' } },
-      { path: '/legacy/settings', component: { template: '<div />' } },
+      { path: '/yourApps/portfolio-tracker', component: { template: '<div />' } },
+      { path: '/yourApps/portfolio-tracker/import', component: { template: '<div />' } },
     ],
   })
 }
@@ -146,7 +149,7 @@ describe('V0.17 — DashboardView', () => {
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
     expect(wrapper.text()).toContain('No portfolio data yet')
-    const cta = wrapper.find('a[href="/import"]')
+    const cta = wrapper.find('a[href="/yourApps/portfolio-tracker/import"]')
     expect(cta.exists()).toBe(true)
   })
 
@@ -165,7 +168,7 @@ describe('V0.17 — DashboardView', () => {
     expect(rows).toHaveLength(12)
   })
 
-  it('renders ready-branch re-import as RouterLink with to=/import?mode=replace (V0.1.1)', async () => {
+  it('renders ready-branch re-import as RouterLink with shell-prefixed to path (V0.1.1)', async () => {
     mockStatus.value = 'ready'
     mockHoldings.value = TWELVE_HOLDINGS
     mockSummary.value = TWELVE_SUMMARY
@@ -177,7 +180,7 @@ describe('V0.17 — DashboardView', () => {
     const links = wrapper.findAllComponents(RouterLink)
     const reimportLink = links.find(l => l.attributes('data-testid') === 'reimport-link')
     expect(reimportLink).toBeDefined()
-    expect(reimportLink!.props('to')).toBe('/import?mode=replace')
+    expect(reimportLink!.props('to')).toBe('/yourApps/portfolio-tracker/import?mode=replace')
   })
 
   it('re-renders totals in EUR when baseCurrency switches from USD to EUR', async () => {
@@ -217,15 +220,11 @@ describe('V0.17 — DashboardView', () => {
   })
 })
 
-// xfail: A.6.3 — DashboardView error-state template
+// A.6.3 — DashboardView error-state template
 //
-// Manually surfaced 2026-05-03 + 2026-05-09: when usePortfolio throws
-// FxRateMissingError on a multi-currency import, status flips to 'error'
-// but DashboardView has no v-else-if branch for it, so <main> renders
-// empty. This block pins the contract — banner names the missing pair,
-// surface "Go to Settings" + Re-import recovery CTAs, suppress the
-// loading/empty/ready branches. `it.fails` markers convert to `it` in
-// the impl commit (matched by tdd-gate's xfail regex).
+// v0.2 update: Go-to-Settings CTA removed (no settings view in v0.2;
+// v1.x will add in-app FX-overrides UI). Only Re-import CTA remains.
+// Tests updated accordingly — settingsLink test inverted to assert absence.
 describe('A.6.3 — DashboardView error state', () => {
   it('renders an error banner with the FxRateMissingError pair when status="error"', async () => {
     mockStatus.value = 'error'
@@ -237,21 +236,34 @@ describe('A.6.3 — DashboardView error state', () => {
     expect(banner.text()).toContain('USD->EUR')
   })
 
-  it('renders Go-to-Settings and Re-import CTAs as RouterLinks in the error branch (V0.1.1)', async () => {
+  it('does not render Go-to-Settings CTA in error state (v0.2 — no settings view)', async () => {
     mockStatus.value = 'error'
     mockError.value = new FxRateMissingError('USD->EUR')
     const router = makeRouter()
     const wrapper = mount(DashboardView, { global: { plugins: [router] } })
-    // /legacy/settings is the V0 settings route (the v1.x in-app FX
-    // overrides UI replaces it). Re-import is the live primary recovery.
-    // Both must be RouterLinks routing through Vue Router, not bare <a href>.
+    // Go-to-Settings CTA must be absent — settings view dropped in v0.2.
     const links = wrapper.findAllComponents(RouterLink)
     const settingsLink = links.find(l => l.attributes('data-testid') === 'error-settings-link')
+    expect(settingsLink).toBeUndefined()
+    expect(wrapper.find('[data-testid="error-settings-link"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/legacy/settings"]').exists()).toBe(false)
+  })
+
+  it('renders only the Re-import CTA in the error state (sole recovery action)', async () => {
+    mockStatus.value = 'error'
+    mockError.value = new FxRateMissingError('USD->EUR')
+    const router = makeRouter()
+    const wrapper = mount(DashboardView, { global: { plugins: [router] } })
+    const banner = wrapper.find('[data-testid="error-banner"]')
+    expect(banner.exists()).toBe(true)
+    // Re-import CTA must be present as a RouterLink with the shell-prefixed path.
+    const links = wrapper.findAllComponents(RouterLink)
     const reimportLink = links.find(l => l.attributes('data-testid') === 'error-reimport-link')
-    expect(settingsLink).toBeDefined()
-    expect(settingsLink!.props('to')).toBe('/legacy/settings')
     expect(reimportLink).toBeDefined()
-    expect(reimportLink!.props('to')).toBe('/import?mode=replace')
+    expect(reimportLink!.props('to')).toBe('/yourApps/portfolio-tracker/import?mode=replace')
+    // Only one RouterLink inside the error banner.
+    const bannerLinks = banner.findAllComponents(RouterLink)
+    expect(bannerLinks).toHaveLength(1)
   })
 
   it('renders only the error banner (not the ready-branch re-import or loading skeletons) when status="error"', async () => {

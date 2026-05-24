@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FxRateMissingError, usePortfolio } from '../../../src/composables/portfolio-tracker/usePortfolio'
-import SummaryCard from '../../../src/components/portfolio-tracker/SummaryCard.vue'
-import HoldingsTable from '../../../src/components/portfolio-tracker/HoldingsTable.vue'
-import EmptyState from '../../../src/components/portfolio-tracker/EmptyState.vue'
-import type { CurrencyCode, Money } from '../../../src/types/portfolio-tracker/firestore'
+import { FxRateMissingError, usePortfolio } from '@/composables/portfolio-tracker/usePortfolio'
+import SummaryCard from '@/components/portfolio-tracker/SummaryCard.vue'
+import HoldingsTable from '@/components/portfolio-tracker/HoldingsTable.vue'
+import EmptyState from '@/components/portfolio-tracker/EmptyState.vue'
+import type { CurrencyCode, Money } from '@/types/portfolio-tracker/firestore'
 
 const { status, loading, holdings, summary, baseCurrency, error } = usePortfolio()
 
@@ -46,11 +46,10 @@ const fxPair = computed(() =>
     <template v-else-if="status === 'error'">
       <!-- A.6.3 — usePortfolio surfaced an error (most commonly
         FxRateMissingError on a multi-currency import without a seeded
-        users/{uid}/meta/fx). Surface the missing pair + recovery CTAs
-        so the dashboard does not render a blank <main>. /legacy/settings
-        is the V0 settings route (the in-app v1.x FX-overrides UI will
-        replace it); Re-import is the live primary recovery — pick a
-        base currency that does not require conversion.
+        users/{uid}/meta/fx). Surface the missing pair + Re-import CTA
+        so the dashboard does not render a blank <main>. Re-import is the
+        primary recovery — pick a base currency that does not require
+        conversion. (v1.x will add in-app FX-overrides UI.)
 
         role="alert" alone implies assertive announcement; aria-live is
         intentionally not set so the role's default behaviour is honoured. -->
@@ -70,25 +69,17 @@ const fxPair = computed(() =>
           <p style="color: var(--text);">
             <template v-if="fxPair">
               Missing FX rate for <code class="font-mono">{{ fxPair }}</code>.
-              Add the rate in Settings, or re-import with a base currency that
-              doesn't need conversion.
+              Re-import with a base currency that doesn't need conversion.
             </template>
             <template v-else>
               {{ error?.message ?? 'Unknown error' }}
             </template>
           </p>
         </div>
-        <div class="flex gap-2 flex-wrap">
-          <router-link
-            data-testid="error-settings-link"
-            to="/legacy/settings"
-            class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
-          >
-            Go to Settings
-          </router-link>
+        <div>
           <router-link
             data-testid="error-reimport-link"
-            to="/import?mode=replace"
+            to="/yourApps/portfolio-tracker/import?mode=replace"
             class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm"
           >
             Re-import CSV
@@ -103,7 +94,7 @@ const fxPair = computed(() =>
         title="No portfolio data yet"
         body="Import a CSV to get started."
         cta-label="Import CSV →"
-        cta-to="/import"
+        cta-to="/yourApps/portfolio-tracker/import"
       />
     </template>
 
@@ -119,7 +110,7 @@ const fxPair = computed(() =>
       <div class="flex">
         <router-link
           data-testid="reimport-link"
-          to="/import?mode=replace"
+          to="/yourApps/portfolio-tracker/import?mode=replace"
           class="ds-btn-ghost inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm w-full md:w-auto"
         >
           Re-import CSV

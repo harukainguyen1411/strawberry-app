@@ -1,9 +1,9 @@
 /**
- * V0.1.2 — CsvImport post-success UX: toast + auto-nav to /
+ * V0.1.2 — CsvImport post-success UX: toast + auto-nav to /yourApps/portfolio-tracker
  *
  * Refs V0.1.2
  *
- * V012.1 — Successful import → toast shows "Imported N trades · M positions" + router.push('/') called
+ * V012.1 — Successful import → toast shows "Imported N trades · M positions" + router.push('/yourApps/portfolio-tracker') called
  * V012.2 — Failed parse → toast shows parse error + router.push NOT called + no redundant inline banner
  */
 
@@ -17,14 +17,14 @@ const mockPush = vi.fn()
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
-  useRoute: () => ({ path: '/import', meta: {} }),
+  useRoute: () => ({ path: '/yourApps/portfolio-tracker/import', meta: {} }),
   RouterView: defineComponent({ render: () => h('div') }),
   RouterLink: defineComponent({ props: ['to'], render() { return h('a', {}, this.$slots.default?.()) } }),
   createRouter: vi.fn(),
   createWebHistory: vi.fn(),
 }))
 
-vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
+vi.mock('@/composables/portfolio-tracker/useAuth', () => ({
   useAuth: () => ({
     email: { value: 'duong@test.com' },
     uid: { value: 'user123' },
@@ -35,7 +35,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useAuth', () => ({
 // Controlled mock for useCsvParser — two modes: success and parse-error
 let mockParseMode: 'success' | 'error' = 'success'
 
-vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
+vi.mock('@/composables/portfolio-tracker/useCsvParser', () => ({
   useCsvParser: vi.fn(() => {
     const FAKE_RESULT = { trades: [{ id: 'T1' }, { id: 'T2' }], positions: [{ ticker: 'AAPL' }], errors: [] }
     const result = ref<typeof FAKE_RESULT | null>(null)
@@ -56,7 +56,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
 }))
 
 // Controlled mock for useImportCsv — resolves with 2 trades + 1 position
-vi.mock('../../../../src/composables/portfolio-tracker/useImportCsv', () => ({
+vi.mock('@/composables/portfolio-tracker/useImportCsv', () => ({
   useImportCsv: vi.fn(() => ({
     importCsv: vi.fn().mockResolvedValue({
       tradesAdded: 2,
@@ -73,7 +73,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useImportCsv', () => ({
 
 async function mountImportAtStep2() {
   mockParseMode = 'success'
-  const { default: CsvImport } = await import('@/views/CsvImport.vue')
+  const { default: CsvImport } = await import('@/views/portfolio-tracker/CsvImport.vue')
   const wrapper = mount(CsvImport, { attachTo: document.body })
   await nextTick()
 
@@ -104,7 +104,7 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     vi.resetModules()
   })
 
-  it('V012.1 successful commit → toast shows "Imported N trades · M positions" and router.push("/") is called', async () => {
+  it('V012.1 successful commit → toast shows "Imported N trades · M positions" and router.push("/yourApps/portfolio-tracker") is called', async () => {
     const wrapper = await mountImportAtStep2()
 
     // Click "Commit import →"
@@ -117,15 +117,15 @@ describe('V0.1.2 — CsvImport post-success UX', () => {
     expect(toast.exists()).toBe(true)
     expect(toast.text()).toMatch(/Imported 2 trades · 1 position/i)
 
-    // Router must have navigated to /
-    expect(mockPush).toHaveBeenCalledWith('/')
+    // Router must have navigated to the shell PT dashboard path
+    expect(mockPush).toHaveBeenCalledWith('/yourApps/portfolio-tracker')
 
     wrapper.unmount()
   })
 
   it('V012.2 failed parse → toast shows parse error message + router.push NOT called + no inline banner', async () => {
     mockParseMode = 'error'
-    const { default: CsvImport } = await import('@/views/CsvImport.vue')
+    const { default: CsvImport } = await import('@/views/portfolio-tracker/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 

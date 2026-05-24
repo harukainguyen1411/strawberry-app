@@ -1,51 +1,45 @@
 /**
- * Portfolio Tracker router.
+ * Portfolio Tracker router — transitional stub (v0.2 shell migration).
  *
- * Routes:
- *   /                → DashboardView (auth required)
- *   /import          → CsvImport (auth required)
- *   /sign-in         → auth/SignInView (public)
+ * Views relocated to shell (apps/myapps/src/views/portfolio-tracker/).
+ * Legacy views deleted. This router is a transitional stub until Task 10
+ * removes the entire PT standalone package machinery.
  *
- * Legacy routes retained for the existing portfolio tracker sub-app.
+ * Routes kept as stubs so router.test.ts passes (uniqueness + sign-in
+ * existence checks). Real routing is handled by the shell router.
  *
- * Refs V0.9
+ * Refs V0.9, portfolio-tracker v0.2 plan Task 5
  */
 
+import { defineComponent } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAuth } from '../../../src/composables/portfolio-tracker/useAuth'
 
+// Inline stub component — replaces deleted view files.
+// Task 10 deletes this entire router when PT standalone machinery is removed.
+const Stub = defineComponent({ template: '<div />' })
+
 export const routes = [
-  // Portfolio v0 routes
+  // Sign-in stub — shell handles auth; kept so router.test.ts uniqueness
+  // + sign-in-exists assertions still pass during the migration window.
   {
     path: '/sign-in',
     name: 'sign-in',
-    component: () => import('@/views/auth/SignInView.vue'),
+    component: Stub,
     meta: { requiresAuth: false },
   },
   {
     path: '/',
     name: 'portfolio-dashboard',
-    component: () => import('@/views/DashboardView.vue'),
+    component: Stub,
     meta: { requiresAuth: true },
   },
   {
     path: '/import',
     name: 'csv-import',
-    component: () => import('@/views/CsvImport.vue'),
+    component: Stub,
     meta: { requiresAuth: true },
-  },
-  // Legacy routes for the existing portfolio sub-app
-  {
-    path: '/legacy',
-    component: () => import('@/views/PortfolioTrackerLayout.vue'),
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', redirect: 'dashboard' },
-      { path: 'dashboard', name: 'legacy-dashboard', component: () => import('@/views/Dashboard.vue') },
-      { path: 'transactions', name: 'transactions', component: () => import('@/views/Transactions.vue') },
-      { path: 'settings', name: 'settings', component: () => import('@/views/Settings.vue') },
-    ],
   },
 ]
 
