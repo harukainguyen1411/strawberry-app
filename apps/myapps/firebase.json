@@ -13,6 +13,20 @@
         "*.local",
         "**/*.log"
       ]
+    },
+    {
+      "source": "portfolio-tracker/functions",
+      "codebase": "portfolio-tracker-functions",
+      "runtime": "nodejs20",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "**/.git/**",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local",
+        "**/*.log"
+      ]
     }
   ],
   "firestore": {
@@ -37,7 +51,8 @@
     "ui": {
       "enabled": true,
       "port": 4000
-    }
+    },
+    "singleProjectMode": true
   },
   "hosting": {
     "public": "dist",

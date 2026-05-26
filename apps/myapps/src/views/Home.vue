@@ -133,6 +133,13 @@ const allApps = ref<App[]>([
     icon: '🐝',
     route: '/yourApps/bee',
     flag: 'bee_visible'
+  },
+  {
+    id: 'portfolio-tracker',
+    name: t('home.portfolioTracker.name'),
+    description: t('home.portfolioTracker.description'),
+    icon: '📈',
+    route: '/yourApps/portfolio-tracker'
   }
 ])
 
@@ -148,7 +155,8 @@ const flags = Object.fromEntries(
 // Used in addition to Remote Config flags so per-user visibility works without
 // the firebase@11 setCustomSignals upgrade.
 const APP_EMAIL_ALLOWLIST: Record<string, string[]> = {
-  bee: ['harukainguyen1411@gmail.com']
+  bee: ['harukainguyen1411@gmail.com'],
+  'portfolio-tracker': ['harukainguyen1411@gmail.com']
 }
 
 const apps = computed(() =>

@@ -5,6 +5,14 @@ import type { User } from 'firebase/auth'
 
 const LOCAL_MODE_KEY = 'readTracker_localMode'
 
+// When running against the Firebase emulator (VITE_USE_FIREBASE_EMULATOR=true),
+// local-mode auto-fallback must be suppressed. The emulator is real auth:
+//   - onAuthChange fires with null on page load (not signed in yet) — correct
+//   - the 3-second timeout must not fire before the user signs in via popup
+// Without this guard both paths would flip localMode=true, hide the
+// GoogleLoginButton, and break the portfolio-tracker E2E sign-in flow.
+const isEmulatorMode = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true'
+
 export const useAuthStore = defineStore('auth', () => {
   const user: Ref<User | null> = ref(null)
   const loading: Ref<boolean> = ref(true)
@@ -25,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
   onAuthChange((firebaseUser: User | null) => {
     user.value = firebaseUser
     loading.value = false
-    
+
     if (firebaseUser) {
       // User is authenticated - disable local mode (unless we're syncing from local)
       if (!syncingFromLocal.value) {
@@ -33,11 +41,16 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.removeItem(LOCAL_MODE_KEY)
       }
     } else {
-      // User is not authenticated - auto-enable local mode if not already set
-      const stored = localStorage.getItem(LOCAL_MODE_KEY)
-      if (stored !== 'true') {
-        localMode.value = true
-        localStorage.setItem(LOCAL_MODE_KEY, 'true')
+      // User is not authenticated.
+      // In emulator mode skip the local-mode auto-enable: the user will sign in
+      // via the Google popup flow; flipping to local mode here would hide the
+      // GoogleLoginButton and break the E2E sign-in flow.
+      if (!isEmulatorMode) {
+        const stored = localStorage.getItem(LOCAL_MODE_KEY)
+        if (stored !== 'true') {
+          localMode.value = true
+          localStorage.setItem(LOCAL_MODE_KEY, 'true')
+        }
       }
     }
   })
@@ -46,15 +59,19 @@ export const useAuthStore = defineStore('auth', () => {
   initializeLocalMode()
 
   // Add timeout to ensure loading state doesn't block UI indefinitely
-  // If Firebase auth doesn't respond within 3 seconds, assume not authenticated
-  setTimeout(() => {
-    if (loading.value && !localMode.value && !user.value) {
-      console.warn('Firebase auth initialization timeout - auto-enabling local mode')
-      localMode.value = true
-      localStorage.setItem(LOCAL_MODE_KEY, 'true')
-      loading.value = false
-    }
-  }, 3000)
+  // If Firebase auth doesn't respond within 3 seconds, assume not authenticated.
+  // Skipped in emulator mode — the emulator is real auth and the user signs in
+  // interactively (popup); the timeout would race the popup and enable local mode.
+  if (!isEmulatorMode) {
+    setTimeout(() => {
+      if (loading.value && !localMode.value && !user.value) {
+        console.warn('Firebase auth initialization timeout - auto-enabling local mode')
+        localMode.value = true
+        localStorage.setItem(LOCAL_MODE_KEY, 'true')
+        loading.value = false
+      }
+    }, 3000)
+  }
 
   const isAuthenticated: ComputedRef<boolean> = computed(() => !!user.value || localMode.value)
 

@@ -1,7 +1,14 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
-import { getAuth, type Auth } from 'firebase/auth'
-import { getFirestore, type Firestore } from 'firebase/firestore'
-import { getStorage, type FirebaseStorage } from 'firebase/storage'
+import {
+  getAuth,
+  connectAuthEmulator,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  type Auth,
+} from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator, type Firestore } from 'firebase/firestore'
+import { getFunctions, connectFunctionsEmulator, type Functions } from 'firebase/functions'
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage'
 import { getAnalytics, type Analytics, isSupported } from 'firebase/analytics'
 import { getRemoteConfig, type RemoteConfig } from 'firebase/remote-config'
 import { remoteConfigDefaults } from './remoteConfigDefaults'
@@ -34,6 +41,37 @@ const app: FirebaseApp = initializeApp(firebaseConfig)
 export const auth: Auth = getAuth(app)
 export const db: Firestore = getFirestore(app)
 export const storage: FirebaseStorage = getStorage(app)
+export const functions: Functions = getFunctions(app)
+
+if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
+  connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
+  connectFirestoreEmulator(db, 'localhost', 8080)
+  connectStorageEmulator(storage, 'localhost', 9199)
+  connectFunctionsEmulator(functions, 'localhost', 5001)
+}
+
+// E2E test helper — exposes a sign-in function on window so Playwright specs
+// can authenticate without going through the Google popup/GAPI iframe flow
+// (which is fragile in headless browsers due to external GAPI script dependency).
+// Only bundled when VITE_E2E=true; no-op in production.
+//
+// Tries signInWithEmailAndPassword first (user exists from a reused emulator run);
+// falls back to createUserWithEmailAndPassword on first run. Both paths trigger
+// the beforeUserSignedIn blocking function, exercising the allowlist check.
+if (import.meta.env.VITE_E2E === 'true') {
+  ;(
+    window as Window & {
+      __e2eSignIn?: (email: string, password: string) => Promise<unknown>
+    }
+  ).__e2eSignIn = async (email: string, password: string) => {
+    try {
+      return await signInWithEmailAndPassword(auth, email, password)
+    } catch {
+      // User does not yet exist in this emulator run — create them.
+      return await createUserWithEmailAndPassword(auth, email, password)
+    }
+  }
+}
 
 // Initialize Remote Config
 export const remoteConfig: RemoteConfig = getRemoteConfig(app)
