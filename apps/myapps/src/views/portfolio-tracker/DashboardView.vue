@@ -4,9 +4,23 @@ import { FxRateMissingError, usePortfolio } from '@/composables/portfolio-tracke
 import SummaryCard from '@/components/portfolio-tracker/SummaryCard.vue'
 import HoldingsTable from '@/components/portfolio-tracker/HoldingsTable.vue'
 import EmptyState from '@/components/portfolio-tracker/EmptyState.vue'
+import BaseCurrencyPicker from '@/components/portfolio-tracker/BaseCurrencyPicker.vue'
+import { useBaseCurrency } from '@/composables/portfolio-tracker/useBaseCurrency'
+import { useAuth } from '@/composables/portfolio-tracker/useAuth'
 import type { CurrencyCode, Money } from '@/types/portfolio-tracker/firestore'
 
 const { status, loading, holdings, summary, baseCurrency, error } = usePortfolio()
+const { setBaseCurrency } = useBaseCurrency()
+const { isAuthenticated } = useAuth()
+
+// Show picker if signed in and baseCurrency not yet set
+const showCurrencyPicker = computed(
+  () => isAuthenticated.value && baseCurrency.value === null
+)
+
+async function onCurrencyConfirm(currency: CurrencyCode) {
+  await setBaseCurrency(currency)
+}
 
 const fallbackBase = computed<CurrencyCode>(() => baseCurrency.value ?? 'USD')
 
@@ -30,7 +44,18 @@ const fxPair = computed(() =>
 </script>
 
 <template>
-  <main class="px-4 md:px-6 py-4 md:py-6 max-w-5xl mx-auto flex flex-col gap-6">
+  <!-- BaseCurrencyPicker guard: undismissable until user picks USD or EUR.
+       Inerts the dashboard content while the picker is showing so focus
+       does not escape to background content. -->
+  <BaseCurrencyPicker
+    :show="showCurrencyPicker"
+    @confirm="onCurrencyConfirm"
+  />
+
+  <main
+    class="px-4 md:px-6 py-4 md:py-6 max-w-5xl mx-auto flex flex-col gap-6"
+    :inert="showCurrencyPicker || undefined"
+  >
     <template v-if="loading">
       <SummaryCard
         :total-value="placeholderMoney"
@@ -119,3 +144,4 @@ const fxPair = computed(() =>
     </template>
   </main>
 </template>
+

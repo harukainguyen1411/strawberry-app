@@ -77,6 +77,25 @@ vi.mock('@/composables/portfolio-tracker/usePortfolio', () => {
   }
 })
 
+// useAuth — DashboardView now uses isAuthenticated to gate the
+// BaseCurrencyPicker. Tests stub as always-authenticated (the picker's
+// show/hide behaviour is unit-tested in BaseCurrencyPicker.test.ts).
+vi.mock('@/composables/portfolio-tracker/useAuth', () => ({
+  useAuth: () => ({
+    uid: ref('test-uid'),
+    isAuthenticated: computed(() => true),
+  }),
+}))
+
+// useBaseCurrency — setBaseCurrency is called only when the picker
+// emits @confirm; unit tests don't exercise that flow.
+vi.mock('@/composables/portfolio-tracker/useBaseCurrency', () => ({
+  useBaseCurrency: () => ({
+    baseCurrency: computed(() => mockBaseCurrency.value),
+    setBaseCurrency: vi.fn(),
+  }),
+}))
+
 let DashboardView: typeof import('@/views/portfolio-tracker/DashboardView.vue')['default']
 
 beforeEach(async () => {
