@@ -2,7 +2,7 @@ import pluginVue from 'eslint-plugin-vue'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 
 export default defineConfigWithVueTs(
-  { ignores: ['dist', 'node_modules', 'coverage', '**/e2e/**', '**/*.config.js', '**/*.config.ts', 'playwright.config.ts'] },
+  { ignores: ['dist', 'dist-shell', 'dist-pt', 'dist-ssr', 'node_modules', 'coverage', '**/e2e/**', '**/*.config.js', '**/*.config.ts', 'playwright.config.ts', 'functions/lib', '**/functions/lib/**'] },
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
   {
