@@ -28,8 +28,7 @@ import { mkdirSync } from 'node:fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEST_EMAIL = 'duong@allowed.test'
-// Fixtures live in apps/myapps/portfolio-tracker/test/fixtures/ (package not yet deleted)
-const T212_PDF = path.resolve(__dirname, '../../portfolio-tracker/test/fixtures/t212-statement.pdf')
+const T212_PDF = path.resolve(__dirname, './fixtures/t212-statement.pdf')
 const ARTIFACTS_DIR = path.join(__dirname, 'artifacts')
 
 mkdirSync(ARTIFACTS_DIR, { recursive: true })

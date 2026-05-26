@@ -27,8 +27,7 @@ import { mkdirSync } from 'node:fs'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEST_EMAIL = 'duong@allowed.test'
 const TEST_PASSWORD = 'e2e-test-password'
-// Fixtures live in apps/myapps/portfolio-tracker/test/fixtures/ (package not yet deleted)
-const T212_CSV = path.resolve(__dirname, '../../portfolio-tracker/test/fixtures/t212-sample.csv')
+const T212_CSV = path.resolve(__dirname, './fixtures/t212-sample.csv')
 const ARTIFACTS_DIR = path.join(__dirname, 'artifacts')
 
 // Ensure artifacts dir exists
