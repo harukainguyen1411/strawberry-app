@@ -45,7 +45,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
 
 describe('A.17 — CsvImport Step 1', () => {
   it('A.17.1 "Parse →" button is disabled when both file and paste are empty', async () => {
-    const CsvImport = (await import('../../../../portfolio-tracker/src/views/CsvImport.vue')).default
+    const CsvImport = (await import('@/views/portfolio-tracker/CsvImport.vue')).default
     const wrapper = mount(CsvImport, {
       attachTo: document.body,
     })

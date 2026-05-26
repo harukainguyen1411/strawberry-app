@@ -68,7 +68,7 @@ vi.mock('../../../../src/composables/portfolio-tracker/useCsvParser', () => ({
 
 describe('A.17.R1 — parseResult populated after onParse (regression: double-instance bug)', () => {
   it('A.17.R1 parseResult is non-null and equals result.value after parse() succeeds', async () => {
-    const { default: CsvImport } = await import('../../../../portfolio-tracker/src/views/CsvImport.vue')
+    const { default: CsvImport } = await import('@/views/portfolio-tracker/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 
@@ -214,7 +214,7 @@ describe('A.17.R5 — FileReader onerror surfaces in CsvImport', () => {
     }
     globalThis.FileReader = FakeFileReader as unknown as typeof FileReader
 
-    const { default: CsvImport } = await import('../../../../portfolio-tracker/src/views/CsvImport.vue')
+    const { default: CsvImport } = await import('@/views/portfolio-tracker/CsvImport.vue')
     const wrapper = mount(CsvImport, { attachTo: document.body })
     await nextTick()
 
