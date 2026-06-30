@@ -48,6 +48,13 @@ export interface GameState {
   pendingExtraTurns: number; // Concealed Knowledge (§12.10)
   shownCards: Record<PlayerId, CharacterId[]>; // Hermit's Prediction (§12.11, private to giver)
   log: GameEvent[];
+  /** Transient: set during a "move" phase when player must still choose destination.
+   *  "wild" = rolled 7, pick any area ≠ current. §9
+   *  "compass" = Mystic Compass equipped, two rolls to choose from. §6 §9
+   *  "emi" = Emi Teleport in progress, pick from precomputed targets. §5 §9
+   *  undefined = no pending move choice needed.
+   */
+  pendingMove: { kind: "wild" | "compass" | "emi"; roll?: [number, number]; compassOptions?: AreaId[] } | undefined;
 }
 
 export type Action =

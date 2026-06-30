@@ -127,5 +127,6 @@ export function createGame(playerIds: readonly string[], seed: string): GameStat
     pendingExtraTurns: 0,
     shownCards,
     log: [],
+    pendingMove: undefined,
   };
 }
