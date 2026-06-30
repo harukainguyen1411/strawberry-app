@@ -137,4 +137,11 @@ export interface PlayerView {
   current: PlayerId; phase: TurnPhase; over: boolean; winners: PlayerId[];
   legal: Action[];           // your legal actions right now
   recent: GameEvent[];       // tail of the log for animation
+  /**
+   * Hermit's Prediction info PRIVATE to this viewer: character ids of recipients
+   * who showed this viewer their card via Hermit's Prediction (§12.11). Only the
+   * giver ever sees these; redacted (empty) for every other viewer so a hidden
+   * recipient's identity never leaks. Sourced from state.shownCards[viewerId].
+   */
+  shownCards: CharacterId[];
 }
