@@ -344,12 +344,21 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
   const actions: Action[] = [];
 
   // ── Out-of-band: Werewolf Counterattack (§12.6) ────────────────────────────────
+  // Offer a Counterattack while ANY pending occurrence exists against an attacker who
+  // is still in range and alive. pendingCounters tracks per-attack occurrences (a
+  // Werewolf hit twice has two), but the offered action set is one per distinct attacker
+  // — reduce consumes exactly one occurrence per Counterattack, so the action stays
+  // offered until every occurrence against that attacker is spent.
   const counters = state.pendingCounters?.[playerId];
   if (counters && counters.length > 0 && player.characterId === "werewolf") {
+    const reachable = attackTargetsInRange(state, playerId);
+    const offered = new Set<PlayerId>();
     for (const attacker of counters) {
+      if (offered.has(attacker)) continue;
       // Only offer counters whose target is still in range and alive.
-      if (attackTargetsInRange(state, playerId).includes(attacker)) {
+      if (reachable.includes(attacker)) {
         actions.push({ type: "Counterattack", player: playerId, target: attacker });
+        offered.add(attacker);
       }
     }
   }
@@ -524,15 +533,9 @@ export function reduce(
       // a fresh Attack (no attacking twice in one turn, §12.10). The only sanctioned
       // second attack is Charles's Bloody Feast, offered as a UseAbility (§5/§12.4).
       next.attackStepSpent = true;
-      // §12.6: if the (still-alive) target is a Werewolf, it may now Counterattack
-      // the attacker. Record the pending counter so legalActions offers it.
-      const target = next.players.find((p) => p.id === action.target);
-      if (target && target.alive && target.characterId === "werewolf" && !next.over) {
-        next.pendingCounters ??= {};
-        const list = next.pendingCounters[action.target] ?? [];
-        if (!list.includes(actor)) list.push(actor);
-        next.pendingCounters[action.target] = list;
-      }
+      // §12.3/§12.6: Werewolf pending-counter queuing now lives in combat.applyAttack so
+      // EVERY real attack path queues uniformly (this Attack case, Charles's Bloody Feast
+      // inside abilities.ts, and Machine-Gun volleys). Nothing to queue here.
       // Charles Bloody Feast and other onAfterAttack passives are resolved via an
       // explicit UseAbility action by the attacker (kept out of the auto-pipeline so
       // the player chooses to pay the 2 self-damage). Vampire/Bob already resolved
@@ -542,7 +545,9 @@ export function reduce(
 
     case "Counterattack": {
       // §12.6: a Werewolf's explicit counter. runHook drives the ability (reveals,
-      // rolls, applies). Clear the pending counter afterward (one response).
+      // rolls, applies). Consume EXACTLY ONE pending occurrence against this attacker
+      // (per-attack tracking, §12.6) so a Werewolf hit twice can still counter the
+      // remaining occurrence — not the whole queue.
       events.push(
         ...runHook("onAttacked", actor, {
           state: next,
@@ -550,7 +555,12 @@ export function reduce(
           params: { attacker: action.target },
         }),
       );
-      if (next.pendingCounters) delete next.pendingCounters[actor];
+      const pending = next.pendingCounters?.[actor];
+      if (pending) {
+        const idx = pending.indexOf(action.target);
+        if (idx !== -1) pending.splice(idx, 1);
+        if (pending.length === 0) delete next.pendingCounters![actor];
+      }
       break;
     }
 

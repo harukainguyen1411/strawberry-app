@@ -254,13 +254,20 @@ function applyBobSteal(
  *
  * After all targets resolve, Vampire heals 2 ONCE if any damage was dealt (§12.7).
  *
+ * Werewolf Counterattack queuing (§12.3/§12.6): EVERY real attack path runs through
+ * here (combat-step attacks, Charles's Bloody Feast, Machine-Gun volleys), so this is
+ * where pending counters are recorded — one PER-ATTACK occurrence for each alive
+ * Werewolf among the targets (NOT deduped by attacker, so a Werewolf hit twice may
+ * counter each), fired on hit OR miss. `queueCounters` defaults to true; the Werewolf's
+ * OWN counter passes false (a counter does NOT itself provoke a counter, §12.6).
+ *
  * Throws if the chosen target is out of range / missing (server relies on this).
  */
 export function applyAttack(
   state: GameState,
   attackerId: PlayerId,
   target?: PlayerId,
-  opts?: { dice?: CombatDice },
+  opts?: { dice?: CombatDice; queueCounters?: boolean },
 ): AttackResult {
   const attacker = getPlayer(state, attackerId);
   const inRange = attackTargetsInRange(state, attackerId);
@@ -288,6 +295,13 @@ export function applyAttack(
   let lastDamage = 0;
   let stoleAny = false;
 
+  // §12.6: every alive Werewolf that this attack actually targets earns a pending
+  // counter, recorded PER-ATTACK occurrence (not deduped by attacker) so a Werewolf
+  // hit twice may counter each, and fired on hit OR miss. We collect the Werewolf
+  // targets that were alive when resolved here, then queue after the attack settles
+  // (a Werewolf killed by the attack is dead and cannot counter).
+  const werewolfTargets: PlayerId[] = [];
+
   // Resolve every target with the one rolled dice. The per-target body is shared so a
   // single-target attack and a Machine Gun multi-target volley use identical mechanics.
   const resolveTargets = (): GameEvent[] => {
@@ -295,6 +309,9 @@ export function applyAttack(
     for (const tId of targets) {
       const targetPlayer = getPlayer(state, tId);
       if (!targetPlayer.alive) continue; // a simultaneous-kill target already removed
+
+      // Record the (alive-at-resolution) Werewolf occurrence so a counter can be queued.
+      if (targetPlayer.characterId === "werewolf") werewolfTargets.push(tId);
 
       const comp = computeDamage(state, attackerId, tId, dice);
       lastDamage = comp.final;
@@ -325,6 +342,24 @@ export function applyAttack(
     events.push(...withWinCheckBatch(state, resolveTargets));
   } else {
     events.push(...resolveTargets());
+  }
+
+  // §12.3/§12.6: queue one pending-counter occurrence per alive Werewolf target so
+  // EVERY real attack path (combat step, Charles Bloody Feast, Machine-Gun volley)
+  // provokes counters uniformly. Skipped for the Werewolf's own counter (a counter
+  // does NOT itself provoke a counter): callers pass queueCounters:false. A Werewolf
+  // killed by this attack is no longer alive and is excluded. Game-over short-circuits
+  // (no counters after the game ends). Occurrences are appended, never deduped.
+  const queueCounters = opts?.queueCounters !== false;
+  if (queueCounters && !state.over) {
+    for (const wId of werewolfTargets) {
+      const w = getPlayer(state, wId);
+      if (!w.alive) continue;
+      state.pendingCounters ??= {};
+      const list = state.pendingCounters[wId] ?? [];
+      list.push(attackerId);
+      state.pendingCounters[wId] = list;
+    }
   }
 
   // Vampire Suck Blood §12.7: heal 2 ONCE per attack action when any damage was dealt.
@@ -376,8 +411,9 @@ export function applyCounterattack(
     state.log.push(evt);
   }
 
-  // The counter is a normal attack (range/dice/modifiers all apply).
-  const res = applyAttack(state, werewolfId, target, opts);
+  // The counter is a normal attack (range/dice/modifiers all apply) but does NOT itself
+  // provoke a counter (§12.6) — so queueCounters:false even if the target is a Werewolf.
+  const res = applyAttack(state, werewolfId, target, { ...opts, queueCounters: false });
   events.push(...res.events);
 
   return { ...res, events };

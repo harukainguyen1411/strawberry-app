@@ -519,6 +519,56 @@ describe("Charles Bloody Feast §5 §12.4", () => {
     expect(p1After.damage >= p1DamageAfterFirst).toBe(true);
     expect(p1After.damage - p1DamageAfterFirst === 4 || !p1After.alive).toBe(true);
   });
+
+  test("§12.6: Bloody Feast extra attack on a Werewolf queues a NEW Counterattack", () => {
+    // The bug: pending-counter queuing lived only in reduce()'s Attack case, so a
+    // Werewolf hit by Charles's Bloody Feast (an applyAttack inside abilities.ts)
+    // got no counter. Charles normal-attacks the Werewolf (counter queued), the
+    // Werewolf consumes its counter, then Charles Bloody-Feasts the SAME Werewolf:
+    // a fresh Counterattack must become legal. george (Hunter, HP 14) stays alive
+    // and out of range so no faction-elimination win fires mid-scenario.
+    //
+    // No deaths are possible here (no equipment → ≤5 per attack): Werewolf (HP 14)
+    // takes ≤5+≤5 from the two Charles attacks; Charles (HP 11) takes ≤5 counter +
+    // 2 self-cost — so the game never ends and dice come from the seeded rng.
+    const g = makeGame(
+      { p0: "charles", p1: "werewolf", p2: "george", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+
+    // 1) Charles normal-attacks the Werewolf. The counter fires on hit OR miss (§12.6).
+    const r1 = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    expect(r1.state.over).toBe(false);
+    // A counter against p0 is now legal for the Werewolf.
+    const counters1 = legalActions(r1.state, "p1").filter(
+      (a) => a.type === "Counterattack" && a.target === "p0",
+    );
+    expect(counters1.length).toBeGreaterThan(0);
+
+    // 2) The Werewolf consumes its counter.
+    const r2 = reduce(r1.state, { type: "Counterattack", player: "p1", target: "p0" });
+    expect(r2.state.over).toBe(false);
+    // The consumed occurrence is gone — no stale counter remains.
+    expect(
+      legalActions(r2.state, "p1").some((a) => a.type === "Counterattack"),
+    ).toBe(false);
+
+    // 3) Charles uses Bloody Feast on the SAME Werewolf.
+    const r3 = reduce(r2.state, {
+      type: "UseAbility",
+      player: "p0",
+      params: { target: "p1" },
+    });
+    expect(r3.state.over).toBe(false);
+
+    // 4) A NEW Counterattack against p0 must be legal — the Bloody-Feast attack
+    //    queued its own pending counter (the whole point of the fix).
+    const counters2 = legalActions(r3.state, "p1").filter(
+      (a) => a.type === "Counterattack" && a.target === "p0",
+    );
+    expect(counters2.length).toBeGreaterThan(0);
+  });
 });
 
 // ─── ResolveArea: all 6 areas end-to-end §7 ──────────────────────────────────────
