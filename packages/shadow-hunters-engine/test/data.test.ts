@@ -17,7 +17,14 @@ test("deck sizes", () => {
 });
 
 test("dice mapping", () => {
+  // All nine d6+d4 results (2–10) must resolve — AC: AREA_BY_DICE[2..10] resolves correctly.
+  expect(AREA_BY_DICE[2]).toBe("hermits_cabin");
+  expect(AREA_BY_DICE[3]).toBe("hermits_cabin");
+  expect(AREA_BY_DICE[4]).toBe("underworld_gate");
+  expect(AREA_BY_DICE[5]).toBe("underworld_gate");
   expect(AREA_BY_DICE[6]).toBe("church");
-  expect(AREA_BY_DICE[10]).toBe("erstwhile_altar");
   expect(AREA_BY_DICE[7]).toBe("wild");
+  expect(AREA_BY_DICE[8]).toBe("cemetery");
+  expect(AREA_BY_DICE[9]).toBe("weird_woods");
+  expect(AREA_BY_DICE[10]).toBe("erstwhile_altar");
 });
