@@ -6,7 +6,9 @@ import { expect, test } from "vitest";
 import { createGame } from "../src/setup.js";
 import { project } from "../src/project.js";
 import { legalActions } from "../src/reduce.js";
+import { applyAttack } from "../src/combat.js";
 import { CHARACTERS } from "../src/data/characters.js";
+import type { AreaId } from "../src/types.js";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i}`);
 const factionOf = (cid: string) =>
@@ -75,7 +77,13 @@ test("legal = the viewer's own legalActions; recent = log tail", () => {
   expect(view.recent).toEqual(g.log.slice(-20));
 });
 
-test("SECRECY: JSON.stringify(view) leaks no other hidden player's characterId, faction, or rng seed", () => {
+test("SECRECY: view leaks no other hidden player's characterId, faction, or rng seed", () => {
+  // FIELD-AWARE check, mirroring script.ts assertSecrecy: a raw
+  // JSON.stringify(view).not.toContain(characterId) scan FALSE-NEGATIVES because
+  // a character id legitimately appears as a SUBSTRING of public data — e.g.
+  // "vampire" is a substring of the public equipment id "black:vampire_bat#0".
+  // So we assert the specific place a hidden identity could leak: every hidden
+  // OTHER player's public characterId MUST be null.
   const g = createGame(ids(8), "secret-seed");
   for (const viewer of g.players) {
     const view = project(g, viewer.id);
@@ -87,13 +95,26 @@ test("SECRECY: JSON.stringify(view) leaks no other hidden player's characterId, 
     // No deck order leaked.
     expect(json).not.toContain('"decks"');
     expect(json).not.toContain('"draw"');
-    for (const other of g.players) {
-      if (other.id === viewer.id) continue;
-      const hidden = !other.revealed && other.alive;
-      if (hidden) {
-        // The hidden player's character id must NOT appear anywhere in the
-        // serialized view (not as a value, not embedded in any string).
-        expect(json).not.toContain(other.characterId);
+
+    const hiddenOthers = new Set(
+      g.players
+        .filter((o) => o.id !== viewer.id && !o.revealed && o.alive)
+        .map((o) => o.id),
+    );
+    // Field-aware: every hidden OTHER player's public characterId is null.
+    for (const pub of view.players) {
+      if (pub.id === viewer.id) continue;
+      if (hiddenOthers.has(pub.id)) {
+        expect(pub.characterId).toBeNull();
+      }
+    }
+    // And no Revealed/Died event in the recent log names a still-hidden OTHER
+    // player (its mere presence for a hidden player would itself be the leak).
+    for (const evt of view.recent) {
+      if (evt.type === "Revealed" || evt.type === "Died") {
+        if (evt.player !== viewer.id) {
+          expect(hiddenOthers.has(evt.player)).toBe(false);
+        }
       }
     }
   }
@@ -154,4 +175,130 @@ test("Hermit's Prediction info appears ONLY in the giver's view (§12.11)", () =
       expect(JSON.stringify(v)).not.toContain(shownAbout.characterId);
     }
   }
+});
+
+// ── Per-viewer redaction of identity-tell log events (§1 secrecy) ────────────
+// project().recent is built PER VIEWER. Events that only a specific character can
+// produce — Vampire's "suck_blood" Healed (§12.7) and Bob's "robbery"-tagged
+// EquipmentTaken (§5/§12.8) — would otherwise let an innocent viewer infer a
+// hidden player's identity by inference. They are dropped from a viewer's recent
+// when their subject is hidden to that viewer; the owner and viewers to whom the
+// subject is open still see them.
+
+/** Place `attacker` and `victim` on the same area so the attack is in range (§10). */
+function colocate(
+  g: ReturnType<typeof createGame>,
+  attackerId: string,
+  victimId: string,
+): void {
+  const area = g.areas[0] as AreaId;
+  g.players.find((p) => p.id === attackerId)!.area = area;
+  g.players.find((p) => p.id === victimId)!.area = area;
+}
+
+test("SECRECY: hidden Vampire's suck_blood Healed is redacted from an innocent viewer's recent (§12.7)", () => {
+  const g = createGame(ids(6), "vamp-redact-seed");
+  const vamp = g.players[0]!;
+  const victim = g.players[1]!;
+  const innocent = g.players[2]!;
+  // Force a hidden Vampire with self-damage to heal, an alive victim in range.
+  vamp.characterId = "vampire";
+  vamp.revealed = false;
+  vamp.damage = 5; // so the heal actually moves the damage track
+  colocate(g, vamp.id, victim.id);
+
+  // d6=4,d4=1 → |4-1|=3 damage > 0 → Suck Blood fires (§12.7).
+  const res = applyAttack(g, vamp.id, victim.id, { dice: { d6: 4, d4: 1 } });
+  // Sanity: the suck_blood Healed actually entered the authoritative log.
+  expect(g.log.some((e) => e.type === "Healed" && e.source === "suck_blood")).toBe(true);
+  expect(res.hit).toBe(true);
+
+  // Innocent viewer: NO suck_blood event, and the Vampire stays characterId:null.
+  const innocentView = project(g, innocent.id);
+  expect(
+    innocentView.recent.some((e) => e.type === "Healed" && e.source === "suck_blood"),
+  ).toBe(false);
+  // Defence in depth: no event in the innocent's recent names the Vampire as a Healed subject.
+  expect(
+    innocentView.recent.some((e) => e.type === "Healed" && e.player === vamp.id),
+  ).toBe(false);
+  const vampPub = innocentView.players.find((p) => p.id === vamp.id)!;
+  expect(vampPub.characterId).toBeNull();
+
+  // The Vampire themselves still sees their own heal.
+  const ownerView = project(g, vamp.id);
+  expect(
+    ownerView.recent.some((e) => e.type === "Healed" && e.source === "suck_blood"),
+  ).toBe(true);
+
+  // A viewer to whom the Vampire is OPEN (revealed) sees it too.
+  vamp.revealed = true;
+  const openView = project(g, innocent.id);
+  expect(
+    openView.recent.some((e) => e.type === "Healed" && e.source === "suck_blood"),
+  ).toBe(true);
+});
+
+test("SECRECY: hidden Bob's robbery EquipmentTaken is redacted from an innocent viewer's recent (§12.8)", () => {
+  const g = createGame(ids(6), "bob-redact-seed"); // 6 players → 4–6p Robbery applies
+  const bob = g.players[0]!;
+  const victim = g.players[1]!;
+  const innocent = g.players[2]!;
+  bob.characterId = "bob";
+  bob.revealed = false;
+  victim.equipment = ["black:chainsaw#0"]; // something to steal
+  colocate(g, bob.id, victim.id);
+
+  // d6=5,d4=1 → |5-1|=4 (>=2) → Robbery converts the hit into a steal (no damage). §12.8
+  const res = applyAttack(g, bob.id, victim.id, { dice: { d6: 5, d4: 1 } });
+  expect(res.stole).toBe(true);
+  // The robbery-tagged EquipmentTaken is in the authoritative log.
+  expect(
+    g.log.some((e) => e.type === "EquipmentTaken" && (e as { via?: string }).via === "robbery"),
+  ).toBe(true);
+
+  // Innocent viewer: NO robbery-tagged EquipmentTaken naming Bob; Bob stays null.
+  const innocentView = project(g, innocent.id);
+  expect(
+    innocentView.recent.some(
+      (e) =>
+        e.type === "EquipmentTaken" &&
+        (e as { via?: string }).via === "robbery",
+    ),
+  ).toBe(false);
+  expect(
+    innocentView.recent.some(
+      (e) => e.type === "EquipmentTaken" && e.player === bob.id,
+    ),
+  ).toBe(false);
+  const bobPub = innocentView.players.find((p) => p.id === bob.id)!;
+  expect(bobPub.characterId).toBeNull();
+
+  // Bob themselves still sees the steal.
+  const ownerView = project(g, bob.id);
+  expect(
+    ownerView.recent.some(
+      (e) =>
+        e.type === "EquipmentTaken" &&
+        (e as { via?: string }).via === "robbery",
+    ),
+  ).toBe(true);
+
+  // A non-robbery EquipmentTaken (e.g. Erstwhile Altar / Moody Goblin / kill loot)
+  // is NOT redacted, even when its actor is hidden — it carries no identity tell.
+  g.log.push({
+    type: "EquipmentTaken",
+    player: innocent.id, // hidden actor, but a plain steal carries no tell
+    from: victim.id,
+    card: "white:silver_rosary#0",
+  });
+  const viewerView = project(g, bob.id);
+  expect(
+    viewerView.recent.some(
+      (e) =>
+        e.type === "EquipmentTaken" &&
+        e.card === "white:silver_rosary#0" &&
+        (e as { via?: string }).via === undefined,
+    ),
+  ).toBe(true);
 });

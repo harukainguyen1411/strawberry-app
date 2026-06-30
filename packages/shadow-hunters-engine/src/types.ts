@@ -127,7 +127,15 @@ export type GameEvent =
   | { type: "Healed"; player: PlayerId; amount: number; source: string }
   | { type: "CardDrawn"; player: PlayerId; deck: DeckKind; card: CardId }
   | { type: "CardGiven"; from: PlayerId; to: PlayerId; card: CardId }
-  | { type: "EquipmentTaken"; player: PlayerId; from: PlayerId; card: CardId }
+  /**
+   * Equipment moved from `from` to `player`. `via:"robbery"` tags the ONE source
+   * that is an identity tell: Bob's 4–6p Robbery combat-steal (§5/§12.8), which is
+   * unique to Bob (no Damaged sibling). project() uses this tag to redact the event
+   * from a viewer to whom Bob is still hidden (§1). All OTHER steals — Erstwhile
+   * Altar (§7), Moody Goblin (§6), Hermit give-ups (§6), and kill loot (§11) — leave
+   * `via` undefined and are never redacted (they carry no character tell).
+   */
+  | { type: "EquipmentTaken"; player: PlayerId; from: PlayerId; card: CardId; via?: "robbery" }
   | { type: "Revealed"; player: PlayerId; characterId: CharacterId }
   | { type: "AbilityUsed"; player: PlayerId; ability: string }
   | { type: "Died"; player: PlayerId; killer: PlayerId | null }

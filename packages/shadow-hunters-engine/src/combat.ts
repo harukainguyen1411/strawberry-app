@@ -234,6 +234,10 @@ function applyBobSteal(
     player: attacker.id,
     from: target.id,
     card,
+    // §1/§12.8: tag this combat-steal distinctly from Erstwhile-Altar/Moody-Goblin
+    // steals so project() can redact it from a viewer to whom Bob is still hidden
+    // (a robbery EquipmentTaken with no Damaged sibling is unique to Bob).
+    via: "robbery",
   };
   state.log.push(evt);
   return [evt];

@@ -91,8 +91,17 @@ export function assertSecrecy(state: GameState): void {
 
     // 2) No Revealed/Died event in the recent log names a still-hidden OTHER player
     //    (such an event would only exist for an open player — its presence is the leak).
+    //    Likewise no IDENTITY-TELL event about a hidden OTHER player: the Vampire's
+    //    suck_blood heal (§12.7) and Bob's robbery-tagged EquipmentTaken (§5/§12.8)
+    //    each name a character uniquely, so their presence for a hidden player leaks. §1
     for (const evt of view.recent) {
       if (evt.type === "Revealed" || evt.type === "Died") {
+        expect(hiddenOthers.has(evt.player)).toBe(false);
+      }
+      if (evt.type === "Healed" && evt.source === "suck_blood") {
+        expect(hiddenOthers.has(evt.player)).toBe(false);
+      }
+      if (evt.type === "EquipmentTaken" && evt.via === "robbery") {
         expect(hiddenOthers.has(evt.player)).toBe(false);
       }
     }
