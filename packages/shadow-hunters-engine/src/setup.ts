@@ -78,6 +78,7 @@ export function createGame(playerIds: readonly string[], seed: string): GameStat
     equipment: [],
     hand: [],
     usedOncePerGame: [],
+    attackImmune: false,   // set by Guardian Angel (§6 §12.9); cleared at turn start
   }));
 
   // ── Deck construction (§3 step 2, §6) ──────────────────────────────────────

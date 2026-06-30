@@ -28,6 +28,12 @@ export interface PlayerState {
   equipment: CardId[];       // face-up equipment in front of player
   hand: CardId[];            // generally empty in base game; reserved
   usedOncePerGame: string[]; // ability ids already spent
+  /**
+   * Set by Guardian Angel: this player takes no damage from attacks ("attack"
+   * source) until their next turn begins (§6 Guardian Angel, §12.9).
+   * Added in Task 7. The reduce.ts turn-start logic clears this flag.
+   */
+  attackImmune: boolean;
 }
 
 export interface DeckState { draw: CardId[]; discard: CardId[]; }

@@ -284,6 +284,10 @@ export function applyDamage(
   // §6 immunity: Talisman / Fortune Brooch block by source.
   if (isImmune(player, source)) return [];
 
+  // §12.9 Guardian Angel: blocks attack-source damage only (§6: "from attacks").
+  // Does NOT block Weird Woods, card damage, Franklin/George abilities. (§12.3, §12.9)
+  if (player.attackImmune && source === "attack") return [];
+
   const maxHp = maxHpOf(player.characterId);
   const before = player.damage;
   player.damage = Math.min(maxHp, before + amount);
