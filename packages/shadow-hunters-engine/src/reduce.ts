@@ -612,6 +612,28 @@ export function reduce(
     }
   }
 
+  // §5/§12.5 Daniel's Scream: the instant ANY character dies, every OTHER living player
+  // whose ability triggers onAnyDeath (i.e. a still-hidden, living Daniel) is FORCED to
+  // reveal. The onAnyDeath hook is registered in abilities.ts but nothing else invokes
+  // it, so we fire it here: if this action produced ANY Died event, run the hook for each
+  // living onAnyDeath player who is NOT one of the just-deceased. The hook is idempotent
+  // (reveal() emits Revealed at most once) and a dead Daniel no-ops inside the ability, so
+  // re-running it is safe. Daniel's reveal does not change win outcomes, but the resulting
+  // state must reflect it — and the trailing maybeEndGame below re-evaluates regardless.
+  const deceased = new Set(
+    events.filter((e) => e.type === "Died").map((e) => (e as { player: PlayerId }).player),
+  );
+  if (deceased.size > 0) {
+    for (const p of next.players) {
+      if (!p.alive) continue;
+      if (deceased.has(p.id)) continue;
+      const ability = abilityFor(p.characterId);
+      if (ability && ability.trigger === "onAnyDeath") {
+        events.push(...runHook("onAnyDeath", p.id, { state: next, player: p.id }));
+      }
+    }
+  }
+
   // §12.1: a final win evaluation so the returned state reflects any game-end the
   // action caused (idempotent — maybeEndGame no-ops once state.over is set).
   if (!next.over) {

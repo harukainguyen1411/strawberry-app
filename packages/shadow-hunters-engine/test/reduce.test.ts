@@ -709,6 +709,66 @@ describe("deck reshuffle §12.15", () => {
   });
 });
 
+// ─── Daniel's Scream — forced reveal on ANY death, through reduce() §5 §12.5 ─────
+//
+// §12.5: Daniel is FORCED to reveal the instant ANY character dies. The onAnyDeath
+// ability is registered in abilities.ts, but it only matters in real play if reduce()
+// actually INVOKES it after a death. This integration test drives a lethal Attack
+// through reduce() and asserts a living hidden Daniel — who is neither the killer nor
+// the victim — is revealed afterward.
+
+describe("Daniel's Scream on any death §5 §12.5", () => {
+  test("a Vampire killing an Allie forces a living hidden Daniel to reveal", () => {
+    // p0 vampire (Shadow, attacker), p1 allie (Neutral, victim at 7/8 dmg),
+    // p2 daniel (Neutral, alive + hidden), p3 emi (Hunter — kept alive so the kill
+    // does NOT end the game, letting us assert play continues alongside the reveal).
+    const g = makeGame({ p0: "vampire", p1: "allie", p2: "daniel", p3: "emi" });
+    g.phase = "attack";
+    // Cursed Sword Masamune never misses (damage = the d4 ≥ 1, §6), so the attack is a
+    // guaranteed kill on an Allie one hit from death — deterministic regardless of rolls.
+    g.players[0]!.equipment = ["white:cursed_sword_masamune#0"];
+    g.players[1]!.damage = 7; // Allie maxHp 8 → any d4 hit kills.
+
+    const danielBefore = g.players.find((p) => p.id === "p2")!;
+    expect(danielBefore.revealed).toBe(false);
+    expect(danielBefore.alive).toBe(true);
+
+    const { state } = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+
+    // The Allie actually died (precondition of the death hook firing).
+    expect(state.players.find((p) => p.id === "p1")!.alive).toBe(false);
+    // §12.5: the living hidden Daniel is now revealed by the Scream.
+    const daniel = state.players.find((p) => p.id === "p2")!;
+    expect(daniel.revealed).toBe(true);
+    expect(daniel.alive).toBe(true); // Daniel did not die — only revealed.
+    // The game continues (a Hunter and a Shadow both remain alive).
+    expect(state.over).toBe(false);
+    // The reveal is reflected as a Revealed event for Daniel in the produced events.
+    expect(
+      state.log.some((e) => e.type === "Revealed" && e.player === "p2"),
+    ).toBe(true);
+  });
+
+  test("Daniel's Scream does NOT reveal a Daniel who is already dead", () => {
+    // A dead Daniel already revealed on his own death; another death must not re-process
+    // him (he is removed from the living, and the hook no-ops for the dead).
+    const g = makeGame({ p0: "vampire", p1: "allie", p2: "daniel", p3: "emi" });
+    g.phase = "attack";
+    g.players[0]!.equipment = ["white:cursed_sword_masamune#0"];
+    g.players[1]!.damage = 7;
+    // Daniel is already dead+revealed (e.g. killed earlier this game).
+    g.players[2]!.alive = false;
+    g.players[2]!.revealed = true;
+    g.deadOrder = ["p2"];
+    g.deadEpoch = [0];
+
+    const { state } = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    // The Allie died; the dead Daniel is untouched (still dead, no new processing throws).
+    expect(state.players.find((p) => p.id === "p1")!.alive).toBe(false);
+    expect(state.players.find((p) => p.id === "p2")!.alive).toBe(false);
+  });
+});
+
 // keep referenced imports used
 void CHARACTERS;
 void (null as unknown as PlayerId);

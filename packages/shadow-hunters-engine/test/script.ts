@@ -114,12 +114,11 @@ export function runScript(
   actions: readonly Action[],
   opts: { checkSecrecy?: boolean } = {},
 ): { state: GameState; events: GameEvent[] } {
-  // Reset damage.ts's module-level death-epoch counter so a run starts from epoch 0,
-  // making the resulting state bit-for-bit reproducible across runs (the §12.2 epoch is a
-  // monotonic counter whose ABSOLUTE values would otherwise drift between back-to-back
-  // runs in the same process — its game-relevant meaning is purely relational). This
-  // matches the codebase's beforeEach(resetWinCheckHook) test-isolation convention; reduce
-  // re-installs maybeEndGame as the win-check hook on every call, so the hook is restored.
+  // Reset damage.ts's win-check hook for test isolation (matches the codebase's
+  // beforeEach(resetWinCheckHook) convention; reduce re-installs maybeEndGame on every
+  // call, so the hook is restored anyway). The §12.2 death-epoch counter now lives ON the
+  // state (state.nextDeathEpoch, init 0 in createGame) — so a fresh createGame already
+  // starts each run from epoch 0 and is bit-for-bit reproducible WITHOUT a reset.
   resetWinCheckHook();
   const checkSecrecy = opts.checkSecrecy ?? true;
   let state = createGame(playerIds, seed);
@@ -158,9 +157,10 @@ export function driveToWin(
   policy: Policy,
   maxSteps = 4000,
 ): { state: GameState; actions: Action[]; events: GameEvent[] } {
-  // Reset the death-epoch counter for bit-for-bit reproducibility across runs (see the
-  // note in runScript). The captured `actions` can then be replayed through runScript
-  // (which also resets) to produce an identical state.
+  // Reset the win-check hook for test isolation (see the note in runScript). The
+  // death-epoch counter lives on state.nextDeathEpoch (init 0 in createGame), so each run
+  // is bit-for-bit reproducible on its own; the captured `actions` replay through
+  // runScript to produce an identical state.
   resetWinCheckHook();
   let state = createGame(playerIds, seed);
   const taken: Action[] = [];

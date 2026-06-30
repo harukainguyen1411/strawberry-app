@@ -56,6 +56,15 @@ export interface GameState {
    * the same effect as the game's first death(s). §12.2 §12.5
    */
   deadEpoch: number[];
+  /**
+   * Monotonic source of the next death epoch (§12.2), carried ON the state so two
+   * identical (seed, actions) games run in one process produce identical deadEpoch
+   * values. Starts at 0 in createGame; takeDeathEpoch()/withWinCheckBatch() read and
+   * bump it. It must NOT be reset per reduce() — that would corrupt the distinct epochs
+   * of multiple SEQUENTIAL deaths within one game. structuredClone carries it through
+   * reduce's pure clone, so each game's counter is independent. §12.2 §12.5
+   */
+  nextDeathEpoch: number;
   lastKill: { killer: PlayerId | null; deadCountAfter: number } | null;
   winners: PlayerId[];       // set when game ends
   over: boolean;

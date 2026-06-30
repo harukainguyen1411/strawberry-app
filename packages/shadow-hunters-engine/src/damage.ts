@@ -41,7 +41,6 @@ export function setWinCheckHook(hook: WinCheckHook): void {
 export function resetWinCheckHook(): void {
   winCheckHook = () => [];
   winCheckBatchDepth = 0;
-  nextDeathEpoch = 0;
   batchEpoch = null;
 }
 
@@ -65,14 +64,18 @@ let winCheckBatchDepth = 0;
 // captured when the (outermost) batch opened, so they are simultaneous; a sequential
 // death (no open batch) takes a fresh epoch. win.ts reads this to credit Daniel
 // "first to die" co-first when he dies in the same effect as the game's first death(s).
-let nextDeathEpoch = 0;
+//
+// The monotonic counter lives ON the state (state.nextDeathEpoch, init 0 in createGame),
+// NOT in a module var — so two identical (seed, actions) games run back-to-back in the
+// same process stamp identical epochs (determinism). batchEpoch stays module-local: a
+// batch only spans ONE synchronous withWinCheckBatch call, never across reduce()s.
 // The epoch the currently-open batch assigns to its deaths (null when no batch open).
 let batchEpoch: number | null = null;
 
 /** The epoch to stamp on the next death (§12.2). Batched deaths share one epoch. */
-function takeDeathEpoch(): number {
+function takeDeathEpoch(state: GameState): number {
   if (batchEpoch !== null) return batchEpoch;
-  return nextDeathEpoch++;
+  return state.nextDeathEpoch++;
 }
 
 /**
@@ -88,7 +91,7 @@ export function withWinCheckBatch(
   body: () => GameEvent[],
 ): GameEvent[] {
   const opensBatch = winCheckBatchDepth === 0;
-  if (opensBatch) batchEpoch = nextDeathEpoch++;
+  if (opensBatch) batchEpoch = state.nextDeathEpoch++;
   winCheckBatchDepth += 1;
   let events: GameEvent[];
   try {
@@ -282,7 +285,7 @@ function die(state: GameState, victim: PlayerState, killer: PlayerId | null): Ga
   state.deadOrder.push(victim.id);
   // §12.2/§12.5: stamp the death epoch — batched (one-effect) deaths share an epoch and
   // are thus simultaneous; sequential deaths each get a fresh one.
-  state.deadEpoch.push(takeDeathEpoch());
+  state.deadEpoch.push(takeDeathEpoch(state));
   state.lastKill = { killer, deadCountAfter: state.deadOrder.length };
 
   // Forced reveal on death (§11). Revealed exactly once.

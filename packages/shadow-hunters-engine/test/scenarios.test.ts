@@ -38,6 +38,7 @@ import {
   characterOf,
 } from "./script.js";
 import { createGame } from "../src/setup.js";
+import { reduce } from "../src/reduce.js";
 import type { Action, Faction, GameState, PlayerId } from "../src/types.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -388,6 +389,67 @@ describe("Scenario 3 — 8p Shadows-win (driver fallback)", () => {
     expect(replay.state.winners).toEqual(first.state.winners);
     expect(replay.state.winners).toEqual(["p0", "p6", "p7"]);
     expect(JSON.stringify(replay.state)).toEqual(JSON.stringify(first.state));
+  });
+});
+
+// ─── Determinism: death-epoch lives on state, not a module counter (§12.2) ──────
+//
+// The §12.2 death-epoch counter MUST live on GameState (state.nextDeathEpoch), not a
+// module-level variable in damage.ts. If it lived on the module, two fresh games run
+// back-to-back in the SAME process — same createGame, same scripted lethal actions —
+// would stamp DIFFERENT absolute epochs into state.deadEpoch (the counter would keep
+// climbing across games), breaking the "same (seed, actions) ⇒ same state" contract.
+//
+// This test runs reduce() DIRECTLY (not runScript, which resets damage.ts for isolation)
+// so it would catch a leak through the module counter: the only thing making the two
+// runs agree is the per-state counter created fresh by createGame.
+
+describe("Determinism — deadEpoch is per-state, reproducible across runs (§12.2)", () => {
+  // A guaranteed lethal, fully deterministic sequence through reduce(): a Vampire (p0)
+  // equipped with Cursed Sword Masamune (never misses; damage = the d4 ≥ 1, §6) attacks an
+  // Allie (p1) already at 7 damage (Allie maxHp 8) — so ANY d4 roll kills her, regardless
+  // of the seed's rolls. p3 is a Hunter (emi) kept alive so the kill does NOT end the game.
+  function playOneLethalGame(): GameState {
+    const ids4 = ["p0", "p1", "p2", "p3"];
+    const g = createGame(ids4, "deadepoch-determinism");
+    // Fixed board so p0 and p1 are in range (church ↔ cemetery).
+    g.areas = [
+      "church", "cemetery", "hermits_cabin",
+      "underworld_gate", "weird_woods", "erstwhile_altar",
+    ];
+    g.pairing = {
+      church: "cemetery", cemetery: "church",
+      hermits_cabin: "underworld_gate", underworld_gate: "hermits_cabin",
+      weird_woods: "erstwhile_altar", erstwhile_altar: "weird_woods",
+    };
+    g.players[0]!.characterId = "vampire";  // Shadow attacker
+    g.players[1]!.characterId = "allie";    // Neutral victim
+    g.players[2]!.characterId = "daniel";   // Neutral (alive, hidden)
+    g.players[3]!.characterId = "emi";      // Hunter — keeps the game alive after the kill
+    for (const p of g.players) p.area = "church";
+    g.players[0]!.equipment = ["white:cursed_sword_masamune#0"]; // never-miss, ≥1 dmg
+    g.players[1]!.damage = 7;  // one hit from death (Allie maxHp 8)
+    g.current = "p0";
+    g.phase = "attack";
+
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    return r.state;
+  }
+
+  test("two fresh games + same lethal action stamp the SAME deadEpoch (no module leak)", () => {
+    const first = playOneLethalGame();
+    const second = playOneLethalGame();
+
+    // The Allie died in both runs.
+    expect(first.players.find((p) => p.id === "p1")!.alive).toBe(false);
+    expect(second.players.find((p) => p.id === "p1")!.alive).toBe(false);
+    expect(first.deadOrder).toEqual(["p1"]);
+    expect(second.deadOrder).toEqual(["p1"]);
+
+    // The death epoch is identical across the two independent runs — it would DRIFT
+    // (e.g. [0] vs [1]) if the counter were a never-reset module variable.
+    expect(first.deadEpoch).toEqual(second.deadEpoch);
+    expect(first.deadEpoch).toEqual([0]); // first death of a fresh game ⇒ epoch 0
   });
 });
 

@@ -123,6 +123,7 @@ export function createGame(playerIds: readonly string[], seed: string): GameStat
     rng,
     deadOrder: [],
     deadEpoch: [],
+    nextDeathEpoch: 0,   // §12.2: per-state death-epoch counter (deterministic across runs)
     lastKill: null,
     winners: [],
     over: false,
