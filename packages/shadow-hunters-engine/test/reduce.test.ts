@@ -111,6 +111,17 @@ describe("legalActions", () => {
     expect(() => reduce(g, { type: "Reveal", player: "p0" })).toThrow();
   });
 
+  test("Unknown CAN voluntarily Reveal (§5 — only its Deceit ability is reveal-exempt, not the player)", () => {
+    // Unknown's special rule is that its Deceit ability doesn't require reveal; the player
+    // itself is NOT barred from voluntarily revealing (unlike Daniel).
+    const g = makeGame({ p0: "unknown", p1: "bob", p2: "charles", p3: "allie" });
+    g.players[0]!.area = "church";
+    expect(legalActions(g, "p0").some((a) => a.type === "Reveal")).toBe(true);
+    // Applying the Reveal action should succeed without throwing.
+    const { state } = reduce(g, { type: "Reveal", player: "p0" });
+    expect(state.players.find((p) => p.id === "p0")!.revealed).toBe(true);
+  });
+
   test("attack phase: only in-range targets are offered", () => {
     // p0 in church, p1 in church (in range), p2 in hermits_cabin (out of range)
     const g = makeGame(
@@ -665,6 +676,36 @@ describe("determinism", () => {
     const b = reduce(mk(), { type: "RollMove", player: "p0" });
     expect(JSON.stringify(a.state)).toBe(JSON.stringify(b.state));
     expect(JSON.stringify(a.events)).toBe(JSON.stringify(b.events));
+  });
+});
+
+// ─── Deck reshuffle (§12.15) ─────────────────────────────────────────────────────
+
+describe("deck reshuffle §12.15", () => {
+  test("when draw pile is empty, discard is shuffled (Fisher-Yates, §12.15) into a fresh draw pile", () => {
+    const g = makeGame({ p0: "allie", p1: "bob", p2: "charles", p3: "daniel" });
+    // Drain the white draw pile into discard in a known order.
+    const originalCards = [...g.decks.white.draw];
+    g.decks.white.discard = [...originalCards];
+    g.decks.white.draw = [];
+    // Record rng state before the reshuffle-triggering draw.
+    const rngBefore = g.rng.s;
+    // Force a card draw so drawCard fires the reshuffle path.
+    // church → White area; Allie is in church; phase=area.
+    g.phase = "area";
+    g.players[0]!.area = "church";
+    const { state } = reduce(g, { type: "ResolveArea", player: "p0" });
+    // The rng must have advanced (Fisher-Yates shuffle consumed rng calls).
+    expect(state.rng.s).not.toBe(rngBefore);
+    // After reshuffle+draw, the drawn card is gone; remaining are in draw or discard
+    // (the drawn card itself goes to discard after play, but that is one card).
+    const remaining = [...state.decks.white.draw, ...state.decks.white.discard];
+    // Set of remaining IDs must be a subset of originalCards (all still accounted for).
+    expect(remaining.length).toBe(originalCards.length - 1 + 1); // drew 1 (played → discarded)
+    // Every card in the new draw pile was in the original set.
+    for (const id of state.decks.white.draw) {
+      expect(originalCards).toContain(id);
+    }
   });
 });
 

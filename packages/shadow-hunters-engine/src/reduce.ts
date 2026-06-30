@@ -3,7 +3,7 @@
 //   §7    — area effects (the 6 ResolveArea branches).
 //   §8    — turn structure: Move (mandatory) → Area action (optional) → Attack (optional).
 //           Franklin/George trigger at the START of the turn (§12.22, before the move).
-//           Reveal may happen any time (except Daniel/Unknown, §5/§12.5).
+//           Reveal may happen any time (except Daniel, §5/§12.5; Unknown CAN reveal).
 //   §9    — movement (wild / Emi / Compass), delegated to movement.ts.
 //   §10   — combat range / resolution, delegated to combat.ts.
 //   §11   — death/loot, delegated to damage.ts.
@@ -30,6 +30,7 @@ import {
 import { playCard as playWhite } from "./cards/white.js";
 import { playCard as playBlack } from "./cards/black.js";
 import { giveHermit } from "./cards/hermit.js";
+import { shuffle } from "./rng.js";
 import { ABILITIES, abilityFor, abilityAvailable, runHook } from "./abilities.js";
 import { maybeEndGame } from "./win.js";
 import { CHARACTERS } from "./data/characters.js";
@@ -105,16 +106,16 @@ function canVoluntarilyReveal(player: PlayerState): boolean {
 /**
  * Draw the top card of a deck, reshuffling the discard into the draw pile if empty
  * (§12.15). Returns the card id, or null if both piles are empty. Mutates the deck.
- * (Reshuffle is order-preserving here — discard appended back — which is sufficient
- * for the engine; the production shuffle would re-randomise, but base-game decks are
- * large enough that exhaustion is rare and determinism is preserved either way.)
+ * Reshuffle uses Fisher-Yates (via rng.shuffle) so deck order is re-randomised as
+ * the rulebook requires ("reshuffle that deck's discard into a fresh draw pile").
  */
 function drawCard(state: GameState, deck: DeckKind): string | null {
   const d = state.decks[deck];
   if (d.draw.length === 0) {
     if (d.discard.length === 0) return null; // §6: both empty — nothing to draw
-    // §12.15: reshuffle the discard into a fresh draw pile.
-    d.draw = d.discard.splice(0, d.discard.length);
+    // §12.15: reshuffle the discard into a fresh draw pile (randomised, not in-order).
+    d.draw = shuffle(d.discard, state.rng);
+    d.discard = [];
   }
   return d.draw.shift() ?? null;
 }

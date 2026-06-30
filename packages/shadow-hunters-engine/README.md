@@ -48,7 +48,7 @@ The single pure reducer. It:
 
 **Turn structure (§8):** `move` → `area` → `attack` → `EndTurn` advances `current` (skipping dead players, §12.17). Consuming a Concealed Knowledge card sets `pendingExtraTurns++`; the same player takes a full extra turn before play passes (§12.10).
 
-**Out-of-band actions allowed at any time:** `Reveal` (except Daniel / Unknown, §5); Werewolf `Counterattack` (only after being attacked, §12.6); Franklin / George `UseAbility` at the start of their turn (§12.22).
+**Out-of-band actions allowed at any time:** `Reveal` (except Daniel, §5/§12.5); Werewolf `Counterattack` (only after being attacked, §12.6); Franklin / George `UseAbility` at the start of their turn (§12.22). Note: Unknown CAN voluntarily reveal — only its Deceit ability is reveal-exempt (§5).
 
 ---
 
@@ -63,7 +63,7 @@ Returns **exactly** the actions the named player is allowed to perform right now
 Guarantees:
 - Out-of-turn players receive an empty array (or `[Counterattack]` / `[Reveal]` when eligible).
 - In-range attack targets (§10) are computed from the current area and its pair; Handgun expands range; Machine Gun targets all in range.
-- `Reveal` is omitted for Daniel (forced reveal only) and Unknown.
+- `Reveal` is omitted for Daniel (forced reveal only, §12.5). Unknown CAN voluntarily reveal — its Deceit ability is the only reveal-exempt behaviour (§5).
 - `UseAbility` is omitted when the ability is once-per-game and already spent (`usedOncePerGame`), or when the game is over.
 
 ---

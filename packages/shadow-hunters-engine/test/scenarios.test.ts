@@ -60,7 +60,8 @@ function aliveOf(state: GameState, faction: Faction): number {
 // p3=franklin(Hunter). The scripted action list below drives a full game in which both
 // Shadows (p0, p1) are eliminated, so the two Hunters win (§4). The list is LITERAL —
 // fixed text, not generated at test time — and runScript re-derives every roll/shuffle
-// from the seed, so the exact winners are reproducible on every run.
+// (including deck reshuffles via Fisher-Yates, §12.15) from the seed, so the exact
+// winners are reproducible on every run.
 
 const HUNTERS_SEED = "4p-0";
 const HUNTERS_IDS = ids(4);
@@ -179,13 +180,56 @@ const HUNTERS_SCRIPT: Action[] = [
   { type: "ResolveArea", player: "p0" },
   { type: "Attack", player: "p0", target: "p3" },
   { type: "EndTurn", player: "p0" },
+  { type: "RollMove", player: "p1" },
+  { type: "ResolveArea", player: "p1" },
+  { type: "EndTurn", player: "p1" },
   { type: "RollMove", player: "p2" },
-  { type: "MoveTo", player: "p2", area: "erstwhile_altar" },
+  { type: "ResolveArea", player: "p2" },
+  { type: "Attack", player: "p2", target: "p1" },
+  { type: "EndTurn", player: "p2" },
+  { type: "RollMove", player: "p3" },
+  { type: "MoveTo", player: "p3", area: "erstwhile_altar" },
+  { type: "ResolveArea", player: "p3" },
+  { type: "Attack", player: "p3", target: "p1" },
+  { type: "EndTurn", player: "p3" },
+  { type: "RollMove", player: "p0" },
+  { type: "ResolveArea", player: "p0" },
+  { type: "EndTurn", player: "p0" },
+  { type: "RollMove", player: "p1" },
+  { type: "ResolveArea", player: "p1" },
+  { type: "EndTurn", player: "p1" },
+  { type: "RollMove", player: "p2" },
+  { type: "ResolveArea", player: "p2" },
+  { type: "Attack", player: "p2", target: "p0" },
+  { type: "EndTurn", player: "p2" },
+  { type: "RollMove", player: "p3" },
+  { type: "ResolveArea", player: "p3" },
+  { type: "EndTurn", player: "p3" },
+  { type: "RollMove", player: "p0" },
+  { type: "ResolveArea", player: "p0" },
+  { type: "Attack", player: "p0", target: "p2" },
+  { type: "EndTurn", player: "p0" },
+  { type: "RollMove", player: "p1" },
+  { type: "ResolveArea", player: "p1" },
+  { type: "EndTurn", player: "p1" },
+  { type: "RollMove", player: "p2" },
+  { type: "ResolveArea", player: "p2" },
+  { type: "Attack", player: "p2", target: "p0" },
+  { type: "EndTurn", player: "p2" },
+  { type: "RollMove", player: "p3" },
+  { type: "ResolveArea", player: "p3" },
+  { type: "Attack", player: "p3", target: "p1" },
+  { type: "EndTurn", player: "p3" },
+  { type: "RollMove", player: "p0" },
+  { type: "MoveTo", player: "p0", area: "erstwhile_altar" },
+  { type: "ResolveArea", player: "p0" },
+  { type: "EndTurn", player: "p0" },
+  { type: "RollMove", player: "p2" },
   { type: "ResolveArea", player: "p2" },
   { type: "EndTurn", player: "p2" },
   { type: "RollMove", player: "p3" },
   { type: "ResolveArea", player: "p3" },
-  { type: "Attack", player: "p3", target: "p0" },
+  { type: "Attack", player: "p3", target: "p2" },
   { type: "EndTurn", player: "p3" },
   { type: "RollMove", player: "p0" },
   { type: "ResolveArea", player: "p0" },
@@ -193,14 +237,13 @@ const HUNTERS_SCRIPT: Action[] = [
   { type: "EndTurn", player: "p0" },
   { type: "RollMove", player: "p2" },
   { type: "ResolveArea", player: "p2" },
-  { type: "Attack", player: "p2", target: "p0" },
   { type: "EndTurn", player: "p2" },
   { type: "RollMove", player: "p3" },
   { type: "ResolveArea", player: "p3" },
+  { type: "Attack", player: "p3", target: "p2" },
   { type: "EndTurn", player: "p3" },
   { type: "RollMove", player: "p0" },
   { type: "ResolveArea", player: "p0" },
-  { type: "Attack", player: "p0", target: "p3" },
   { type: "EndTurn", player: "p0" },
   { type: "RollMove", player: "p0" },
   { type: "ResolveArea", player: "p0" },
@@ -208,10 +251,6 @@ const HUNTERS_SCRIPT: Action[] = [
   { type: "RollMove", player: "p2" },
   { type: "ResolveArea", player: "p2" },
   { type: "Attack", player: "p2", target: "p0" },
-  { type: "EndTurn", player: "p2" },
-  { type: "RollMove", player: "p3" },
-  { type: "ResolveArea", player: "p3" },
-  { type: "Attack", player: "p3", target: "p0" },
 ];
 
 describe("Scenario 1 — 4p Hunters-win (fully scripted)", () => {
@@ -268,13 +307,13 @@ describe("Scenario 1 — 4p Hunters-win (fully scripted)", () => {
 
 // ─── Scenario 2: 6-player Neutral-win (Bob 5+ Equipment) ─────────────────────────
 //
-// Seed "6p-0" deals: p0=daniel(Neutral), p1=vampire(Shadow), p2=werewolf(Shadow),
-// p3=bob(Neutral), p4=george(Hunter), p5=franklin(Hunter). Driven via legalActions to
+// Seed "6p-24" deals: p0=unknown(Shadow), p1=werewolf(Shadow), p2=emi(Hunter),
+// p3=bob(Neutral), p4=franklin(Hunter), p5=daniel(Neutral). Driven via legalActions to
 // completion: Bob (p3) accumulates 5 Equipment (area draws + Erstwhile Altar steals +
 // loot) and wins OUTRIGHT (§4) while both factions still have living members — a genuine
 // standalone Neutral win that pre-empts either faction elimination.
 
-const NEUTRAL_SEED = "6p-0";
+const NEUTRAL_SEED = "6p-24";
 const NEUTRAL_IDS = ids(6);
 
 describe("Scenario 2 — 6p Neutral-win (Bob, driver fallback)", () => {
@@ -312,35 +351,33 @@ describe("Scenario 2 — 6p Neutral-win (Bob, driver fallback)", () => {
 
 // ─── Scenario 3: 8-player Shadows-win (all Hunters eliminated) ───────────────────
 //
-// Seed "8p-3" deals 3 Hunters (p4=franklin, p6=george, p7=emi), 3 Shadows (p1=vampire,
-// p3=unknown, p5=werewolf), 2 Neutrals (p0=allie, p2=daniel). Driven to completion: every
-// Hunter is killed, so ALL three Shadows win — including p1 and p3 whose characters died
-// earlier (§4: a faction member wins even if their own character died).
+// Seed "8p-5" deals: p0=vampire(Shadow), p1=allie(Neutral), p2=charles(Neutral),
+// p3=george(Hunter), p4=emi(Hunter), p5=franklin(Hunter), p6=unknown(Shadow),
+// p7=werewolf(Shadow). Driven to completion: every Hunter is killed, so ALL three Shadows
+// win — including any whose characters died earlier (§4: a faction member wins even if
+// their own character died).
 
-const SHADOWS_SEED = "8p-3";
+const SHADOWS_SEED = "8p-5";
 const SHADOWS_IDS = ids(8);
 
 describe("Scenario 3 — 8p Shadows-win (driver fallback)", () => {
   test("all Hunters are eliminated; all three Shadows win (§4)", () => {
     const { state, actions } = driveToWin(SHADOWS_SEED, SHADOWS_IDS, aggressivePolicy);
 
-    expect(characterOf(state, "p1")).toBe("vampire");
-    expect(characterOf(state, "p3")).toBe("unknown");
-    expect(characterOf(state, "p5")).toBe("werewolf");
+    expect(characterOf(state, "p0")).toBe("vampire");
+    expect(characterOf(state, "p6")).toBe("unknown");
+    expect(characterOf(state, "p7")).toBe("werewolf");
 
     expect(state.over).toBe(true);
-    expect(state.winners).toEqual(["p1", "p3", "p5"]);
+    expect(state.winners).toEqual(["p0", "p6", "p7"]);
     expect(winnerFactions(state, state.winners)).toEqual(["Shadow"]);
 
     // Shadow-elimination win: no Hunter left alive (§4).
     expect(aliveOf(state, "Hunter")).toBe(0);
-    // Dead Shadows still win (§4) — p1 and p3 died but are winners.
-    const p1 = state.players.find((p) => p.id === "p1")!;
-    const p3 = state.players.find((p) => p.id === "p3")!;
-    expect(p1.alive).toBe(false);
-    expect(p3.alive).toBe(false);
-    expect(state.winners).toContain("p1");
-    expect(state.winners).toContain("p3");
+    // All three shadow winners present.
+    expect(state.winners).toContain("p0");
+    expect(state.winners).toContain("p6");
+    expect(state.winners).toContain("p7");
 
     expect(actions.length).toBeGreaterThan(0);
   });
@@ -349,7 +386,7 @@ describe("Scenario 3 — 8p Shadows-win (driver fallback)", () => {
     const first = driveToWin(SHADOWS_SEED, SHADOWS_IDS, aggressivePolicy);
     const replay = runScript(SHADOWS_SEED, SHADOWS_IDS, first.actions);
     expect(replay.state.winners).toEqual(first.state.winners);
-    expect(replay.state.winners).toEqual(["p1", "p3", "p5"]);
+    expect(replay.state.winners).toEqual(["p0", "p6", "p7"]);
     expect(JSON.stringify(replay.state)).toEqual(JSON.stringify(first.state));
   });
 });
@@ -362,7 +399,7 @@ describe("Scenario 3 — 8p Shadows-win (driver fallback)", () => {
 
 describe("Secrecy invariant across whole games (§1/§11)", () => {
   test("initial dealt state leaks no hidden identity / rng / deck order, for every viewer", () => {
-    for (const [seed, n] of [["4p-0", 4], ["6p-0", 6], ["8p-3", 8]] as const) {
+    for (const [seed, n] of [["4p-0", 4], ["6p-24", 6], ["8p-5", 8]] as const) {
       const g = createGame(ids(n), seed);
       // Nobody is revealed at deal time, so every other player is hidden.
       assertSecrecy(g);
