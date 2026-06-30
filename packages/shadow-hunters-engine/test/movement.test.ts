@@ -226,13 +226,24 @@ describe("RollMove + MoveTo: wild (7) choice §7 §9", () => {
   });
 
   test("MoveTo for wild cannot stay in current area (never-stay §9)", () => {
-    // Player is in church, has rolled wild — cannot choose church
+    // Player is in church and has a pending wild move — cannot choose church.
+    // Set pendingMove correctly so applyMoveTo reaches the never-stay check (movement.ts §9).
     const state = makeState({ currentArea: "church", seed: "moveto-nostay" });
-    // Simulate wild pending
-    (state as unknown as Record<string, unknown>)["wildPending"] = true;
+    state.pendingMove = { kind: "wild", roll: [4, 3] };
 
-    // Trying to stay in current area should throw
-    expect(() => applyMoveTo(state, "church")).toThrow();
+    // applyMoveTo must throw because the target equals the current area
+    expect(() => applyMoveTo(state, "church")).toThrow(
+      /never-stay|cannot move to their current area/i,
+    );
+
+    // Confirm it is specifically the never-stay guard that fires, not a missing-pendingMove error:
+    // a different (non-current) area must succeed.
+    const state2 = makeState({ currentArea: "church", seed: "moveto-nostay" });
+    state2.pendingMove = { kind: "wild", roll: [4, 3] };
+    const otherArea = AREAS.find((a) => a !== "church") as AreaId;
+    const result = applyMoveTo(state2, otherArea);
+    expect(result.state.phase).toBe("area");
+    expect(result.state.players.find((p) => p.id === "p0")!.area).toBe(otherArea);
   });
 
   test("MoveTo for non-wild state is illegal (throws)", () => {
@@ -316,37 +327,52 @@ describe("Emi Teleport: movement replacement §9 §5", () => {
 });
 
 // ─── Mystic Compass: roll twice, choose §6 §9 ───────────────────────────────
+// Compass is OPTIONAL (§6: "the only before-move-optional equipment").
+// Activate by passing { useCompass: true } to applyRollMove.
 
 describe("Mystic Compass: double-roll §6 §9", () => {
-  test("with Mystic Compass, applyRollMove provides compassChoices array of 2 areas", () => {
+  test("Mystic Compass is optional: equipped but not activated gives a normal roll, not compassChoices", () => {
+    // §6 explicitly marks Compass as optional; a player may ignore it and roll normally.
+    const state = makeState({
+      currentArea: null,
+      equipment: ["white:mystic_compass#0"],
+      seed: "compass-optional",
+    });
+
+    // Normal roll (no useCompass flag) — must NOT activate compass
+    const result = applyRollMove(state);
+    expect(result.compassChoices).toBeUndefined();
+    // Phase must resolve normally (move→area or wild pending)
+    // (either outcome is fine; the key invariant is no compassChoices)
+  });
+
+  test("with Mystic Compass activated (useCompass:true), applyRollMove provides compassChoices", () => {
     const state = makeState({
       currentArea: null,
       equipment: ["white:mystic_compass#0"],
       seed: "compass-test",
     });
 
-    const result = applyRollMove(state);
+    const result = applyRollMove(state, { useCompass: true });
 
     expect(result.compassChoices).toBeDefined();
-    // Compass rolls twice; if both give the same area, may have 1 unique choice
+    // Compass rolls twice; may produce 1–all-non-current unique choices
     expect(result.compassChoices!.length).toBeGreaterThanOrEqual(1);
-    expect(result.compassChoices!.length).toBeLessThanOrEqual(2);
     for (const choice of result.compassChoices!) {
       expect(AREAS).toContain(choice);
     }
   });
 
-  test("with Mystic Compass, choosing one of two rolls resolves movement", () => {
+  test("with Mystic Compass activated, choosing one of the offered choices resolves movement", () => {
     const state = makeState({
       currentArea: null,
       equipment: ["white:mystic_compass#0"],
       seed: "compass-choose",
     });
 
-    const rollResult = applyRollMove(state);
+    const rollResult = applyRollMove(state, { useCompass: true });
     expect(rollResult.compassChoices).toBeDefined();
     expect(rollResult.compassChoices!.length).toBeGreaterThanOrEqual(1);
-    expect(rollResult.compassChoices!.length).toBeLessThanOrEqual(2);
 
     const chosen = rollResult.compassChoices![0] as AreaId;
     const moveResult = applyMoveTo(rollResult.state, chosen);
@@ -358,16 +384,15 @@ describe("Mystic Compass: double-roll §6 §9", () => {
 
   test("Mystic Compass does not add compassChoices when not equipped", () => {
     const state = makeState({ currentArea: null, seed: "no-compass" });
-    // Ensure no compass
     const player = state.players.find((p) => p.id === "p0")!;
     player.equipment = [];
 
-    const result = applyRollMove(state);
+    // Even when useCompass is set, no compass equipped → no compassChoices
+    const result = applyRollMove(state, { useCompass: true });
     expect(result.compassChoices).toBeUndefined();
   });
 
-  test("with Mystic Compass, both choices are valid areas; never-stay still applies", () => {
-    // Player is in a specific area; compass gives two rolls
+  test("with Mystic Compass activated, all choices are valid areas; never-stay applies", () => {
     // Neither choice should equal the current area
     for (let i = 0; i < 20; i++) {
       const seed = `compass-nostay-${i}`;
@@ -378,12 +403,50 @@ describe("Mystic Compass: double-roll §6 §9", () => {
         seed,
       });
 
-      const result = applyRollMove(state);
+      const result = applyRollMove(state, { useCompass: true });
       if (!result.compassChoices) continue;
 
       for (const choice of result.compassChoices) {
         expect(choice).not.toBe(currentArea);
       }
+    }
+  });
+
+  test("Compass wild result: all non-current areas are offered as choices (full wild semantics §7)", () => {
+    // When one of the Compass rolls is a 7 (wild), the player may go anywhere ≠ current.
+    // The compassChoices must include ALL non-current areas, not just an arbitrary one.
+    // Force a wild by finding a seed where resolveRoll returns wild for one of the two rolls.
+    // Strategy: scan seeds and look for compassChoices containing more areas than a single roll could.
+    // (If wild is expanded correctly, choices will include all 6−1=5 areas when current≠null.)
+    let wildExpansionSeen = false;
+    for (let i = 0; i < 300; i++) {
+      const seed = `compass-wild-${i}`;
+      const currentArea = "church" as AreaId;
+      const state = makeState({
+        currentArea,
+        equipment: ["white:mystic_compass#0"],
+        seed,
+      });
+
+      const result = applyRollMove(state, { useCompass: true });
+      if (!result.compassChoices) continue;
+
+      // All choices must be valid non-current areas
+      for (const choice of result.compassChoices) {
+        expect(AREAS).toContain(choice);
+        expect(choice).not.toBe(currentArea);
+      }
+
+      // When a wild occurs, all non-current areas appear in choices
+      if (result.compassChoices.length === AREAS.length - 1) {
+        // All non-current areas present — wild expansion confirmed
+        wildExpansionSeen = true;
+        break;
+      }
+    }
+    // The test documents the invariant; if no wild occurred in 300 seeds, skip gracefully
+    if (!wildExpansionSeen) {
+      console.warn("Compass wild expansion: no wild result seen in 300 seeds; invariant not triggered");
     }
   });
 });

@@ -148,7 +148,9 @@ export function emiTeleportTargets(state: GameState, playerId: PlayerId): AreaId
  *
  * - Validates phase === "move".
  * - If player is Emi (Teleport), sets up pendingMove.kind="emi" for subsequent MoveTo.
- * - If player has Mystic Compass, rolls twice and sets pendingMove.kind="compass".
+ * - If player has Mystic Compass AND opts.useCompass===true, rolls twice and sets
+ *   pendingMove.kind="compass". Compass is optional (§6: "the only before-move-optional
+ *   equipment") — pass useCompass:true to activate it; omit or pass false for a normal roll.
  * - Otherwise rolls d6+d4, re-rolling if result equals current area (§9).
  * - For sum=7 (wild), sets pendingMove.kind="wild" and does not advance phase.
  * - For all other results, moves the player and advances phase to "area".
@@ -156,7 +158,10 @@ export function emiTeleportTargets(state: GameState, playerId: PlayerId): AreaId
  * Mutates state.rng (PRNG advancement is an in-place mutation on the rng object
  * inside GameState, consistent with how the rest of the engine works).
  */
-export function applyRollMove(state: GameState): RollMoveResult {
+export function applyRollMove(
+  state: GameState,
+  opts: { useCompass?: boolean } = {},
+): RollMoveResult {
   if (state.phase !== "move") {
     throw new Error(`applyRollMove called in phase "${state.phase}"; expected "move"`);
   }
@@ -179,47 +184,38 @@ export function applyRollMove(state: GameState): RollMoveResult {
   }
 
   // ── Mystic Compass §6 §9 ─────────────────────────────────────────────────
-  if (hasEquipment(player.equipment, "mystic_compass")) {
-    // Roll twice; filter out current area (never-stay §9); present both choices
+  // Compass is OPTIONAL (§6: "the only before-move-optional equipment").
+  // Only activate when the player explicitly opts in (opts.useCompass === true).
+  if (opts.useCompass && hasEquipment(player.equipment, "mystic_compass")) {
+    // Roll twice; when either roll is wild (7), that roll grants full free choice
+    // (any area ≠ current) per §7 — preserve the full wild semantics here.
     const roll1 = resolveRoll(state, currentArea);
     const roll2 = resolveRoll(state, currentArea);
 
-    const choices: AreaId[] = [];
-    // Each roll may have returned "wild" — treat wild as a special choice
-    // (In Compass + wild scenario, the player picks from the two rolls; if one is wild
-    // they could move anywhere; for simplicity we expand wild to all non-current areas.)
-    for (const resolved of [roll1, roll2]) {
+    // Build the union of valid choices from both rolls.
+    // A wild result means "any non-current area" (§7), so expand it fully.
+    const finalChoices: AreaId[] = [];
+
+    const expandRoll = (resolved: { area: AreaId | "wild" }): void => {
       if (resolved.area === "wild") {
-        // Expand wild to all valid areas except current
+        // Wild: player may go anywhere ≠ current (§7); add all non-current areas
         for (const a of AREAS) {
-          if (a !== currentArea && !choices.includes(a)) choices.push(a);
+          if (a !== currentArea && !finalChoices.includes(a)) finalChoices.push(a);
         }
       } else {
-        if (!choices.includes(resolved.area)) choices.push(resolved.area);
+        if (!finalChoices.includes(resolved.area)) finalChoices.push(resolved.area);
       }
-    }
+    };
 
-    // Deduplicate (already done above) and filter out current area
-    const uniqueChoices = choices.filter((a) => a !== currentArea);
+    expandRoll(roll1);
+    expandRoll(roll2);
 
-    // If both rolls gave the same non-wild result, still present 2-roll semantics
-    // but with possibly just 1 unique choice — that is fine.
-    // Use up to 2 choices (one per roll result) if they differ
-    const finalChoices: AreaId[] = [];
-    if (roll1.area !== "wild" && roll1.area !== currentArea) finalChoices.push(roll1.area);
-    else if (roll1.area === "wild") {
-      // Wild in compass: offer all non-current areas as first "choice"
-      const wildTarget = AREAS.find((a) => a !== currentArea);
-      if (wildTarget && !finalChoices.includes(wildTarget)) finalChoices.push(wildTarget);
+    // Fallback: should never be empty given resolveRoll guarantees ≠ currentArea,
+    // but guard anyway.
+    if (finalChoices.length === 0) {
+      const fallback = AREAS.find((a) => a !== currentArea);
+      if (fallback) finalChoices.push(fallback);
     }
-    if (roll2.area !== "wild" && roll2.area !== currentArea && !finalChoices.includes(roll2.area)) {
-      finalChoices.push(roll2.area);
-    } else if (roll2.area === "wild") {
-      const wildTarget = AREAS.find((a) => a !== currentArea && !finalChoices.includes(a));
-      if (wildTarget) finalChoices.push(wildTarget);
-    }
-    // Fallback: ensure at least one unique choice if both rolled same
-    if (finalChoices.length === 0 && uniqueChoices.length > 0) finalChoices.push(uniqueChoices[0]!);
 
     state.pendingMove = { kind: "compass", compassOptions: finalChoices as AreaId[] };
     return { state, events, compassChoices: finalChoices as AreaId[] };
