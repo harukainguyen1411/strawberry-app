@@ -69,6 +69,19 @@ export interface GameState {
    *  undefined = no pending move choice needed.
    */
   pendingMove: { kind: "wild" | "compass" | "emi"; roll?: [number, number]; compassOptions?: AreaId[] } | undefined;
+  /**
+   * Transient (set by reduce.ts): a Werewolf who was just attacked this turn and may
+   * still respond with a Counterattack against the listed attacker(s). §12.6 Cleared
+   * once the Werewolf counters or the turn ends. Keyed by Werewolf playerId →
+   * attacker playerIds that may be countered. undefined when no counter is pending.
+   */
+  pendingCounters?: Record<PlayerId, PlayerId[]>;
+  /**
+   * Transient (set by reduce.ts): true while a start-of-turn hook (Franklin/George
+   * Lightning/Demolish) is still available to the current player this turn. Cleared
+   * once the player rolls to move or uses/declines the ability. §8 §12.22
+   */
+  startOfTurnAbilityAvailable?: boolean;
 }
 
 export type Action =
