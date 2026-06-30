@@ -27,6 +27,7 @@ import {
   type AbilityCtx,
 } from "../src/abilities.js";
 import { applyAttack, applyCounterattack } from "../src/combat.js";
+import { emiTeleportTargets } from "../src/movement.js";
 import { resetWinCheckHook } from "../src/damage.js";
 import { CHARACTERS } from "../src/data/characters.js";
 import type {
@@ -126,17 +127,26 @@ describe("ABILITIES registry §5", () => {
 
 // ─── Emi — Teleport (onMove) §5 §9 ─────────────────────────────────────────────
 
-describe("Emi Teleport §5", () => {
-  test("teleport options = paired area + the opposite pair, never current", () => {
+describe("Emi Teleport §5 §12.21", () => {
+  test("teleport options = EXACTLY 2: paired area + closest opposite-pair area, never current", () => {
     const s = makeState({ characters: { p0: "emi" }, area: { p0: "church" } });
     const ctx: AbilityCtx = { state: s, player: "p0" };
     const ev = runHook("onMove", "p0", { ...ctx, params: { dryRun: true } });
     void ev;
     const opts = ABILITIES["emi"]!.teleportOptions!(s, "p0");
-    // Paired with church = cemetery; opposite pairs exist; current excluded.
-    expect(opts).toContain("cemetery");
+    // §5/§12.21: EXACTLY the two options — the paired Area, OR the closest Area in
+    // the opposite pair. NOT every non-current Area. Board (makeState) pairs are
+    // [church,cemetery] [hermits_cabin,underworld_gate] [weird_woods,erstwhile_altar];
+    // from church: paired = cemetery; closest opposite-pair area = hermits_cabin.
+    expect([...opts].sort()).toEqual(["cemetery", "hermits_cabin"]);
+    expect(opts).toHaveLength(2);
+    // §12.21 must NOT leak the farther pair or the current Area.
     expect(opts).not.toContain("church");
-    expect(opts.length).toBeGreaterThan(0);
+    expect(opts).not.toContain("underworld_gate");
+    expect(opts).not.toContain("weird_woods");
+    expect(opts).not.toContain("erstwhile_altar");
+    // Parity with the single source of truth in movement.ts.
+    expect([...opts].sort()).toEqual([...emiTeleportTargets(s, "p0")].sort());
   });
 
   test("teleport moves Emi to a chosen option and reveals (requiresReveal)", () => {

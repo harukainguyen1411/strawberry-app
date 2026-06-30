@@ -43,6 +43,7 @@
 
 import { applyDamage, applyHeal, reveal } from "./damage.js";
 import { applyAttack, applyCounterattack, type CombatDice } from "./combat.js";
+import { emiTeleportTargets } from "./movement.js";
 import { giveHermit } from "./cards/hermit.js";
 import { CHARACTERS } from "./data/characters.js";
 import type {
@@ -170,36 +171,22 @@ function revealForAbility(state: GameState, player: PlayerId): GameEvent[] {
   return reveal(state, player);
 }
 
-// ─── Emi — Teleport (onMove) §5 §9 ─────────────────────────────────────────────
+// ─── Emi — Teleport (onMove) §5 §9 §12.21 ──────────────────────────────────────
 
 /**
- * §9 Emi Teleport options: the Area paired with the current one, plus the two Areas
- * of the "opposite pair" (the closest opposite-pair Area, modelled here as either of
- * the opposite pair so the reducer/UI can pick). Never the current Area (§9 no-stay).
+ * §5 §12.21 Emi Teleport options: EXACTLY the two options in §5 — the Area paired
+ * with the current one, OR the closest Area in the opposite pair. Never the current
+ * Area (§9 no-stay). §12.21 is a tagged [RULING] invariant that removes the
+ * "opposite pair is ambiguous on a 6-area board" ambiguity, so the engine must NOT
+ * offer every non-current Area.
  *
- * Board layout: state.areas is [a0,a1,a2,a3,a4,a5] in 3 pairs [0,1][2,3][4,5].
- * "Opposite pair" = the pair that is neither the current Area's pair. Since there are
- * three pairs, "the opposite pair" is ambiguous for a 6-area board; the engine offers
- * every Area not in the current pair as a teleport destination (a superset that always
- * includes the paired Area and the nearest opposite Area; the player chooses).
+ * This is the same rule as movement.ts emiTeleportTargets — the single source of
+ * truth for Emi's destinations — so we delegate to it rather than re-deriving the
+ * board geometry here. Returns the (up to) 2 legal destinations; [] before the
+ * first move (player has no current Area yet).
  */
 function emiTeleportOptions(state: GameState, player: PlayerId): AreaId[] {
-  const p = getPlayer(state, player);
-  if (p.area === null) {
-    // Before the first move, every Area is a legal teleport destination.
-    return [...state.areas];
-  }
-  const here = p.area;
-  const paired = state.pairing[here];
-  // The paired Area is always offered; plus every Area outside the current pair.
-  const out: AreaId[] = [];
-  for (const a of state.areas) {
-    if (a === here) continue; // §9 never stay
-    out.push(a);
-  }
-  // Ensure the paired Area is present (it is, since paired ≠ here).
-  void paired;
-  return out;
+  return emiTeleportTargets(state, player);
 }
 
 const emiAbility: AbilityDef = {
