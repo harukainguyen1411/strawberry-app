@@ -388,6 +388,128 @@ describe("Werewolf Counterattack §12.6", () => {
   });
 });
 
+// ─── Single attack step per turn §8 §10 §12.10 ──────────────────────────────────
+
+describe("single attack step per turn §8 §10", () => {
+  // Balanced roster: p0 attacker (charles, Neutral), p1/p2 high-HP in-range targets,
+  // p3 a Shadow (vampire) OUT of range. george (Hunter) and vampire (Shadow) both stay
+  // alive so no faction-elimination win fires while we probe the attack-step machine.
+  test("after attacking, a fresh Attack is no longer offered (no attacking twice)", () => {
+    const g = makeGame(
+      { p0: "charles", p1: "george", p2: "bob", p3: "vampire" },
+      { areas: { p0: "church", p1: "church", p2: "church", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    // Before attacking: both in-range targets (p1 george 14hp, p2 bob 10hp) are offered.
+    const before = legalActions(g, "p0").filter((a) => a.type === "Attack");
+    expect(before.length).toBe(2);
+
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    expect(r.state.over).toBe(false); // game continues (Hunter + Shadow both alive)
+    expect(r.state.attackStepSpent).toBe(true);
+
+    // After attacking: NO fresh Attack of any kind is legal — only EndTurn / Bloody Feast.
+    const after = legalActions(r.state, "p0").filter((a) => a.type === "Attack");
+    expect(after).toEqual([]);
+    expect(legalActions(r.state, "p0").some((a) => a.type === "EndTurn")).toBe(true);
+  });
+
+  test("a SECOND Attack in the same turn is rejected by reduce", () => {
+    // Empirically the bug let a current player attack p1, then p2, then p1 AGAIN in one
+    // turn. Assert the second attack (against ANY in-range target) throws after the first.
+    const g = makeGame(
+      { p0: "charles", p1: "george", p2: "bob", p3: "vampire" },
+      { areas: { p0: "church", p1: "church", p2: "church", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    expect(r.state.over).toBe(false);
+    // Second attack against the OTHER in-range target is illegal.
+    expect(() => reduce(r.state, { type: "Attack", player: "p0", target: "p2" })).toThrow();
+    // Re-attacking the SAME target via a fresh Attack is also illegal (the bug allowed
+    // this too); the only sanctioned repeat is Charles's Bloody Feast UseAbility.
+    expect(() => reduce(r.state, { type: "Attack", player: "p0", target: "p1" })).toThrow();
+  });
+
+  test("a Concealed-Knowledge extra turn restores a fresh attack step §12.10", () => {
+    // After an attack spends the step, ending into an extra turn must re-enable Attack.
+    const g = makeGame(
+      { p0: "charles", p1: "george", p2: "bob", p3: "vampire" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    g.pendingExtraTurns = 1;
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    expect(r.state.over).toBe(false);
+    expect(r.state.attackStepSpent).toBe(true);
+    // End the (first) turn → extra turn for the SAME player, attack step reset.
+    const r2 = reduce(r.state, { type: "EndTurn", player: "p0" });
+    expect(r2.state.current).toBe("p0");
+    expect(r2.state.phase).toBe("move");
+    expect(r2.state.attackStepSpent).toBe(false);
+  });
+});
+
+// ─── Charles Bloody Feast reachable via UseAbility §5 §12.4 ──────────────────────
+
+describe("Charles Bloody Feast §5 §12.4", () => {
+  test("Bloody Feast is NOT offered before Charles attacks", () => {
+    const g = makeGame(
+      { p0: "charles", p1: "allie", p2: "bob", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    // Pre-attack: Attack offered, UseAbility (Bloody Feast) is NOT (it's "after you attack").
+    const legal = legalActions(g, "p0");
+    expect(legal.some((a) => a.type === "Attack")).toBe(true);
+    expect(legal.some((a) => a.type === "UseAbility")).toBe(false);
+  });
+
+  test("after Charles attacks, UseAbility (Bloody Feast) is offered instead of a 2nd Attack", () => {
+    const g = makeGame(
+      { p0: "charles", p1: "allie", p2: "bob", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    const legal = legalActions(r.state, "p0");
+    // No fresh Attack, but Bloody Feast (UseAbility) IS now offered (target still in range).
+    expect(legal.some((a) => a.type === "Attack")).toBe(false);
+    expect(legal.some((a) => a.type === "UseAbility")).toBe(true);
+    expect(legal.some((a) => a.type === "EndTurn")).toBe(true);
+  });
+
+  test("reduce accepts the Bloody Feast UseAbility and deals the extra attack §12.4", () => {
+    // Charles attacks p1, then pays 2 self-damage to attack p1 AGAIN via UseAbility.
+    // Inject dice so the extra attack lands a known amount (d6=5,d4=1 → |5-1|=4).
+    const g = makeGame(
+      { p0: "charles", p1: "allie", p2: "bob", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    const p1DamageAfterFirst = r.state.players.find((p) => p.id === "p1")!.damage;
+    const charlesDamageBefore = r.state.players.find((p) => p.id === "p0")!.damage;
+
+    // Bloody Feast: legal, and runs an extra attack on the same target.
+    const r2 = reduce(r.state, {
+      type: "UseAbility",
+      player: "p0",
+      params: { target: "p1", dice: { d6: 5, d4: 1 } },
+    });
+    const charlesAfter = r2.state.players.find((p) => p.id === "p0")!;
+    const p1After = r2.state.players.find((p) => p.id === "p1")!;
+    // Charles paid 2 self-damage (§5) and revealed (§5: ability requires reveal).
+    expect(charlesAfter.damage).toBe(charlesDamageBefore + 2);
+    expect(charlesAfter.revealed).toBe(true);
+    // The extra attack dealt |5-1| = 4 to p1 (allie maxHp 8 → 8 dead? p1 started 0,
+    // first attack rng-rolled, second adds 4). Assert p1 took MORE damage than after
+    // the first attack alone (the extra attack landed), or p1 died from it.
+    expect(p1After.damage >= p1DamageAfterFirst).toBe(true);
+    expect(p1After.damage - p1DamageAfterFirst === 4 || !p1After.alive).toBe(true);
+  });
+});
+
 // ─── ResolveArea: all 6 areas end-to-end §7 ──────────────────────────────────────
 
 describe("ResolveArea — all 6 areas §7", () => {

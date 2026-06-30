@@ -82,6 +82,17 @@ export interface GameState {
    * once the player rolls to move or uses/declines the ability. §8 §12.22
    */
   startOfTurnAbilityAvailable?: boolean;
+  /**
+   * Transient (set by reduce.ts): true once the current player has used their SINGLE
+   * combat Attack this turn (§8: the turn is Move → Area → a single Attack step; §10
+   * resolves one attack). The attack step is then SPENT — legalActions must no longer
+   * offer a fresh Attack (a player may not attack twice in one turn, the very reason
+   * Concealed Knowledge grants a whole extra turn, §12.10). The ONLY sanctioned second
+   * attack is Charles's Bloody Feast (§5/§12.4), offered as a UseAbility while this flag
+   * is set. Cleared by beginTurn() so a new turn (and a Concealed-Knowledge extra turn)
+   * starts with a fresh attack step. §8 §10 §12.4
+   */
+  attackStepSpent?: boolean;
 }
 
 export type Action =

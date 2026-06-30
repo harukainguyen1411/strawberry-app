@@ -271,6 +271,9 @@ function beginTurn(state: GameState): void {
   p.attackImmune = false;
   state.pendingMove = undefined;
   state.pendingCounters = {};
+  // §8 §10: a fresh turn (and each Concealed-Knowledge extra turn, §12.10) starts with
+  // an unspent attack step — the player may take their single Attack again this turn.
+  state.attackStepSpent = false;
   // Franklin/George have an onStartTurn ability; mark it available if unspent.
   const ability = abilityFor(p.characterId);
   state.startOfTurnAbilityAvailable =
@@ -406,8 +409,28 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
         break;
       }
       case "attack": {
-        for (const target of attackTargetsInRange(state, playerId)) {
-          actions.push({ type: "Attack", player: playerId, target });
+        if (!state.attackStepSpent) {
+          // §8/§10: a SINGLE attack step. Offer each in-range target ONLY while the
+          // attack step is unspent; once the player has attacked, no fresh Attack is
+          // legal (a player may not attack twice in one turn — the reason Concealed
+          // Knowledge grants a whole extra turn, §12.10).
+          for (const target of attackTargetsInRange(state, playerId)) {
+            actions.push({ type: "Attack", player: playerId, target });
+          }
+        } else if (
+          // §5/§12.4: the ONLY sanctioned second attack is Charles's Bloody Feast,
+          // an onAfterAttack ability the attacker may invoke AFTER his own attack this
+          // turn (paying 2 self-damage to attack the SAME character again). Offer it
+          // as a UseAbility once the attack step is spent and a valid target remains.
+          // Vampire/Bob also trigger onAfterAttack but are passive no-ops resolved
+          // inside applyAttack (requiresReveal === false) — they are NOT offered here.
+          ability &&
+          ability.trigger === "onAfterAttack" &&
+          ability.requiresReveal &&
+          abilityAvailable(state, playerId) &&
+          attackTargetsInRange(state, playerId).length > 0
+        ) {
+          actions.push({ type: "UseAbility", player: playerId });
         }
         actions.push({ type: "EndTurn", player: playerId }); // §8: attack is optional
         break;
@@ -496,6 +519,10 @@ export function reduce(
     case "Attack": {
       const res = applyAttack(next, actor, action.target);
       events.push(...res.events);
+      // §8/§10: the turn's SINGLE attack step is now spent — legalActions stops offering
+      // a fresh Attack (no attacking twice in one turn, §12.10). The only sanctioned
+      // second attack is Charles's Bloody Feast, offered as a UseAbility (§5/§12.4).
+      next.attackStepSpent = true;
       // §12.6: if the (still-alive) target is a Werewolf, it may now Counterattack
       // the attacker. Record the pending counter so legalActions offers it.
       const target = next.players.find((p) => p.id === action.target);
