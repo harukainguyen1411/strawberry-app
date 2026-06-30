@@ -21,6 +21,8 @@ import { createGame } from "../src/setup.js";
 import { evaluateWinners, maybeEndGame } from "../src/win.js";
 import { applyAttack } from "../src/combat.js";
 import { applyDamage, resetWinCheckHook, setWinCheckHook } from "../src/damage.js";
+import { playCard as playBlack } from "../src/cards/black.js";
+import { playCard as playWhite } from "../src/cards/white.js";
 import type {
   GameState,
   CharacterId,
@@ -324,15 +326,17 @@ describe("Daniel — first to die OR alive when Hunters win (§12.5)", () => {
   });
 });
 
-// ─── Simultaneity (§12.2) ─────────────────────────────────────────────────────────
+// ─── Single-death satisfying two conditions (§12.1) ─────────────────────────────
+// NOTE: this is the SINGLE-death/two-conditions case (one target, p3) — handled by the
+// pure evaluateWinners. It is NOT the §12.2 multi-victim batch (that lives below).
 
-describe("simultaneous satisfaction (§12.2)", () => {
-  test("the kill that ends the game can satisfy two conditions → both win together", () => {
+describe("a single kill satisfying two conditions (§12.1)", () => {
+  test("one kill on one target can satisfy two conditions → both win together", () => {
     // p0 (alive) + p1 (dead earlier) are Hunters; p2,p3 are Shadows; p4 is Charles.
     // Pre-state: p1 (Hunter) and p2 (Shadow) already dead → 2 dead.
     // Charles (p4) attacks the LAST Shadow p3, delivering the 3rd kill: this both
     // (a) leaves all Shadows dead → Hunters win, and (b) makes deadCountAfter=3 by
-    // Charles's own attack → Charles wins. Both fire from one event (§12.2).
+    // Charles's own attack → Charles wins. Both fire from one (single-target) event.
     const s = makeState({
       players: ["p0", "p1", "p2", "p3", "p4"],
       characters: {
@@ -355,6 +359,111 @@ describe("simultaneous satisfaction (§12.2)", () => {
     const winners = evaluateWinners(s);
     // Hunters p0 (alive) + p1 (dead) win; Charles p4 wins; all Shadows dead.
     expect(winners.sort()).toEqual(["p0", "p1", "p4"]);
+  });
+});
+
+// ─── §12.2: one effect kills MULTIPLE players SIMULTANEOUSLY ──────────────────────
+// These drive the REAL AoE paths (Dynamite, Flare, Machine Gun) with the win-check hook
+// wired (as the reducer wires it). The plan Step 1 calls for "a simultaneous double-kill
+// that satisfies two conditions → both win" — i.e. ONE effect killing TWO players. The
+// pre-fix code fired the per-death win-check after the FIRST death, ended the game, and
+// short-circuited the AoE loop (`if (state.over) break`) so the SECOND victim never took
+// its (simultaneous) damage — leaving it wrongly alive and a winner. Each test below is a
+// REGRESSION GUARD: it FAILS on the unfixed wiring and passes only with §12.2 batching.
+
+describe("simultaneous multi-death from one effect (§12.2)", () => {
+  test("Dynamite killing the last Shadow AND Allie together → Allie is DEAD and does NOT win", () => {
+    // p0,p1 Hunters; p2 the last alive Shadow; p4 Allie; p3 a Shadow already dead.
+    // Dynamite hits the shared area, killing p2 (→ all Shadows dead → Hunters win) AND
+    // Allie together. §12.2: the deaths are simultaneous, so Allie must NOT be alive at
+    // the single win-check — she dies and LOSES. (Pre-fix: the p2 death ended the game
+    // before Allie's damage applied, so Allie stayed alive and wrongly won.)
+    const s = makeState({
+      players: ["p0", "p1", "p2", "p3", "p4"],
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire", p4: "allie" },
+      damage: { p2: 9, p4: 6 }, // unknown maxHp 11, allie maxHp 8 → 3 dmg kills both
+      alive: { p3: false }, // one Shadow already dead
+    });
+    s.deadOrder = ["p3"];
+    s.deadEpoch = [0];
+    setWinCheckHook(maybeEndGame);
+
+    // Dynamite: dice total 6 → church (everyone's area in makeState). Caster p0.
+    playBlack(s, "p0", "black:dynamite#0", { dice: { d6: 3, d4: 3 }, target: "p0" });
+
+    expect(get(s, "p2").alive).toBe(false); // last Shadow dead → Hunters win
+    expect(get(s, "p4").alive).toBe(false); // §12.2: Allie died SIMULTANEOUSLY
+    expect(s.over).toBe(true);
+    expect(s.winners).not.toContain("p4"); // dead Allie does NOT win
+    expect(s.winners.sort()).toEqual(["p0", "p1"]); // only the Hunters
+  });
+
+  test("Flare double-kill: last Shadow + a Charles-3rd-kill victim — Hunters win, NOT a dead-Allie-style survivor", () => {
+    // Flare (every OTHER character takes 2) is fired by Charles. It kills BOTH the last
+    // Shadow (→ Hunters win) and Allie together. §12.2: one effect, one win-check; Allie
+    // is dead → loses. Flare is a CARD (not an attack), so it credits no Charles kill.
+    const s = makeState({
+      players: ["p0", "p1", "p2", "p3", "p4"],
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire", p4: "allie" },
+      damage: { p2: 10, p4: 7 }, // unknown maxHp 11, allie maxHp 8 → 2 dmg kills both
+      alive: { p3: false },
+    });
+    s.deadOrder = ["p3"];
+    s.deadEpoch = [0];
+    setWinCheckHook(maybeEndGame);
+
+    // p1 (Hunter, Franklin) casts Flare; every other character takes 2.
+    playWhite(s, "p1", "white:flare_of_judgement#0");
+
+    expect(get(s, "p2").alive).toBe(false); // last Shadow dead
+    expect(get(s, "p4").alive).toBe(false); // §12.2: Allie died simultaneously
+    expect(s.over).toBe(true);
+    expect(s.winners).not.toContain("p4");
+    expect(s.winners.sort()).toEqual(["p0", "p1"]); // Hunters only
+  });
+
+  test("Daniel co-first: dies in the SAME one-effect batch as the game's first death → first-to-die win (§12.5)", () => {
+    // No prior deaths. Dynamite is the game's FIRST death event and kills TWO players at
+    // once: a Shadow (p2) and Daniel (p4). Daniel is the 2nd-processed victim of the one
+    // effect, so pre-fix he landed at deadOrder[1] and was denied first-to-die. §12.2 +
+    // §12.5: both die simultaneously in the first death epoch → Daniel is CO-FIRST and wins.
+    const s = makeState({
+      players: ["p0", "p1", "p2", "p3", "p4"],
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire", p4: "daniel" },
+      damage: { p2: 9, p4: 11 }, // unknown maxHp 11, daniel maxHp 13 → 3 dmg kills both
+      // p3 (the other Shadow) is OUT of the blast so the game does NOT end on a faction win;
+      // Daniel's win must come from first-to-die alone.
+      area: { p3: "weird_woods" },
+    });
+    setWinCheckHook(maybeEndGame);
+
+    playBlack(s, "p0", "black:dynamite#0", { dice: { d6: 3, d4: 3 }, target: "p0" });
+
+    expect(get(s, "p2").alive).toBe(false);
+    expect(get(s, "p4").alive).toBe(false);
+    // Daniel is the 2nd entry in deadOrder but shares the first death epoch with p2.
+    expect(s.deadOrder.indexOf("p4")).toBeGreaterThan(0);
+    const idx = s.deadOrder.indexOf("p4");
+    expect(s.deadEpoch[idx]).toBe(s.deadEpoch[0]); // same (first) epoch → co-first
+    expect(s.winners).toContain("p4"); // §12.5 co-first: Daniel wins first-to-die
+  });
+
+  test("a one-effect batch checks win ONCE: a single GameWon is emitted for a double-kill", () => {
+    // The batch must collapse to ONE win-check (and one GameWon) even though two deaths
+    // occur, per §12.2 ("win conditions are checked once").
+    const s = makeState({
+      players: ["p0", "p1", "p2", "p3", "p4"],
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire", p4: "allie" },
+      damage: { p2: 9, p4: 6 },
+      alive: { p3: false },
+    });
+    s.deadOrder = ["p3"];
+    s.deadEpoch = [0];
+    setWinCheckHook(maybeEndGame);
+
+    playBlack(s, "p0", "black:dynamite#0", { dice: { d6: 3, d4: 3 }, target: "p0" });
+
+    expect(s.log.filter((e) => e.type === "GameWon").length).toBe(1);
   });
 });
 

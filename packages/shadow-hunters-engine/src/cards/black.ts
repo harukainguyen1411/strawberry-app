@@ -20,7 +20,7 @@
 //   death+win checks after each sub-damage.
 // §12.2: Dynamite AoE deaths are simultaneous; win-check once after all.
 
-import { applyDamage, applyHeal } from "../damage.js";
+import { applyDamage, applyHeal, withWinCheckBatch } from "../damage.js";
 import { BLACK } from "../data/cards.js";
 import { CHARACTERS } from "../data/characters.js";
 import { AREA_BY_DICE } from "../data/areas.js";
@@ -175,17 +175,25 @@ const dynamite: BlackHandler = ({ state, opts }) => {
   if (!areaResult || areaResult === "wild") return []; // total 7 = nothing
 
   const targetArea = areaResult;
-  const events: GameEvent[] = [];
 
-  // Every character in the matching area takes 3. Collect targets first to handle
-  // simultaneous deaths correctly (§12.2): we resolve all, then let winCheck run.
-  for (const p of state.players) {
-    if (!p.alive) continue;
-    if (p.area !== targetArea) continue;
-    events.push(...applyDamage(state, p.id, 3, "dynamite", null));
-    if (state.over) break; // §12.1: game may end mid-AoE
-  }
-  return events;
+  // §12.2: Dynamite is ONE effect — every character in the matching area takes 3
+  // SIMULTANEOUSLY. We snapshot the affected players up front (so a death-driven board
+  // change can't alter the set mid-resolution), then resolve all damage inside a
+  // win-check batch: deaths still resolve fully, but the game is not ENDED until every
+  // simultaneous victim has taken their damage, after which the win-check runs once and
+  // ALL satisfied conditions win together. No mid-loop `state.over` break — that was the
+  // bug that let a co-victim survive (and wrongly win) when the first death ended the game.
+  const affected = state.players
+    .filter((p) => p.alive && p.area === targetArea)
+    .map((p) => p.id);
+
+  return withWinCheckBatch(state, () => {
+    const events: GameEvent[] = [];
+    for (const id of affected) {
+      events.push(...applyDamage(state, id, 3, "dynamite", null));
+    }
+    return events;
+  });
 };
 
 /**

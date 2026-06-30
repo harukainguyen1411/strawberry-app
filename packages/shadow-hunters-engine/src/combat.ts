@@ -19,7 +19,7 @@
 //   §12.14 — equipment is active at declaration; kill-based transfers affect only later attacks.
 
 import { rollD6, rollD4 } from "./rng.js";
-import { applyDamage, applyHeal } from "./damage.js";
+import { applyDamage, applyHeal, withWinCheckBatch } from "./damage.js";
 import { CHARACTERS } from "./data/characters.js";
 import type { GameState, GameEvent, PlayerId, PlayerState, AreaId } from "./types.js";
 
@@ -288,26 +288,43 @@ export function applyAttack(
   let lastDamage = 0;
   let stoleAny = false;
 
-  for (const tId of targets) {
-    const targetPlayer = getPlayer(state, tId);
-    if (!targetPlayer.alive) continue; // a simultaneous-kill target already removed
+  // Resolve every target with the one rolled dice. The per-target body is shared so a
+  // single-target attack and a Machine Gun multi-target volley use identical mechanics.
+  const resolveTargets = (): GameEvent[] => {
+    const loop: GameEvent[] = [];
+    for (const tId of targets) {
+      const targetPlayer = getPlayer(state, tId);
+      if (!targetPlayer.alive) continue; // a simultaneous-kill target already removed
 
-    const comp = computeDamage(state, attackerId, tId, dice);
-    lastDamage = comp.final;
+      const comp = computeDamage(state, attackerId, tId, dice);
+      lastDamage = comp.final;
 
-    // Bob Robbery (§12.8): steal instead of dealing 2+ damage; no damage-on-hit effects.
-    if (bobRobberyApplies(state, attacker, targetPlayer, comp.final)) {
-      events.push(...applyBobSteal(state, attacker, targetPlayer));
-      stoleAny = true;
-      lastDamage = 0; // a steal deals no damage
-      continue;
+      // Bob Robbery (§12.8): steal instead of dealing 2+ damage; no damage-on-hit effects.
+      if (bobRobberyApplies(state, attacker, targetPlayer, comp.final)) {
+        loop.push(...applyBobSteal(state, attacker, targetPlayer));
+        stoleAny = true;
+        lastDamage = 0; // a steal deals no damage
+        continue;
+      }
+
+      if (comp.final > 0) {
+        // §11 / §12.14: damage applied via the damage track, crediting the attacker for loot.
+        loop.push(...applyDamage(state, tId, comp.final, ATTACK_SOURCE, attackerId));
+        dealtAny = true;
+      }
     }
+    return loop;
+  };
 
-    if (comp.final > 0) {
-      // §11 / §12.14: damage applied via the damage track, crediting the attacker for loot.
-      events.push(...applyDamage(state, tId, comp.final, ATTACK_SOURCE, attackerId));
-      dealtAny = true;
-    }
+  // §12.2: a Machine Gun volley is ONE effect — all targets are damaged SIMULTANEOUSLY
+  // with the single roll, so its multi-target loop runs inside a win-check batch (deaths
+  // resolve fully, the game ends only AFTER every target is hit, win-check runs once and
+  // ALL satisfied conditions win together). A single-target attack does NOT batch, so its
+  // per-hit §12.1 win-check cadence is unchanged.
+  if (machineGun) {
+    events.push(...withWinCheckBatch(state, resolveTargets));
+  } else {
+    events.push(...resolveTargets());
   }
 
   // Vampire Suck Blood §12.7: heal 2 ONCE per attack action when any damage was dealt.

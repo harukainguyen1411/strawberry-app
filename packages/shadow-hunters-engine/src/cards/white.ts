@@ -12,7 +12,7 @@
 //   spear_of_longinus, holy_robe → go to player.equipment, NEVER discarded.
 // Single-use cards: everything else → discarded to white discard after resolution.
 
-import { applyHeal, applyDamage, setDamage, reveal } from "../damage.js";
+import { applyHeal, applyDamage, setDamage, reveal, withWinCheckBatch } from "../damage.js";
 import { WHITE } from "../data/cards.js";
 import { CHARACTERS } from "../data/characters.js";
 import { rollD6 } from "../rng.js";
@@ -82,14 +82,22 @@ const holyWaterOfHealing: WhiteHandler = ({ state, caster }) => {
  * Source is "flare_of_judgement" (not "attack") — §12.3: card effects are not attacks.
  */
 const flareOfJudgement: WhiteHandler = ({ state, caster }) => {
-  const events: GameEvent[] = [];
-  for (const p of state.players) {
-    if (p.id === caster) continue; // "every OTHER character"
-    if (!p.alive) continue;
-    events.push(...applyDamage(state, p.id, 2, "flare_of_judgement", null));
-    if (state.over) break; // game may end mid-Flare (§12.1)
-  }
-  return events;
+  // §12.2: Flare is ONE effect — every OTHER character takes 2 SIMULTANEOUSLY. Snapshot
+  // the affected set up front, then resolve inside a win-check batch so all deaths apply
+  // before the game can end; the win-check runs once at the close and ALL satisfied
+  // conditions win together. No mid-loop `state.over` break (that let a co-victim wrongly
+  // survive and win when the first death ended the game).
+  const affected = state.players
+    .filter((p) => p.id !== caster && p.alive)
+    .map((p) => p.id);
+
+  return withWinCheckBatch(state, () => {
+    const events: GameEvent[] = [];
+    for (const id of affected) {
+      events.push(...applyDamage(state, id, 2, "flare_of_judgement", null));
+    }
+    return events;
+  });
 };
 
 /**

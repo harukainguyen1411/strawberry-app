@@ -18,8 +18,10 @@
 //           the 3rd kill; ability/card kills do NOT. Read from state.lastKill (set in
 //           damage.ts: { killer, deadCountAfter }). A multi-kill that crosses 3 counts.
 //   §12.5 — Daniel timing: "first to die" = the prior dead count was 0 when he died
-//           (he is first in deadOrder; co-first if simultaneous). "Survive while
-//           Hunters win" requires Daniel ALIVE at the win-check.
+//           (co-first if simultaneous). damage.ts stamps state.deadEpoch so one-effect
+//           AoE deaths (§12.2) share an epoch; Daniel is first-to-die iff his death
+//           epoch equals the first death's epoch (deadEpoch[0]). "Survive while Hunters
+//           win" requires Daniel ALIVE at the win-check.
 
 import { CHARACTERS } from "./data/characters.js";
 import type { GameState, GameEvent, PlayerId, Faction } from "./types.js";
@@ -62,7 +64,8 @@ function factionInPlay(state: GameState, faction: Faction): boolean {
  *     - Shadow win  : a Shadow side exists and all Hunters are dead.
  *     - Charles     : his OWN attack made deadCountAfter ≥ 3 (state.lastKill).
  *     - Bob         : possesses ≥ 5 equipment.
- *     - Daniel first: Daniel is first in deadOrder (prior dead count was 0).
+ *     - Daniel first: Daniel died in the first death epoch (prior dead count was 0;
+ *       co-first if simultaneous, via state.deadEpoch — §12.2/§12.5).
  *
  *   Piggyback (only when the game is ending this evaluation):
  *     - Allie       : alive.
@@ -94,11 +97,25 @@ export function evaluateWinners(state: GameState): PlayerId[] {
     .filter((p) => p.characterId === "bob" && p.equipment.length >= 5)
     .map((p) => p.id);
 
-  // Daniel "first to die": Daniel sits at index 0 of deadOrder (co-first allowed —
-  // simultaneous deaths are appended together, but only index 0 is "first"; §12.5
-  // ties are handled by the simultaneous-death batching upstream).
+  // Daniel "first to die" (§12.5, co-first if simultaneous): Daniel died in the SAME
+  // effect as the game's first death(s). damage.ts stamps state.deadEpoch (aligned with
+  // deadOrder) so one-effect AoE deaths share an epoch (§12.2); a sequential death gets a
+  // fresh epoch. Daniel is first-to-die iff his death epoch equals the first death's epoch
+  // — which collapses to "deadOrder[0] === daniel" for a lone death, and also credits a
+  // Daniel who is the 2nd-processed victim of a simultaneous double-kill.
+  //
+  // Robustness: a death's effective epoch is `deadEpoch[idx] ?? idx`. With the array fully
+  // populated (the production path) this is the real epoch; if a caller pre-seeds deadOrder
+  // without a matching deadEpoch (representing prior SEQUENTIAL deaths) it degrades to
+  // index ordering — exactly the old first-in-deadOrder semantics.
+  const epochAt = (idx: number): number => state.deadEpoch[idx] ?? idx;
+  const firstEpoch = state.deadOrder.length > 0 ? epochAt(0) : undefined;
   const danielFirstWinners = state.players
-    .filter((p) => p.characterId === "daniel" && state.deadOrder[0] === p.id)
+    .filter((p) => {
+      if (p.characterId !== "daniel") return false;
+      const idx = state.deadOrder.indexOf(p.id);
+      return idx !== -1 && epochAt(idx) === firstEpoch;
+    })
     .map((p) => p.id);
 
   const gameEnds =

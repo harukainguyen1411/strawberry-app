@@ -122,6 +122,7 @@ export function createGame(playerIds: readonly string[], seed: string): GameStat
     decks,
     rng,
     deadOrder: [],
+    deadEpoch: [],
     lastKill: null,
     winners: [],
     over: false,

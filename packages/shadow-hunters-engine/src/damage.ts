@@ -40,10 +40,75 @@ export function setWinCheckHook(hook: WinCheckHook): void {
 /** Reset the win-check hook to the no-op default (test isolation). */
 export function resetWinCheckHook(): void {
   winCheckHook = () => [];
+  winCheckBatchDepth = 0;
+  nextDeathEpoch = 0;
+  batchEpoch = null;
+}
+
+// ─── Simultaneous-death batching (§12.2) ─────────────────────────────────────
+// §12.2: deaths from a SINGLE effect (Flare, Dynamite, Machine Gun) resolve
+// SIMULTANEOUSLY; then win conditions are checked ONCE; ALL satisfied win.
+//
+// The per-mutation cadence (§12.1) would otherwise end the game after the FIRST
+// death and never apply the remaining (simultaneous) deaths — leaving a victim
+// wrongly alive (and possibly a winner). To make a one-effect multi-death actually
+// simultaneous, an AoE handler opens a batch: while a batch is open, runWinCheck is
+// suppressed (deaths still resolve fully — deadOrder/lastKill/loot/Died all run — the
+// game is simply not ENDED yet). When the batch closes, the win-check runs once over
+// the settled state, so every satisfied condition (including a co-victim's loss /
+// faction win / Daniel co-first) is evaluated together. Batches nest by depth so a
+// handler that itself calls into another batched primitive is safe.
+let winCheckBatchDepth = 0;
+
+// Death-epoch bookkeeping (§12.2 / §12.5 co-first). Every death records an epoch into
+// state.deadEpoch (aligned with deadOrder). Deaths inside ONE batch share the epoch
+// captured when the (outermost) batch opened, so they are simultaneous; a sequential
+// death (no open batch) takes a fresh epoch. win.ts reads this to credit Daniel
+// "first to die" co-first when he dies in the same effect as the game's first death(s).
+let nextDeathEpoch = 0;
+// The epoch the currently-open batch assigns to its deaths (null when no batch open).
+let batchEpoch: number | null = null;
+
+/** The epoch to stamp on the next death (§12.2). Batched deaths share one epoch. */
+function takeDeathEpoch(): number {
+  if (batchEpoch !== null) return batchEpoch;
+  return nextDeathEpoch++;
+}
+
+/**
+ * Run `body` with the win-check deferred to a single check at the end (§12.2).
+ * Use this to wrap the target loop of a one-effect multi-death (AoE) so all deaths
+ * resolve before the game can end. Every death inside the batch shares ONE death epoch
+ * (so §12.5 co-first works). Returns the body's events plus the events from the single
+ * trailing win-check. Re-entrant: nested batches share the outermost batch's epoch and
+ * only the OUTERMOST batch fires the win-check when it closes.
+ */
+export function withWinCheckBatch(
+  state: GameState,
+  body: () => GameEvent[],
+): GameEvent[] {
+  const opensBatch = winCheckBatchDepth === 0;
+  if (opensBatch) batchEpoch = nextDeathEpoch++;
+  winCheckBatchDepth += 1;
+  let events: GameEvent[];
+  try {
+    events = body();
+  } finally {
+    winCheckBatchDepth -= 1;
+    if (opensBatch) batchEpoch = null;
+  }
+  // Only the outermost batch runs the single trailing win-check (§12.2).
+  if (opensBatch) {
+    events = [...events, ...runWinCheck(state)];
+  }
+  return events;
 }
 
 function runWinCheck(state: GameState): GameEvent[] {
   if (state.over) return [];
+  // §12.2: inside a simultaneous-death batch, defer the check to the batch close so
+  // all deaths from the one effect resolve before the game can end.
+  if (winCheckBatchDepth > 0) return [];
   return winCheckHook(state);
 }
 
@@ -215,6 +280,9 @@ function die(state: GameState, victim: PlayerState, killer: PlayerId | null): Ga
 
   victim.alive = false;
   state.deadOrder.push(victim.id);
+  // §12.2/§12.5: stamp the death epoch — batched (one-effect) deaths share an epoch and
+  // are thus simultaneous; sequential deaths each get a fresh one.
+  state.deadEpoch.push(takeDeathEpoch());
   state.lastKill = { killer, deadCountAfter: state.deadOrder.length };
 
   // Forced reveal on death (§11). Revealed exactly once.

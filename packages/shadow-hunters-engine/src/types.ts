@@ -48,6 +48,14 @@ export interface GameState {
   decks: Record<DeckKind, DeckState>;
   rng: Rng;
   deadOrder: PlayerId[];     // order of deaths (for Daniel "first to die"; §4)
+  /**
+   * Death "epoch" aligned 1:1 with deadOrder: deaths from a SINGLE effect (one-effect
+   * AoE — Flare/Dynamite/Machine Gun) share an epoch number, so they count as
+   * SIMULTANEOUS (§12.2/§12.5 "co-first if simultaneous"). Sequential deaths each get a
+   * fresh epoch. Used by win.ts to credit Daniel "first to die" co-first when he dies in
+   * the same effect as the game's first death(s). §12.2 §12.5
+   */
+  deadEpoch: number[];
   lastKill: { killer: PlayerId | null; deadCountAfter: number } | null;
   winners: PlayerId[];       // set when game ends
   over: boolean;
