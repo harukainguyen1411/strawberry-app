@@ -28,6 +28,13 @@ export interface PlayCardOpts {
    *   - Chocolate / Advent: pass "reveal" to trigger the reveal-and-heal branch.
    */
   option?: string;
+  /**
+   * Injected d6 roll for deterministic tests (Blessing). Mirrors the `roll`
+   * injection used by Franklin's Lightning ability (abilities.ts AbilityCtx.params.roll)
+   * and the `dice` injection in black.ts. When provided, the handler uses this value
+   * instead of rolling state.rng. Production omits it (rolls from state.rng).
+   */
+  roll?: number;
 }
 
 type HandlerCtx = {
@@ -158,7 +165,8 @@ const disenchantMirror: WhiteHandler = ({ state }) => {
  */
 const blessing: WhiteHandler = ({ state, opts }) => {
   if (!opts.target) throw new Error("Blessing requires a target");
-  const roll = rollD6(state.rng);
+  // Injected d6 for deterministic tests (mirrors Franklin's roll injection); else roll state.rng.
+  const roll = opts.roll ?? rollD6(state.rng);
   return applyHeal(state, opts.target, roll, "blessing");
 };
 

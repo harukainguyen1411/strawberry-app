@@ -9,6 +9,7 @@ import { expect, test } from "vitest";
 import { playCard } from "../src/cards/white.js";
 import { makeState, whiteCard, equip, setDamageRaw, getPlayer } from "./helpers.js";
 import { resetWinCheckHook, applyDamage } from "../src/damage.js";
+import { CHARACTERS } from "../src/data/characters.js";
 
 // Reset win-check hook before each test to keep tests isolated.
 // (The hook is a module-level singleton; we don't want Task 11 side effects yet.)
@@ -62,18 +63,44 @@ test("First Aid sets target's damage to exactly 7", () => {
   expect(getPlayer(s, "p1").damage).toBe(7);
 });
 
-test("First Aid kills Allie (maxHp=8, set to 7 leaves 1 from death — does NOT kill)", () => {
-  // Allie has maxHp=8; damage set to 7 < 8, so alive.
-  const s = makeState({ damage: { p0: 0 } });
-  // p0 might not be allie; we need to find allie in the state or use a character check.
-  // We'll target any player whose maxHp is > 7 (they survive).
-  const target = s.players.find((p) => p.alive);
-  if (!target) return; // should not happen
-  playCard(s, "p0", whiteCard("first_aid"), { target: target.id });
-  // After set-to-7: alive if maxHp > 7; dead if maxHp <= 7.
-  // All base characters have maxHp >= 8 (Allie=8); so set-to-7 never immediately kills.
-  expect(target.alive).toBe(true);
-  expect(target.damage).toBe(7);
+test("First Aid set-to-7 leaves Allie one below death (maxHp=8 → 7 < 8, stays alive)", () => {
+  // §12.12: First Aid is an absolute set to 7; Allie's maxHp is 8 (the lowest in the
+  // base roster), so 7 < 8 — Allie survives at exactly one damage from death.
+  const s = makeState({ damage: { p1: 0 } });
+  const allie = getPlayer(s, "p1");
+  allie.characterId = "allie"; // maxHp 8 (rulebook-confirmed)
+  playCard(s, "p0", whiteCard("first_aid"), { target: "p1" });
+  expect(allie.damage).toBe(7);
+  expect(allie.alive).toBe(true); // 7 < 8 → one below death
+});
+
+test("First Aid set-to-7 KILLS a character whose maxHp <= 7 (§12.12 death path)", () => {
+  // §12.12: "kills any character with max HP <= 7". No BASE character has maxHp <= 7
+  // (Allie at 8 is the lowest), so we exercise the death path with a synthetic
+  // character override (maxHp 7). This drives the real First Aid handler →
+  // setDamage(7) → checkDeath (7 >= 7) → die, asserting alive === false.
+  const FRAGILE = {
+    id: "fragile_test_char",
+    name: "Fragile",
+    faction: "Neutral" as const,
+    maxHp: 7, // <= 7: set-to-7 is lethal
+    ability: "(test-only synthetic character)",
+    winCondition: "(test-only)",
+  };
+  CHARACTERS.push(FRAGILE);
+  try {
+    const s = makeState({ damage: { p1: 0 } });
+    const victim = getPlayer(s, "p1");
+    victim.characterId = FRAGILE.id; // maxHp 7
+    playCard(s, "p0", whiteCard("first_aid"), { target: "p1" });
+    expect(victim.damage).toBe(7); // set to exactly 7 (== maxHp)
+    expect(victim.alive).toBe(false); // §12.12: 7 >= maxHp 7 → dead
+    expect(s.deadOrder).toContain("p1"); // death was recorded through the death path
+  } finally {
+    // Restore the roster so other tests see only the 10 base characters.
+    const idx = CHARACTERS.findIndex((c) => c.id === FRAGILE.id);
+    if (idx !== -1) CHARACTERS.splice(idx, 1);
+  }
 });
 
 // ── Concealed Knowledge (×1): extra turn (§12.10) ────────────────────────────
@@ -158,20 +185,31 @@ test("Disenchant Mirror reveals all Shadow characters except Unknown", () => {
 
 // ── Blessing (×1): heal another player d6 ─────────────────────────────────────
 // §6: "Single-use. Choose another character; heal them by a d6 roll."
-test("Blessing heals target by d6 (at least 1, at most 6)", () => {
-  const s = makeState({ damage: { p1: 6 } });
-  playCard(s, "p0", whiteCard("blessing"), { target: "p1" });
-  const remaining = getPlayer(s, "p1").damage;
-  // d6 ∈ [1,6]; damage was 6, so remaining ∈ [0, 5]
-  expect(remaining).toBeGreaterThanOrEqual(0);
-  expect(remaining).toBeLessThanOrEqual(5);
+test("Blessing heals the target by EXACTLY the injected d6 (no caster self-damage)", () => {
+  // §6: "heal them by a d6 roll." Inject a fixed d6 (mirrors Franklin's roll injection)
+  // so the heal is exact, not just range-bounded. d6=4 on a target at 6 damage → 2 left.
+  const s = makeState({ damage: { p0: 5, p1: 6 } });
+  playCard(s, "p0", whiteCard("blessing"), { target: "p1", roll: 4 });
+  expect(getPlayer(s, "p1").damage).toBe(2); // 6 − 4 = exactly 2
+  expect(getPlayer(s, "p0").damage).toBe(5); // caster damage UNCHANGED (Blessing heals only the target)
 });
 
-test("Blessing does not affect the caster", () => {
-  const s = makeState({ damage: { p0: 5, p1: 5 } });
+test("Blessing with d6=6 fully heals a target at 6 damage (exact)", () => {
+  const s = makeState({ damage: { p0: 5, p1: 6 } });
+  playCard(s, "p0", whiteCard("blessing"), { target: "p1", roll: 6 });
+  expect(getPlayer(s, "p1").damage).toBe(0); // 6 − 6 = exactly 0
+  expect(getPlayer(s, "p0").damage).toBe(5); // caster unchanged
+});
+
+test("Blessing without an injected roll still heals within the d6 range and never touches the caster", () => {
+  // Production path (no injected roll): rolls state.rng. We still pin the caster-unchanged
+  // invariant and the [0,5] residual bound on a target that started at 6.
+  const s = makeState({ damage: { p0: 5, p1: 6 } });
   playCard(s, "p0", whiteCard("blessing"), { target: "p1" });
-  // p0 damage unchanged.
-  expect(getPlayer(s, "p0").damage).toBe(5);
+  const remaining = getPlayer(s, "p1").damage;
+  expect(remaining).toBeGreaterThanOrEqual(0);
+  expect(remaining).toBeLessThanOrEqual(5);
+  expect(getPlayer(s, "p0").damage).toBe(5); // caster damage unchanged
 });
 
 // ── Chocolate (×1): if name starts A/E/U, may reveal; if revealed, fully heal ─

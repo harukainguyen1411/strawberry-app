@@ -19,7 +19,7 @@
 import { expect, test, describe, beforeEach, afterEach } from "vitest";
 import { createGame } from "../src/setup.js";
 import { evaluateWinners, maybeEndGame } from "../src/win.js";
-import { applyAttack } from "../src/combat.js";
+import { applyAttack, applyCounterattack } from "../src/combat.js";
 import { applyDamage, resetWinCheckHook, setWinCheckHook } from "../src/damage.js";
 import { playCard as playBlack } from "../src/cards/black.js";
 import { playCard as playWhite } from "../src/cards/white.js";
@@ -517,5 +517,120 @@ describe("maybeEndGame — sets winners/over and pushes GameWon", () => {
     applyAttack(s, "p0", "p2", { dice: { d6: 6, d4: 4 } });
     expect(s.over).toBe(true);
     expect(s.winners.sort()).toEqual(["p0", "p1"]);
+  });
+});
+
+// ─── §12.13: mutual-damage card ends the game mid-effect (target first, then self) ──
+//
+// §12.13: Bloodthirsty Spider / Spiritual Doll apply sub-damages in stated order
+// (target, THEN self), with death+win checks after EACH. If a win triggers after the
+// target's sub-damage, the game ends immediately and the caster's self-damage does NOT
+// apply. With the win-check hook wired, killing the last alive Shadow as the target ends
+// the game between the two sub-damages.
+
+describe("§12.13 mutual-damage mid-effect game-end", () => {
+  test("Bloodthirsty Spider kills the last Shadow (target) → game over, caster self-damage NOT applied", () => {
+    // p0,p1 Hunters; p2,p3 Shadows. p3 already dead, p2 is the last alive Shadow at
+    // 1-from-death (maxHp 11, damage 10 → the 2 target-damage kills). The caster (p1, a
+    // Hunter at 0 damage) would normally take 2 self-damage AFTER the target — but the
+    // last-Shadow death ends the game (Hunters win) between the sub-damages, so the
+    // self-damage is skipped (the handler returns early on state.over). §12.13
+    const s = makeState({
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire" },
+      damage: { p1: 0, p2: 10 }, // unknown maxHp 11 → 2 dmg kills the last Shadow
+      alive: { p3: false }, // the other Shadow is already dead
+    });
+    s.deadOrder = ["p3"];
+    s.deadEpoch = [0];
+    setWinCheckHook(maybeEndGame);
+
+    // Hunter p1 plays Bloodthirsty Spider at the last Shadow p2.
+    playBlack(s, "p1", "black:bloodthirsty_spider#0", { target: "p2" });
+
+    expect(get(s, "p2").alive).toBe(false); // target (last Shadow) died first
+    expect(s.over).toBe(true); // §12.1/§12.13: win-check fired mid-effect → Hunters win
+    expect(s.winners.sort()).toEqual(["p0", "p1"]);
+    // §12.13: the caster's self-damage sub-step was reached only AFTER the game ended,
+    // so it never applied — the caster stays at 0 damage.
+    expect(get(s, "p1").damage).toBe(0);
+    // And applyDamage is a no-op once the game is over anyway; confirm no self Damaged event.
+    const selfDamaged = s.log.filter(
+      (e) => e.type === "Damaged" && e.player === "p1",
+    );
+    expect(selfDamaged).toHaveLength(0);
+  });
+
+  test("Spiritual Doll self-branch (d6 5–6) does NOT end on a non-terminal self-hit", () => {
+    // Control: when the Doll resolves the self-branch on a caster who is NOT the last of a
+    // faction, no win fires. This pins that the mid-effect end is driven by the win-check,
+    // not by the card. Inject d6=5 → caster takes 3; nobody wins.
+    const s = makeState({
+      characters: { p0: "emi", p1: "franklin", p2: "unknown", p3: "vampire" },
+      damage: { p1: 0 },
+    });
+    setWinCheckHook(maybeEndGame);
+    playBlack(s, "p1", "black:spiritual_doll#0", { target: "p2", dice: { d6: 5, d4: 1 } });
+    expect(get(s, "p1").damage).toBe(3); // self-branch applied (no game-end)
+    expect(s.over).toBe(false);
+  });
+});
+
+// ─── §12.6: a lethal Werewolf counter kills the attacker → Shadows win ─────────────
+//
+// §12.6: the Werewolf's Counterattack is a NORMAL attack (rolls, can miss, equipment
+// applies). With the win-check hook wired, if the counter kills the last alive Hunter,
+// the win-check fires AFTER the counter's damage and the Shadows win.
+
+describe("§12.6 lethal Werewolf counter ends the game (Shadows win)", () => {
+  test("a Hunter 1-from-death attacks a Werewolf; the lethal counter kills the attacker → Shadows win", () => {
+    // p0 (Hunter, the lone alive Hunter) is at 1-from-death (emi maxHp 10, damage 9).
+    // p1 Werewolf (Shadow), p2 Shadow (vampire). The other Hunter slot is a dead Hunter so
+    // killing p0 empties the Hunter side. p0 attacks p1 (misses, dice tie); the Werewolf's
+    // counter rolls |6−1| = 5 → p0 takes 5 → 9+5 ≥ 10 → dead → all Hunters dead → Shadows win.
+    const s = makeState({
+      characters: { p0: "emi", p1: "werewolf", p2: "vampire", p3: "george" },
+      damage: { p0: 9 }, // emi maxHp 10 → a 5-damage counter is lethal
+      alive: { p3: false }, // the other Hunter (George) already dead → p0 is the last Hunter
+    });
+    s.deadOrder = ["p3"];
+    s.deadEpoch = [0];
+    setWinCheckHook(maybeEndGame);
+
+    // p0's initial attack misses (tie); the counter is what kills.
+    applyAttack(s, "p0", "p1", { dice: { d6: 3, d4: 3 } });
+    expect(get(s, "p0").alive).toBe(true); // initial attack did nothing
+    expect(s.over).toBe(false);
+
+    // The Werewolf counters for a lethal 5.
+    applyCounterattack(s, "p1", "p0", { dice: { d6: 6, d4: 1 } });
+
+    expect(get(s, "p0").alive).toBe(false); // attacker killed by the counter
+    expect(s.over).toBe(true); // §12.1: win-check after the counter
+    // All Hunters dead → every Shadow wins (even a dead one); here p1 + p2 are the Shadows.
+    expect(s.winners.sort()).toEqual(["p1", "p2"]);
+  });
+});
+
+// ─── §12.9: Guardian Angel blocks the Werewolf counter (attacker takes 0) ──────────
+//
+// §12.9 / §12.3: Guardian Angel blocks damage from ATTACKS only — and the Werewolf's
+// counter IS an attack (source "attack"). So an attacker holding Guardian Angel
+// (attackImmune set) takes 0 from the counter.
+
+describe("§12.9 Guardian Angel blocks the Werewolf counter", () => {
+  test("attacker with attackImmune set takes 0 from a counter that would otherwise hit for 5", () => {
+    const s = makeState({
+      characters: { p0: "emi", p1: "werewolf", p2: "vampire", p3: "george" },
+      damage: { p0: 0 },
+    });
+    get(s, "p0").attackImmune = true; // Guardian Angel on the original attacker (§12.9)
+    setWinCheckHook(maybeEndGame);
+
+    // Werewolf counters for what would be 5 damage — but it is an "attack", so it is blocked.
+    applyCounterattack(s, "p1", "p0", { dice: { d6: 6, d4: 1 } });
+
+    expect(get(s, "p0").damage).toBe(0); // §12.9: counter damage blocked by Guardian Angel
+    expect(get(s, "p0").alive).toBe(true);
+    expect(s.over).toBe(false);
   });
 });
