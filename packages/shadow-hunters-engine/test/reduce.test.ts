@@ -397,6 +397,57 @@ describe("Werewolf Counterattack §12.6", () => {
     const r2 = reduce(g2, { type: "Attack", player: "p0", target: "p1" });
     expect(legalActions(r2.state, "p1").some((a) => a.type === "Counterattack")).toBe(false);
   });
+
+  test("the attacker cannot EndTurn while a Werewolf's counter is still pending (§12.6)", () => {
+    // The reaction window must not be skippable. If the attacker could EndTurn, the
+    // turn would advance and beginTurn() would wipe pendingCounters — silently losing
+    // the Werewolf's counter. The current player is on hold until the counter resolves.
+    const g = makeGame(
+      { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    const s = r.state;
+    expect(s.pendingCounters?.["p1"]).toContain("p0");
+    // p0 (attacker) may NOT end their turn while the counter is live.
+    expect(legalActions(s, "p0").some((a) => a.type === "EndTurn")).toBe(false);
+    expect(() => reduce(s, { type: "EndTurn", player: "p0" })).toThrow();
+  });
+
+  test("the Werewolf may Decline the counter, releasing the turn without revealing (§12.6)", () => {
+    const g = makeGame(
+      { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    // Decline is offered to the Werewolf (the counter is optional, §12.6).
+    expect(legalActions(r.state, "p1").some((a) => a.type === "DeclineCounter")).toBe(true);
+    const d = reduce(r.state, { type: "DeclineCounter", player: "p1" });
+    // Declining does NOT out a hidden Werewolf.
+    expect(d.state.players.find((p) => p.id === "p1")!.revealed).toBe(false);
+    // Counter cleared → the attacker's turn is released.
+    expect(d.state.pendingCounters?.["p1"] ?? []).toEqual([]);
+    expect(legalActions(d.state, "p0").some((a) => a.type === "EndTurn")).toBe(true);
+  });
+
+  test("taking the Counterattack clears the pending occurrence and releases the turn (§12.6)", () => {
+    const g = makeGame(
+      { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
+    const c = reduce(r.state, { type: "Counterattack", player: "p1", target: "p0" });
+    // The occurrence against p0 is consumed.
+    expect(c.state.pendingCounters?.["p1"] ?? []).not.toContain("p0");
+    // With the counter resolved, if p0 survived the game continues and EndTurn returns.
+    const p0 = c.state.players.find((p) => p.id === "p0")!;
+    if (p0.alive && !c.state.over) {
+      expect(legalActions(c.state, "p0").some((a) => a.type === "EndTurn")).toBe(true);
+    }
+  });
 });
 
 // ─── Single attack step per turn §8 §10 §12.10 ──────────────────────────────────

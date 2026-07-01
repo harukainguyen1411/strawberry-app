@@ -400,15 +400,16 @@ function applyHermitEffectForced(
     case "hermits_exorcism":
       return applyDamage(state, recipient, 2, effectKey, null);
 
-    // HP-conditional — lie doesn't change actual HP; run normal handler.
-    case "hermits_bully": {
-      const handler = HERMIT_HANDLERS[effectKey]!;
-      return handler({ state, giver, recipient, cardId: `hermit:${effectKey}#0`, opts });
-    }
-    case "hermits_tough_lesson_of_love": {
-      const handler = HERMIT_HANDLERS[effectKey]!;
-      return handler({ state, giver, recipient, cardId: `hermit:${effectKey}#0`, opts });
-    }
+    // HP-conditional — §12.11: the LIE forces the effect regardless of Unknown's
+    // real max HP ("selling the lie"). Do NOT re-run the real-HP handler: Unknown's
+    // true maxHp is 11, so deferring to the handler would silently no-op Tough Lesson
+    // of Love (needs ≥12) and only coincidentally fire Bully (needs ≤11). The lie
+    // applies the card's damage on its own terms — matching the faction-conditional
+    // cases above which also apply the mechanic directly.
+    case "hermits_bully":
+      return applyDamage(state, recipient, 1, "hermits_bully", null);
+    case "hermits_tough_lesson_of_love":
+      return applyDamage(state, recipient, 2, "hermits_tough_lesson_of_love", null);
 
     // Prediction cannot be forced / is handled separately.
     case "hermits_prediction": {

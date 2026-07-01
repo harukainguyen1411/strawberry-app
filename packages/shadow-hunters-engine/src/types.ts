@@ -113,6 +113,7 @@ export type Action =
   | { type: "UseAbility"; player: PlayerId; params?: Record<string, unknown> }
   | { type: "Reveal"; player: PlayerId }
   | { type: "Counterattack"; player: PlayerId; target: PlayerId } // Werewolf (§12.6)
+  | { type: "DeclineCounter"; player: PlayerId } // Werewolf passes on its pending counter(s) (§12.6)
   | { type: "EndTurn"; player: PlayerId };
 
 export type AreaChoice =

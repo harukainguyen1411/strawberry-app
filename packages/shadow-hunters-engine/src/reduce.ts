@@ -361,6 +361,11 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
         offered.add(attacker);
       }
     }
+    // §12.6: the counter is optional, and the reaction window must be closed
+    // EXPLICITLY before the attacker's turn can proceed (see the hold below). Always
+    // offer a Decline — even when no attacker is reachable — so the Werewolf can pass
+    // (without revealing) and release the turn instead of it hanging forever.
+    actions.push({ type: "DeclineCounter", player: playerId });
   }
 
   // ── Out-of-band: voluntary Reveal (§5) ─────────────────────────────────────────
@@ -368,8 +373,20 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
     actions.push({ type: "Reveal", player: playerId });
   }
 
+  // §12.6: while a living Werewolf holds an unresolved counter against the current
+  // player, that player's turn is on hold — they may take no turn action (least of all
+  // EndTurn, which would advance the turn and wipe the counter) until the Werewolf
+  // counters or declines. Out-of-band actions (voluntary Reveal, the counter itself)
+  // above this point stay available.
+  const counterHeldAgainstCurrent = state.players.some(
+    (pl) =>
+      pl.alive &&
+      pl.characterId === "werewolf" &&
+      (state.pendingCounters?.[pl.id]?.includes(state.current) ?? false),
+  );
+
   // ── Current-player turn actions (§8) ────────────────────────────────────────────
-  if (playerId === state.current) {
+  if (playerId === state.current && !counterHeldAgainstCurrent) {
     // Allie's manual once-per-game heal is available whenever unspent (§5).
     const ability = abilityFor(player.characterId);
     if (ability && ability.trigger === "manual" && abilityAvailable(state, playerId)) {
@@ -561,6 +578,14 @@ export function reduce(
         if (idx !== -1) pending.splice(idx, 1);
         if (pending.length === 0) delete next.pendingCounters![actor];
       }
+      break;
+    }
+
+    case "DeclineCounter": {
+      // §12.6: the Werewolf passes on its counter. Clear ALL pending occurrences it
+      // holds — declining does NOT reveal a hidden Werewolf. This closes the reaction
+      // window and releases the attacker's held turn.
+      if (next.pendingCounters) delete next.pendingCounters[actor];
       break;
     }
 

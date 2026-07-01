@@ -410,6 +410,37 @@ test("Unknown lying on heal card at 0 damage — takes 1 instead (§6 full-healt
   expect(getPlayer(s, "p1").damage).toBe(1);
 });
 
+// ─── Unknown lying on HP-conditional cards (§12.11) ────────────────────────────
+// The lie FORCES the effect regardless of Unknown's real max HP ("selling the
+// lie"). Unknown's true maxHp is 11, so without the forced path Tough Lesson of
+// Love (needs ≥12) would silently no-op — but the lie must still deal its 2 damage
+// (Unknown selling that they are a high-HP character).
+
+test("Unknown lying on Hermit's Tough Lesson of Love — forces 2 damage despite maxHp=11 (§12.11)", () => {
+  // p1 = unknown (maxHp=11 < 12). Truthfully nothing happens; the lie sells being
+  // a high-HP character, so 2 damage is actually taken.
+  const s = makeHermitState();
+  giveHermit(s, "p0", "p1", hermitCard("hermits_tough_lesson_of_love"), { lie: true });
+  expect(getPlayer(s, "p1").damage).toBe(2);
+  expect(getPlayer(s, "p1").revealed).toBe(false);
+});
+
+test("Unknown declining Hermit's Tough Lesson of Love — nothing happens, no reveal (§12.11)", () => {
+  const s = makeHermitState();
+  giveHermit(s, "p0", "p1", hermitCard("hermits_tough_lesson_of_love"), { decline: true });
+  expect(getPlayer(s, "p1").damage).toBe(0);
+  expect(getPlayer(s, "p1").revealed).toBe(false);
+});
+
+test("Unknown lying on Hermit's Bully — forces 1 damage on its own terms (§12.11)", () => {
+  // Unknown's real maxHp (11) already satisfies Bully (≤11), but the lie path must
+  // apply the effect directly, not re-derive it from the real-HP check.
+  const s = makeHermitState();
+  giveHermit(s, "p0", "p1", hermitCard("hermits_bully"), { lie: true });
+  expect(getPlayer(s, "p1").damage).toBe(1);
+  expect(getPlayer(s, "p1").revealed).toBe(false);
+});
+
 test("Unknown cannot fake Hermit's Prediction — actual characterId always shown (§12.11)", () => {
   // §12.11: "Hermit's Prediction shows the actual card and cannot be faked."
   // Regardless of lie/decline opts, Prediction always writes the real characterId.
