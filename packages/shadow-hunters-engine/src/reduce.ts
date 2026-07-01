@@ -361,10 +361,20 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
         offered.add(attacker);
       }
     }
-    // §12.6: the counter is optional, and the reaction window must be closed
-    // EXPLICITLY before the attacker's turn can proceed (see the hold below). Always
-    // offer a Decline — even when no attacker is reachable — so the Werewolf can pass
-    // (without revealing) and release the turn instead of it hanging forever.
+    // §12.6: the counter is optional. Offer the Werewolf an explicit Decline (even when
+    // no attacker is in range) so they can pass WITHOUT revealing — the clean way for the
+    // server/UI to resolve the reaction. This lives in the WEREWOLF's own action set, so
+    // it is not an identity leak (a viewer only ever sees their own legalActions).
+    //
+    // SECRECY (§1): we deliberately do NOT gate the ATTACKER's actions on a pending
+    // counter. The attacker's own legal set is part of their projected view (project.ts
+    // exposes `legal = legalActions(viewer)`), so suppressing e.g. EndTurn only-when-a-
+    // Werewolf-was-hit would let the attacker deduce the target's hidden identity with
+    // zero reveal. Guaranteeing the Werewolf actually gets its reaction window before the
+    // attacker's next action is a SERVER-LAYER concern (Phase 2): the server holds full
+    // state and can wait for the reaction without exposing anything to the attacker. In
+    // the pure engine, an unresolved counter is auto-declined when the turn advances
+    // (beginTurn clears pendingCounters — an implicit decline).
     actions.push({ type: "DeclineCounter", player: playerId });
   }
 
@@ -373,20 +383,8 @@ export function legalActions(state: GameState, playerId: PlayerId): Action[] {
     actions.push({ type: "Reveal", player: playerId });
   }
 
-  // §12.6: while a living Werewolf holds an unresolved counter against the current
-  // player, that player's turn is on hold — they may take no turn action (least of all
-  // EndTurn, which would advance the turn and wipe the counter) until the Werewolf
-  // counters or declines. Out-of-band actions (voluntary Reveal, the counter itself)
-  // above this point stay available.
-  const counterHeldAgainstCurrent = state.players.some(
-    (pl) =>
-      pl.alive &&
-      pl.characterId === "werewolf" &&
-      (state.pendingCounters?.[pl.id]?.includes(state.current) ?? false),
-  );
-
   // ── Current-player turn actions (§8) ────────────────────────────────────────────
-  if (playerId === state.current && !counterHeldAgainstCurrent) {
+  if (playerId === state.current) {
     // Allie's manual once-per-game heal is available whenever unspent (§5).
     const ability = abilityFor(player.characterId);
     if (ability && ability.trigger === "manual" && abilityAvailable(state, playerId)) {
@@ -583,8 +581,10 @@ export function reduce(
 
     case "DeclineCounter": {
       // §12.6: the Werewolf passes on its counter. Clear ALL pending occurrences it
-      // holds — declining does NOT reveal a hidden Werewolf. This closes the reaction
-      // window and releases the attacker's held turn.
+      // holds — declining does NOT reveal a hidden Werewolf and emits no event, so it is
+      // invisible to every other viewer (no identity leak). This is the explicit way for
+      // the server/UI to resolve the reaction; if it is never sent, beginTurn clears any
+      // unresolved counter on turn advance (an implicit decline).
       if (next.pendingCounters) delete next.pendingCounters[actor];
       break;
     }

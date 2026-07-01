@@ -398,41 +398,67 @@ describe("Werewolf Counterattack §12.6", () => {
     expect(legalActions(r2.state, "p1").some((a) => a.type === "Counterattack")).toBe(false);
   });
 
-  test("the attacker cannot EndTurn while a Werewolf's counter is still pending (§12.6)", () => {
-    // The reaction window must not be skippable. If the attacker could EndTurn, the
-    // turn would advance and beginTurn() would wipe pendingCounters — silently losing
-    // the Werewolf's counter. The current player is on hold until the counter resolves.
-    const g = makeGame(
-      { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
-      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
-    );
-    g.phase = "attack";
-    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
-    const s = r.state;
-    expect(s.pendingCounters?.["p1"]).toContain("p0");
-    // p0 (attacker) may NOT end their turn while the counter is live.
-    expect(legalActions(s, "p0").some((a) => a.type === "EndTurn")).toBe(false);
-    expect(() => reduce(s, { type: "EndTurn", player: "p0" })).toThrow();
+  test("SECRECY: the attacker's own legal set does NOT change when the target is a hidden Werewolf (§1/§12.6)", () => {
+    // project(viewer).legal === legalActions(viewer), so the attacker's OWN options are
+    // part of their view. If attacking a hidden Werewolf suppressed (or added) any of the
+    // attacker's actions vs. attacking a hidden non-Werewolf under identical conditions,
+    // the attacker could deduce the target's secret identity with ZERO reveal. The two
+    // legal sets must be identical. (This guards against a counter-hold gate that keys off
+    // the target being a Werewolf.)
+    const mk = (p1char: string) =>
+      makeGame(
+        { p0: "emi", p1: p1char, p2: "charles", p3: "daniel" },
+        { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+      );
+    const gWere = mk("werewolf"); // Shadow — attacking it queues a counter
+    gWere.phase = "attack";
+    // Control: a hidden Shadow that is NOT the Werewolf, so no counter queues but the
+    // faction balance (1H/1S/2N) is identical — no faction-elimination win fires either.
+    const gCtrl = mk("unknown");
+    gCtrl.phase = "attack";
+
+    const afterWere = reduce(gWere, { type: "Attack", player: "p0", target: "p1" });
+    const afterCtrl = reduce(gCtrl, { type: "Attack", player: "p0", target: "p1" });
+
+    // Matched conditions: game continues and the target stays alive + hidden in both.
+    expect(afterWere.state.over).toBe(false);
+    expect(afterCtrl.state.over).toBe(false);
+    expect(afterWere.state.players.find((p) => p.id === "p1")!.alive).toBe(true);
+    expect(afterCtrl.state.players.find((p) => p.id === "p1")!.alive).toBe(true);
+
+    const legalWere = legalActions(afterWere.state, "p0").map((a) => a.type).sort();
+    const legalCtrl = legalActions(afterCtrl.state, "p0").map((a) => a.type).sort();
+    expect(legalWere).toEqual(legalCtrl); // no differential ⇒ no identity leak
+    expect(legalWere).toContain("EndTurn"); // attacker is NOT gated by the pending counter
   });
 
-  test("the Werewolf may Decline the counter, releasing the turn without revealing (§12.6)", () => {
+  test("a Werewolf is offered Counterattack + DeclineCounter after being attacked (§12.6)", () => {
     const g = makeGame(
       { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
       { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
     );
     g.phase = "attack";
     const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
-    // Decline is offered to the Werewolf (the counter is optional, §12.6).
-    expect(legalActions(r.state, "p1").some((a) => a.type === "DeclineCounter")).toBe(true);
+    const wLegal = legalActions(r.state, "p1").map((a) => a.type);
+    expect(wLegal).toContain("Counterattack");
+    expect(wLegal).toContain("DeclineCounter"); // optional pass, in the Werewolf's own set
+  });
+
+  test("DeclineCounter clears the pending counter WITHOUT revealing the Werewolf (§12.6)", () => {
+    const g = makeGame(
+      { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
+      { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
+    );
+    g.phase = "attack";
+    const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
     const d = reduce(r.state, { type: "DeclineCounter", player: "p1" });
-    // Declining does NOT out a hidden Werewolf.
+    // No reveal, no event, counter cleared — invisible to every other viewer.
     expect(d.state.players.find((p) => p.id === "p1")!.revealed).toBe(false);
-    // Counter cleared → the attacker's turn is released.
+    expect(d.events.length).toBe(0);
     expect(d.state.pendingCounters?.["p1"] ?? []).toEqual([]);
-    expect(legalActions(d.state, "p0").some((a) => a.type === "EndTurn")).toBe(true);
   });
 
-  test("taking the Counterattack clears the pending occurrence and releases the turn (§12.6)", () => {
+  test("taking the Counterattack consumes the pending occurrence (§12.6)", () => {
     const g = makeGame(
       { p0: "emi", p1: "werewolf", p2: "charles", p3: "daniel" },
       { areas: { p0: "church", p1: "church", p2: "weird_woods", p3: "weird_woods" } },
@@ -440,13 +466,7 @@ describe("Werewolf Counterattack §12.6", () => {
     g.phase = "attack";
     const r = reduce(g, { type: "Attack", player: "p0", target: "p1" });
     const c = reduce(r.state, { type: "Counterattack", player: "p1", target: "p0" });
-    // The occurrence against p0 is consumed.
     expect(c.state.pendingCounters?.["p1"] ?? []).not.toContain("p0");
-    // With the counter resolved, if p0 survived the game continues and EndTurn returns.
-    const p0 = c.state.players.find((p) => p.id === "p0")!;
-    if (p0.alive && !c.state.over) {
-      expect(legalActions(c.state, "p0").some((a) => a.type === "EndTurn")).toBe(true);
-    }
   });
 });
 

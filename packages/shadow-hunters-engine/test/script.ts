@@ -221,11 +221,6 @@ export function driveToWin(
  * driver moves on to the current player).
  */
 export function aggressivePolicy(state: GameState, legal: Action[]): Action | null {
-  // §12.6: a pending Werewolf counter must be resolved before the attacker's turn can
-  // proceed. Decline it — this consumes NO rng and does not reveal, so the driver stays
-  // fully deterministic and reaches the same seed-bound outcome it always did.
-  const decline = legal.find((a) => a.type === "DeclineCounter");
-  if (decline) return decline;
   const attack = legal.find((a) => a.type === "Attack");
   if (attack) return attack;
   const move = legal.find((a) => a.type === "RollMove" || a.type === "MoveTo");
