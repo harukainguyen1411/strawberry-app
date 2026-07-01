@@ -1,0 +1,22 @@
+{
+  "name": "@strawberry/shadow-hunters-engine",
+  "version": "1.0.0",
+  "description": "Pure, deterministic rules engine for the Shadow Hunters base game",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.4"
+  }
+}
